@@ -1,0 +1,134 @@
+---
+title: "Final Project_Overview RA"
+author: "Cassie Malcom"
+date: "10/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+```{r}
+library(rio)
+library(dplyr)
+library(here)
+library(tidyr)
+# install.packages(naniar)
+library(naniar)
+library(readr)
+library(magrittr)
+# install.packages(sjmisc)
+library(sjmisc)
+library(skimr)
+library(janitor)
+library(ggplot2)
+library(tidyverse)
+library(psych)
+library(tinytex)
+library(crayon)
+```
+
+```{r}
+na_strings <- c(-3, -5, -6, -8, -9, -11)
+```
+
+```{r}
+RA <- import(here("data", "Referrals and Arrests.csv")) %>%
+as_tibble() %>%
+ 
+set_na(na = c(-3, -5, -6, -8, -9, -11))
+RA
+```
+
+```{r}
+skim(RA)
+```
+
+Verify that COMBOKEY is the key for joining
+```{r}
+RA %>%
+count(COMBOKEY)
+```
+
+Describe the RA data set
+```{r}
+RA %>%
+  describeBy()
+```
+
+```{r}
+str(RA)
+```
+
+```{r}
+enroll <- import(here("data", "enroll.csv")) %>%
+as_tibble() %>%
+ 
+set_na(na = c(-3, -5, -6, -8, -9, -11))
+```
+
+Describe the enroll data set
+```{r}
+enroll %>%
+  describeBy()
+```
+
+```{r}
+str(enroll)
+```
+
+```{r}
+ra_full <- full_join(enroll, RA)
+
+ra_full
+```
+
+```{r}
+export(ra_full, here("data", "ra_full.csv"))
+```
+
+```{r}
+sch_su <- import(here("data", "sch_su.csv")) %>%
+as_tibble() %>%
+ 
+set_na(na = c(-3, -5, -6, -8, -9, -11))
+
+sch_su
+```
+
+```{r}
+ra_full_c <- ra_full %>%
+  clean_names()
+```
+
+
+```{r}
+ra_final <- full_join(ra_full_c, sch_su)
+
+ra_final
+```
+
+
+```{r}
+export(ra_final, here("data", "ra_final.csv"))
+```
+
+```{r}
+ra_lawst <- ra_final %>%
+select(lea_state_name, lea_name, starts_with("tot"), combokey, jj) %>%
+  set_na(na = c(-3, -5, -6, -8, -9, -11))
+
+ra_lawst
+```
+
+```{r}
+
+```
+
