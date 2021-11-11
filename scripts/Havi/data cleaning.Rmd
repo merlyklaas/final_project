@@ -1,0 +1,131 @@
+---
+title: "Data Cleaning and Summary"
+author: "Havisha Khurana"
+date: "11/2/2021"
+output: 
+    html_document:
+        highlight: kate
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's load packages
+```{r packages and theme, include = FALSE}
+packages <- c("here", "janitor", "tidyverse", "skimr", "rio", "psych")
+lapply(packages, library, character.only = TRUE)
+theme_set(theme_minimal())
+```
+
+Let's read the data.
+```{r read data}
+hnb <- import(here("data","Harassment and Bullying.csv")) %>% 
+    as_tibble()
+hnb_col <- colnames(hnb)
+```
+
+Quick summary: 
+
+* There are `r ncol(hnb)` variables in this dataset.   
+* First 8 are school characteristics  
+* 9-13 are Harassment and Bullying allegations -- Allegations based on sex, ethnicity, disability status, sexual orientation and religion. Total varianles: `r length(grep("SCH_HBALLEGATIONS", hnb_col))`  
+* 14 - 79 are #students reported as being bullied by different intent and demographic characteristics. Total variables: `r length(grep("SCH_HBREPORTED", hnb_col))`  
+* 80 - 145 are #students discilined for bullying or harassing by different intent and demographic characteristics. Total variables: `r length(grep("SCH_DISCIPLINED", hnb_col))`  
+* Totals are available (starts with TOT) for different intent (rex, race and disability status), reported/disciplined and gender (male, female) combo. Total variables for reported: `r length(grep("TOT_HBREPORTED", hnb_col))`, and Total variables for disciplined: `r length(grep("TOT_HBDISCIPLINED", hnb_col))`   
+
+_Note to self:_ `grep()` saves the indices of columns
+
+First, let's change all negative numbers to NA. 
+
+```{r hnb_pos}
+remove_neg <- function (x) ifelse(x < 0, NA, x)
+hnb_pos <- hnb %>% 
+    mutate(across(c(9:145), remove_neg))
+```
+
+Nice!
+
+Let's make a shorter dataset to work with. I have allegations, reported and disciplined for the following intents: sex, race and disability. Let's just take these forward.
+
+```{r hnb_sub}
+cat_sum <- function(x) rowSums(select(hnb_pos, starts_with(x)), na.rm = TRUE)
+
+hnb_sub <- hnb_pos %>% 
+    select("LEA_STATE","LEA_NAME","COMBOKEY", starts_with(c("SCH_HBALLEGATIONS","TOT_HBREPORTED","TOT_HBDISCIPLINED"))) %>% 
+    mutate(TOT_HBREPORTED_SEX = cat_sum("TOT_HBREPORTED_SEX"),
+           TOT_HBREPORTED_RAC = cat_sum("TOT_HBREPORTED_RAC"),
+           TOT_HBREPORTED_DIS = cat_sum("TOT_HBREPORTED_DIS"),
+           TOT_HBDISCIPLINED_SEX = cat_sum("TOT_HBDISCIPLINED_SEX"),
+           TOT_HBDISCIPLINED_RAC = cat_sum("TOT_HBDISCIPLINED_RAC"),
+           TOT_HBDISCIPLINED_DIS = cat_sum("TOT_HBDISCIPLINED_DIS"),
+           TOT_HBALLEGATIONS = cat_sum("SCH_HBALLEGATIONS"),
+           TOT_HBREPORTED = cat_sum("TOT_HBREPORTED"),
+           TOT_HBDISCIPLINED = cat_sum("TOT_HBDISCIPLINED")) %>% 
+    filter(if_any(c(27:29),~ . > 0))
+```
+
+That looks like a neat data set. We have total `r ncol(hnb_sub)` variables - 3 are identifiers and rest are numeric. Also, we have filtered out rows where all numeric columns are 0.
+
+Let's find some summary of cols.
+
+```{r summary}
+skim(hnb_sub)
+
+```
+
+This is super interesting! Some conclusions: 
+
+* Allegations are highest, followed by disciplined and then reported. Probably, some teacher/adult saw the incident and disciplined the students involved, and hence things were not reported. Or, one student reported multiple people, hence the whole group was disciplined.    
+* Allegation, reported and disciplined have highest raw count for the 'Disability' intent, followed by 'sex' and 'race'. However, the mean in all categories follow the order: 'sex', 'race' and 'disability'
+* In reported, often female students report more frequencty for 'sex' intent, but male students report more often for 'race' and 'disability'
+* In disciplined, for all intents, male students are more often disciplined than female students.
+
+Let's do some plots now.
+
+```{r scatter plot matrix allegations, out.width="100%"}
+
+pairs.panels(hnb_sub[,4:8], 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
+
+#pairs(hnb_sub[,4:8], pch = 19, lower.panel = NULL)
+#plotmatrix(hnb_sub[,27:29], colour="gray20")
+```
+
+```{r total, out.width="100%"}
+pairs.panels(hnb_sub[,27:29], 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
+```
+        
+```{r group total, out.width="100%"}
+pairs.panels(hnb_sub[,21:26], 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
+```
+
+Let's look at state-wide boxplot, but each point represents the district
+
+```{r state and district, out.width="100%"}
+hnb_sub2 <- hnb_sub %>% 
+    group_by(LEA_NAME) %>% 
+    mutate(district_all = mean(TOT_HBALLEGATIONS),
+           district_rep = mean(TOT_HBREPORTED),
+           district_dis = mean(TOT_HBDISCIPLINED))
+
+hnb_sub2 %>% 
+    group_by(LEA_STATE) %>% 
+    ggplot() +
+    geom_boxplot(aes(LEA_STATE, district_all))
+```
+

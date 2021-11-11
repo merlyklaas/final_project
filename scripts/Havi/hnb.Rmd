@@ -1,0 +1,64 @@
+---
+title: "Harassment and Bullying"
+author: "Havisha Khurana"
+date: "10/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Exploring Harassment and Bullying Data set
+
+```{r load packages, include = FALSE}
+library(rio)
+library(readxl)
+library(tidyverse)
+library(here)
+library(skimr)
+```
+
+Let's explore the data set.
+
+```{r}
+hnb <- import(here("data","Harassment and Bullying.csv")) %>% 
+    as_tibble()
+head(hnb)
+```
+There are 145 columns; removing the details of school (8 variables), there remaining `r 145-8` are combinations of intent, ethnicity, gender, ability status and English learner status.
+
+Let's explore the unique values in different columns.
+
+```{r unique column values}
+hnb_wi <- hnb %>% 
+    select(starts_with("SCH_"))
+
+#apply(hnb_wi, 2, function(x) (unique(x)))
+
+```
+```{r unique}
+apply(hnb_wi[2:126], 2, function(x) unique(x))
+```
+
+Question to the group: there are 4 negative numbers in the data: -11, -9, -6, -5. What could it mean? A substitute for data unavailable, or a code for some issues in getting that data. Anyhow, it looks like missing data and I'll start by cleaning the data set such that a column with any negative number will be removed.
+
+**Figure this out later:**
+{r remove negative columns}
+hnb_clean <- hnb
+apply(hnb_clean[9:145], 2, function(x)  {ifelse(x < 0, NA, x)})
+hnb_clean <- hnb_clean[complete.cases(hnb_clean),]
+dim(hnb_clean)
+
+Let's do some plots:
+```{r plot}
+ggplot(hnb_wi) +
+    geom_point(mapping = aes(x = SCH_HBALLEGATIONS_SEX, y = SCH_HBALLEGATIONS_RAC)) 
+```
+
+
+```{r summary}
+skim(hnb_wi)
+
+```
+ 
+ 

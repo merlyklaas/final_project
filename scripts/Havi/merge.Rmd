@@ -1,0 +1,85 @@
+---
+title: "merge data"
+author: "Havisha Khurana"
+date: "11/10/2021"
+output: 
+    html_document
+        highlight: pygments, 
+        code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's load packages
+```{r packages and theme, include = FALSE}
+packages <- c("here", "janitor", "tidyverse", "skimr", "rio")
+lapply(packages, library, character.only = TRUE)
+theme_set(theme_minimal())
+```
+
+Let's read the data.
+```{r read data}
+hnb <- import(here("data","Harassment and Bullying.csv")) %>% 
+    as_tibble()
+enroll <- import(here("data","Enrollment.csv")) %>% 
+    as_tibble()
+hnb_col <- colnames(hnb)
+enroll_col <- colnames(enroll)
+```
+
+First, let's change all negative numbers to NA in both the data 
+
+```{r pos data set}
+
+#change negative numbers to NA
+remove_neg <- function (x) ifelse(x < 0, NA, x) #function
+
+hnb_pos <- hnb %>% 
+    mutate(across(c(9:145), remove_neg)) 
+enroll_pos <- enroll %>% 
+    mutate(across(c(9:123), remove_neg))
+
+# make new variables
+cat_sum <- function(x, y) rowSums(select(x, starts_with(y))) #function
+
+hnb_pos <- hnb_pos %>% 
+   mutate(TOT_HBDISCIPLINED = cat_sum(., "TOT_HBDISCIPLINED")) %>% 
+   select("COMBOKEY", "TOT_HBDISCIPLINED")
+
+enroll_pos <- enroll %>% 
+    mutate(TOT_ENROLL = cat_sum(enroll, "TOT_ENR")) %>% 
+    select(c(1:8),"TOT_ENROLL")
+```
+
+Let's join these and create a new variable.
+
+```{r join}
+dis_enrol <- left_join(enroll_pos,hnb_pos, by = "COMBOKEY") %>% 
+    mutate(HNB_ENROL = ((TOT_HBDISCIPLINED*1000)/TOT_ENROLL))
+```
+
+Let's see summary statistics
+
+```{r summary}
+skim(dis_enrol)
+
+```
+
+Let's plot
+
+```{r bar}
+dis_enrol %>% 
+    filter(HNB_ENROL > 100) %>% 
+    ggplot() +
+        geom_histogram(aes(x = HNB_ENROL), bins = 100)
+
+```
+
+```{r}
+disc_enrol %>%
+filter(HNB_ENROL > 2000)
+
+```
+
