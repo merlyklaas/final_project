@@ -70,7 +70,6 @@ enroll %>%
   ggplot(aes(x = Count, y = Group)) +
   geom_boxplot() + 
   theme_minimal()
-
 ```
 
 Now creating a set of new variables. I am creating enrollment percents for each
@@ -116,8 +115,6 @@ For those cases, I just recoded back to 100 percent. It appears like it worked b
 Afterwards, I subset the file to only keep the school information, enrollment totals, and percent enrollment.
 
 ```{r }
-
-
 enroll <- enroll %>%
   mutate(enroll_el_pct = ifelse(enroll_el_pct > 100,100,enroll_el_pct),
          enroll_elserv_pct = ifelse(enroll_elserv_pct > 100,100,enroll_elserv_pct),
@@ -140,7 +137,6 @@ enroll <- enroll %>%
          dist_percent_el = (sum(enroll_el)/dist_enrollment)*100,
          dist_percent_sped = (sum(enroll_sped)/dist_enrollment)*100
          )
-
 
 enroll %>%
   melt(id.vars = "SCH_NAME", 
@@ -194,6 +190,16 @@ select(c("LEA_STATE", "LEA_STATE_NAME", "LEAID", "LEA_NAME", "SCHID", "SCH_NAME"
           "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
           "dist_percent_aian", "dist_percent_el", "dist_percent_sped"))
 ```
+
+*END OF ENROLLMENT DATA CLEANING*
+
+# School Characteristic Cleaning
+
+# Suspension Expulsion Cleaning
+
+# Harassemnt/Bullying Cleaning
+
+# Arrests and Referrals
 
 # Methods
 
