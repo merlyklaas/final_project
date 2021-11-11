@@ -1,0 +1,96 @@
+---
+output: html_document
+---
+<style type="text/css">
+  body{
+  font-size: 12pt;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<center> <h3> EDLD 651: Introduction to Educational Data Science </h3> </center>
+<center> <h3> Final Project: Outline </h3> </center>
+<center> <h3> Group: Cassie, Errol, Havi, Manuel, Merly </h3> </center>
+
+<br>
+<br>
+
+### 1. _Description of the Data_
+
+This research project will be conducted using High School and Middle School level data from the [**Civil Rights Data Collection (CRDC)**](https://ocrdata.ed.gov/), 2017-2018 data set. The CRDC contains multiple data sets that cover a range of topics. From the overall data set, we are focusing on frequency data reported in the following areas: 
+
+1. School Support (count of enrolled novice teachers, sworn LEO)
+2. Harassment and Bullying (count of incidents of students by subgroup)
+3. Referrals & Arrests (count of referrals and arrests of students by subgroup)
+4. Expulsions (count of expulsions of students by subgroup)
+5. Enrollment (count of enrolled students by subgroup)
+6. School characteristics (Supplementary data on reporting schools and districts)
+
+<br>
+
+### 2. _Discussion of Preparatory Work_
+
+
+#### 2.1 Getting to know the Data
+
+As a first step, we have divided the 6 data sets among ourselves. Each person is responsible to do a basic data cleaning: 
+
+* Select columns
+* Check for missing/malformed data
+* Check for duplicated observations
+* Summary statistics (skimr)
+* Record observations
+* Create any calculated data columns
+
+Once we get to know the data, we will try to link each data set according to our variables of interest (Research Questions). 
+
+```{r work distribution, echo = FALSE, result = 'asis', warning = FALSE}
+library(knitr)
+data <- c("School Support", "Harassment and Bullying", "Referrals & Arrests", "Expulsions", "Enrollment", "School characteristics")
+main <- c("Errol", "Havi", "Cassie", "Merly", "Manuel", "Errol") 
+reviewer <- c("Merly", "Cassie", "Errol", "Manuel", "Havi", "Havi")
+wd <- data.frame(data_set = data, lead = main, review = reviewer)
+kable(wd, caption = "Data set distribution")
+```
+
+<br>
+
+#### 2.2 Research Questions  
+**1. Relationship of Concentration of novice teachers and rate of exclusionary discipline (i.e., suspensions, expulsions) in high school students** 
+
+* Vary by student subgroups? (i.e. race, disability)
+* Vary district?
+* Vary by state?
+
+**2. Relationship of security guard density and harassment and bullying or referrals + arrests (or restraint & seclusion)?** 
+
+* Should we see if there is any correlation between corporal punishment and security guard presence?
+* Might vary by student characteristic (e.g., students with disabilities, gender, grade level, or race)
+* Number of transfers out of schools with guards might be at an increased level
+
+**(_Still considering_) Discipline concentration by school level?**
+
+For now, we can use all data regardless of level, and we will determine whether this is feasible in following meetings.
+
+
+#### 2.3 Role allocation of each member
+
+
+* Coordinator : Manuel 
+* Project Manager 1: Merly (#1 Research question : Relationship of Concentration of novice teachers and rate of exclusionary discipline for Middle and High School Students)
+* Project Manager 2. Cassie (#2 Research question: Relationship of security guard density and harassment and bullying or referrals + arrests?
+* Scrum Master: Errol 
+* Quality assurance (course deliverable): Havi
+
+<br>
+
+### Section 3: _Requirements of the Project_
+
+* For each research question, we'll include an abstract, introduction, methods, results, discussion and references. 
+* We are using multiple data sets and specific variables in this study. As a part of tidying our data set, we'll use all the required functions, i.e., `pivot_longer()`, `mutate()`, `select()`, `filter()`, `pivot_wider()`, `group_by()`, `summarize()`
+* Each research question will be accompanied with figures and discussion to determine whether a relationship exists
+* APA style tables, graphs and references will be included as needed.
+

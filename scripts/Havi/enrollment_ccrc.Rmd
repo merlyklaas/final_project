@@ -1,0 +1,202 @@
+---
+title: "CCRC EnrollmentCleaning"
+author: "Manuel Vazquez"
+date: "11/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading necesarry packages. Using pacman to help load a list of packages. The if statement
+is required in case it needs to be installed in the computer of somebody running this.
+
+```{r }
+if (!require("pacman")) install.packages("pacman") 
+pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry, purrr,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor)
+```
+<center>
+# Part 1 - Data Import and light Cleaning
+</center>
+
+
+## 1.a Enrollment File 
+
+In this section, I will import the enrollment file and subset it to keep relevant variables. 
+This file will be the base file. 
+
+```{r }
+#Importing the Enrollment file
+enroll<- read_csv(here("data", "Enrollment.csv")) %>%
+  as_tibble() %>%
+  subset(select = -c(9:31))
+```
+
+Exploring the file - I notice that there are some minimum values that are less than
+zero, negative values don't make sense for enrollment. Ned to replace those to 
+missing.
+
+```{r }
+skim(enroll)
+``` 
+
+
+First, need to replace values that have negative values with a missing value, then
+creating enrollment counts for race/ethnicity groups as well as EL and SPED.
+
+```{r }
+enroll <- enroll %>%
+  mutate_all(~replace(., . < 0, NA)) %>%
+  mutate(enroll_all = TOT_ENR_M + TOT_ENR_F,
+         enroll_latinx = SCH_ENR_HI_M + SCH_ENR_HI_F,
+         enroll_aian = SCH_ENR_AM_M + SCH_ENR_AM_F,
+         enroll_asianam = SCH_ENR_AS_M + SCH_ENR_AS_F,
+         enroll_nhpi = SCH_ENR_HP_M + SCH_ENR_HP_F,
+         enroll_black = SCH_ENR_BL_M + SCH_ENR_BL_F,
+         enroll_white = SCH_ENR_WH_M + SCH_ENR_WH_F,
+         enroll_twomore = SCH_ENR_TR_M + SCH_ENR_TR_F,
+         enroll_el = SCH_ENR_LEP_M + SCH_ENR_LEP_F,
+         enroll_elserv = TOT_LEPPROGENR_M + TOT_LEPPROGENR_F,
+         enroll_sped = SCH_ENR_IDEA_M + SCH_ENR_IDEA_F)
+```
+
+Checking to see if the code worked by checking the distribution of all the variables. 
+In theory, none should go below zero in these box graphs. Based on the results, it appears
+as if this worked out well 
+
+```{r }
+enroll %>% 
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c("enroll_all", "enroll_latinx", "enroll_aian", "enroll_asianam",
+                        "enroll_nhpi", "enroll_black", "enroll_white", "enroll_twomore",
+                        "enroll_el", "enroll_elserv", "enroll_sped"),
+       variable.name = "Group",
+       value.name = "Count") %>%
+  ggplot(aes(x = Count, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+
+```
+
+Now creating a set of new variables. I am creating enrollment percents for each
+race/ethnicity group as well as EL and SPED.
+
+```{r }
+enroll <- enroll %>%
+  mutate(enroll_latinx_pct = (enroll_latinx/enroll_all)*100,
+         enroll_aian_pct = (enroll_aian/enroll_all)*100,
+         enroll_asianam_pct = (enroll_asianam/enroll_all)*100,
+         enroll_nhpi_pct = (enroll_nhpi/enroll_all)*100,
+         enroll_black_pct = (enroll_black/enroll_all)*100,
+         enroll_white_pct = (enroll_white/enroll_all)*100,
+         enroll_twomore_pct = (enroll_twomore/enroll_all)*100,
+         enroll_el_pct = (enroll_el/enroll_all)*100,
+         enroll_elserv_pct = (enroll_elserv/enroll_all)*100,
+         enroll_sped_pct = (enroll_sped/enroll_all)*100)
+```
+
+Also checking to see distribution of all the variables by ploting them. I notice some 
+are reporting percents higher than 100. For example, some schools, the percent of students
+who are EL enrolled is greater than 100. This shouldn't be the case.
+
+```{r }
+enroll %>% 
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c( "enroll_latinx_pct", "enroll_aian_pct", "enroll_asianam_pct",
+                        "enroll_nhpi_pct", "enroll_black_pct", "enroll_white_pct", "enroll_twomore_pct",
+                        "enroll_el_pct", "enroll_elserv_pct", "enroll_sped_pct"),
+       variable.name = "Group",
+       value.name = "Count") %>%
+  ggplot(aes(x = Count, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+
+enroll %>%
+    filter(enroll_el_pct > 100) %>%
+    select(SCH_NAME,SCH_ENR_LEP_F,SCH_ENR_LEP_M, enroll_el, enroll_all, enroll_el_pct)
+```
+
+Recoding those schools that report percentages higher than 100. Doing this for EL% and SPED%.
+For those cases, I just recoded back to 100 percent. It appears like it worked based on the visual.
+Afterwards, I subset the file to only keep the school information, enrollment totals, and percent enrollment.
+
+```{r }
+
+
+enroll <- enroll %>%
+  mutate(enroll_el_pct = ifelse(enroll_el_pct > 100,100,enroll_el_pct),
+         enroll_elserv_pct = ifelse(enroll_elserv_pct > 100,100,enroll_elserv_pct),
+         enroll_sped_pct = ifelse(enroll_sped_pct > 100,100,enroll_sped_pct)) 
+```
+  
+Creating  District Level Independent variables (% EL, % SPED, % students of color)
+
+```{r }
+enroll <- enroll %>%
+  group_by(LEAID) %>%
+  mutate(dist_enrollment = sum(enroll_all),
+         dist_percent_white = (sum(enroll_white)/dist_enrollment)*100,
+         dist_percent_latinx = (sum(enroll_latinx)/dist_enrollment)*100,
+         dist_percent_black = (sum(enroll_black)/dist_enrollment)*100,
+         dist_percent_twomore = (sum(enroll_twomore)/dist_enrollment)*100,
+         dist_percent_asianam= (sum(enroll_asianam)/dist_enrollment)*100,
+         dist_percent_nhpi = (sum(enroll_nhpi)/dist_enrollment)*100,
+         dist_percent_aian = (sum(enroll_aian)/dist_enrollment)*100,
+         dist_percent_el = (sum(enroll_el)/dist_enrollment)*100,
+         dist_percent_sped = (sum(enroll_sped)/dist_enrollment)*100
+         )
+
+
+enroll %>%
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c( "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
+                        "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
+                        "dist_percent_aian", "dist_percent_el", "dist_percent_sped"),
+       variable.name = "Group",
+       value.name = "Percent") %>%
+  ggplot(aes(x = Percent, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+  
+
+
+enroll %>%
+  ggplot(aes(x = dist_enrollment, y = LEA_STATE_NAME)) +
+  geom_density_ridges() + theme_minimal()
+```
+
+Replacing district rates with values greater than 100 to just 100
+
+```{r }
+
+enroll <- enroll %>%
+  mutate(dist_percent_el = ifelse(dist_percent_el > 100,100,dist_percent_el),
+         dist_percent_sped = ifelse(dist_percent_sped > 100,100,dist_percent_sped))
+
+enroll %>%
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c( "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
+                        "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
+                        "dist_percent_aian", "dist_percent_el", "dist_percent_sped"),
+       variable.name = "Group",
+       value.name = "Percent") %>%
+  ggplot(aes(x = Percent, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+``` 
+  
+Making the dataset smaller and just keeping variables that we need  
+  
+```{r }  
+enroll <- enroll %>%  
+select(c("LEA_STATE", "LEA_STATE_NAME", "LEAID", "LEA_NAME", "SCHID", "SCH_NAME", 
+          "COMBOKEY", "JJ",  "enroll_all", "enroll_latinx", "enroll_aian", "enroll_asianam",
+           "enroll_nhpi", "enroll_black", "enroll_white", "enroll_twomore",
+           "enroll_el", "enroll_elserv", "enroll_sped","enroll_latinx_pct", 
+          "enroll_aian_pct", "enroll_asianam_pct", "enroll_nhpi_pct", "enroll_black_pct", 
+          "enroll_white_pct", "enroll_twomore_pct","enroll_el_pct", "enroll_elserv_pct", "enroll_sped_pct",
+          "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
+          "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
+          "dist_percent_aian", "dist_percent_el", "dist_percent_sped"))
+```
