@@ -1,12 +1,16 @@
 ---
-title: "Title of Papers"
+title: "School Personnel and School Climate"
 author: "TEAM QRME"
 date: "11/10/2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE)
 
 # Add your packages that you need here. This will load the libraries
 if (!require("pacman")) install.packages("pacman") 
@@ -17,6 +21,8 @@ pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma
 # Abstract
 
 # Introduction
+
+# Enrollment Cleaning
 
 In this section, I will import the enrollment file and subset it to keep relevant variables. This file will be the base file. 
 
@@ -70,7 +76,6 @@ enroll %>%
   ggplot(aes(x = Count, y = Group)) +
   geom_boxplot() + 
   theme_minimal()
-
 ```
 
 Now creating a set of new variables. I am creating enrollment percents for each
@@ -116,8 +121,6 @@ For those cases, I just recoded back to 100 percent. It appears like it worked b
 Afterwards, I subset the file to only keep the school information, enrollment totals, and percent enrollment.
 
 ```{r }
-
-
 enroll <- enroll %>%
   mutate(enroll_el_pct = ifelse(enroll_el_pct > 100,100,enroll_el_pct),
          enroll_elserv_pct = ifelse(enroll_elserv_pct > 100,100,enroll_elserv_pct),
@@ -140,7 +143,6 @@ enroll <- enroll %>%
          dist_percent_el = (sum(enroll_el)/dist_enrollment)*100,
          dist_percent_sped = (sum(enroll_sped)/dist_enrollment)*100
          )
-
 
 enroll %>%
   melt(id.vars = "SCH_NAME", 
@@ -195,7 +197,40 @@ select(c("LEA_STATE", "LEA_STATE_NAME", "LEAID", "LEA_NAME", "SCHID", "SCH_NAME"
           "dist_percent_aian", "dist_percent_el", "dist_percent_sped"))
 ```
 
+*END OF ENROLLMENT DATA CLEANING*
+
+# School Characteristic Cleaning
+
+# Suspension Expulsion Cleaning
+
+# Harassemnt/Bullying Cleaning
+
+# Arrests and Referrals
+
 # Methods
+
+This analysis was conducted using publicly available data from the 2017-18 civil rights data collection. Each biennium, schools across the United States are required to respond and report key information about their school. This includes enrollment information, levels of school personnel, incidents of exclusionary discipline, harassment, and bullying.
+
+## Sample and Exclusion Criteria
+
+The sample in this study included K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains XXX schools who serve students in Grades K-12.  Schools categorized **{update when we figure out which schools are excluded** were excluded from the analysis.  The final sample included XX schools across the United States. Table 1 summarizes information on the study sample (see table x in the appendix). 
+
+## Study Variables
+The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. This variable was calculated by dividing the number of novice teachers at a school by the total number of full time teachers. Across schools in our sample, the mean rate of novice teachers was X, and the numbers ranged from X to X. The main predictor of interest for research question two was the number of security personnel (sworn law enforcement officers and other security personnel) per 1000 students Across the school sample, the average rate of security personnel was X per 1000 students.
+
+The analysis had three outcomes of interest that broadly examined school climate — one for research question one and two for RQ2. For research question 1, the main outcome of interest was the rate of students who received an exclusionary discipline (suspension and expulsion). More specifically, this variable was defined as the number of exclusionary cases per 1000 students at a school. For research question 2, the two variables of interest were rates of harassment/bullying and rates of referrals and arrests. Rate of harrassment and bulling was defined as the number of students per 1000 students who were disciplined for harassment/bullying. Rate of referral/arrests was defined as the number of students per 1000 students who received a referral or were arrested.
+
+## Analytic Approach
+Descriptive statistics and regression analysis were used to answer the two research questions. 
+
+To answer the first research question, we used a 3-level hierarchical linear model with schools nested within districts and districts nested within states. The final model is represented by the following sets of equations. 
+Y_jks= π_0ks+X_j+ 〖γ1〗_j Noviceteachers+ ε_jks
+π_ks=β_00s+ r_0jk 
+β_00s= γ_000+ μ_00k
+Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level measure of counselor caseload. The γ1 coefficient represents the relationship between counselor caseload and study outcomes and addresses the first research question.
+
+To answer the second research question...
+
 
 # Results
 
