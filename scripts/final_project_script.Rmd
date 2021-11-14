@@ -210,7 +210,9 @@ select(c("LEA_STATE", "LEA_STATE_NAME", "LEAID", "LEA_NAME", "SCHID", "SCH_NAME"
 
 ### School Characteristic Cleaning
 
-The first step of suspension and expulsion data cleaning isimporting dataset
+### Expulsions and Suspensions Cleaning
+
+The first step of suspension and expulsion data cleaning is importing data
 
 ```{r import-data, include=FALSE}
 susp <- read.csv(here("data", "Suspensions.csv")) %>% 
