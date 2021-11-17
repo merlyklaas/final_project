@@ -1,0 +1,167 @@
+---
+title: "Expulsion"
+author: "Merly Klaas"
+date: "10/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rio)
+library(ggplot2)
+library(readr)
+library(here)
+library(janitor)
+library(skimr)
+library(dplyr)
+library(purrr)
+```
+
+Importing the dataset
+
+```{r}
+expl <- read.csv(here("data", "Expulsions.csv")) %>% 
+  clean_names() %>%  
+  as_tibble()
+expl[expl < 0] <- NA
+
+
+```
+
+Count colSums for all columns
+
+```{r}
+expl_colsums <- expl %>% 
+  select(9:142) %>% 
+  colSums(., na.rm=TRUE) 
+expl_colsums 
+```
+
+
+Dataset with no negative values across all variables. 
+
+```{r}
+expl1 <- expl
+expl1[expl1 < 0] <- NA
+
+expl1 <- expl1 %>% 
+  drop_na()
+```
+
+## Explusion of preschool children, by race/ethnicity and gender, disability status
+
+
+```{r}
+preschool_expl <- expl %>% 
+  select(1:24)
+preschool_expl[preschool_expl < 0] <- NA
+
+preschool_expl <- preschool_expl %>% 
+  drop_na()
+```
+
+## Expulsion of students with educational services, by race/ethnicity, gender, disability status
+
+```{r}
+w_edu_expl <- expl %>% 
+  select (1:8, 29:48, 85:103)
+w_edu_expl[w_edu_expl <0] <- NA
+
+w_edu_expl <- w_edu_expl %>% 
+  drop_na()
+```
+
+## Expulsion of students without educational services, by race/etchnicity, gender, disability status
+
+```{r}
+wo_edu_expl <- expl %>% 
+  select (1:8, 49:64, 104:122)
+wo_edu_expl[wo_edu_expl <0] <- NA
+wo_edu_expl <- wo_edu_expl %>% 
+  drop_na()
+```
+
+## Expulsion of students under zero tolerance policy
+
+```{r}
+zero_pol_expl <- expl %>% 
+  select(1:8, 65:84, 123:142)
+zero_pol_expl[zero_pol_expl <0] <- NA
+zero_pol_expl <- zero_pol_expl %>% 
+  drop_na()
+```
+```{r}
+b <- expl %>% 
+  summarize (male_female = tot_psdisc_exp_m + tot_psdisc_exp_f + 
+               tot_discwodis_expwe_m + tot_discwodis_expwe_f + 
+               tot_discwodis_expwoe_m + tot_discwodis_expwoe_f + 
+               tot_discwodis_expzt_m + tot_discwodis_expzt_f + 
+               tot_discwdis_expwe_idea_m + tot_discwdis_expwe_idea_f +
+               tot_discwdis_expwoe_idea_m + tot_discwdis_expwoe_idea_f,
+             hi= sch_psdisc_exp_hi_m + sch_psdisc_exp_hi_f + 
+               sch_discwodis_expwe_hi_m + sch_discwodis_expwe_hi_f +
+               sch_discwodis_expwoe_hi_m + sch_discwodis_expwoe_hi_f + 
+               sch_discwdis_expwe_idea_hi_m +sch_discwdis_expwe_idea_hi_f + 
+               sch_discwdis_expwoe_idea_hi_m + sch_discwdis_expwoe_idea_hi_f + 
+               sch_discwodis_expzt_hi_m + sch_discwodis_expzt_hi_f + 
+               sch_discwdis_expzt_idea_hi_m + sch_discwdis_expzt_idea_hi_f,
+             bl= sch_psdisc_exp_bl_m + sch_psdisc_exp_bl_f + 
+               sch_discwodis_expwe_bl_m + sch_discwodis_expwe_bl_f +
+               sch_discwodis_expwoe_bl_m + sch_discwodis_expwoe_bl_f + 
+               sch_discwdis_expwe_idea_bl_m +sch_discwdis_expwe_idea_bl_f + 
+               sch_discwdis_expwoe_idea_bl_m + sch_discwdis_expwoe_idea_bl_f + 
+               sch_discwodis_expzt_bl_m + sch_discwodis_expzt_bl_f + 
+               sch_discwdis_expzt_idea_bl_m + sch_discwdis_expzt_idea_bl_f,
+             am = sch_psdisc_exp_am_m + sch_psdisc_exp_am_f + 
+               sch_discwodis_expwe_am_m + sch_discwodis_expwe_am_f +
+               sch_discwodis_expwoe_am_m + sch_discwodis_expwoe_am_f + 
+               sch_discwdis_expwe_idea_am_m +sch_discwdis_expwe_idea_am_f + 
+               sch_discwdis_expwoe_idea_am_m + sch_discwdis_expwoe_idea_am_f + 
+               sch_discwodis_expzt_am_m + sch_discwodis_expzt_am_f + 
+               sch_discwdis_expzt_idea_am_m + sch_discwdis_expzt_idea_am_f,
+             as= sch_psdisc_exp_as_m + sch_psdisc_exp_as_f + 
+               sch_discwodis_expwe_as_m + sch_discwodis_expwe_as_f +
+               sch_discwodis_expwoe_as_m + sch_discwodis_expwoe_as_f + 
+               sch_discwdis_expwe_idea_as_m +sch_discwdis_expwe_idea_as_f + 
+               sch_discwdis_expwoe_idea_as_m + sch_discwdis_expwoe_idea_as_f + 
+               sch_discwodis_expzt_as_m + sch_discwodis_expzt_as_f + 
+               sch_discwdis_expzt_idea_as_m + sch_discwdis_expzt_idea_as_f,
+             hp= sch_psdisc_exp_hp_m + sch_psdisc_exp_hp_f + 
+               sch_discwodis_expwe_hp_m + sch_discwodis_expwe_hp_f +
+               sch_discwodis_expwoe_hp_m + sch_discwodis_expwoe_hp_f + 
+               sch_discwdis_expwe_idea_hp_m +sch_discwdis_expwe_idea_hp_f + 
+               sch_discwdis_expwoe_idea_hp_m + sch_discwdis_expwoe_idea_hp_f + 
+               sch_discwodis_expzt_hp_m + sch_discwodis_expzt_hp_f + 
+               sch_discwdis_expzt_idea_hp_m + sch_discwdis_expzt_idea_hp_f,
+             wh= sch_psdisc_exp_wh_m + sch_psdisc_exp_wh_f + 
+               sch_discwodis_expwe_wh_m + sch_discwodis_expwe_wh_f +
+               sch_discwodis_expwoe_wh_m + sch_discwodis_expwoe_wh_f + 
+               sch_discwdis_expwe_idea_wh_m +sch_discwdis_expwe_idea_wh_f + 
+               sch_discwdis_expwoe_idea_wh_m + sch_discwdis_expwoe_idea_wh_f + 
+               sch_discwodis_expzt_wh_m + sch_discwodis_expzt_wh_f + 
+               sch_discwdis_expzt_idea_wh_m + sch_discwdis_expzt_idea_wh_f,
+             tr= sch_psdisc_exp_tr_m + sch_psdisc_exp_tr_f + 
+               sch_discwodis_expwe_tr_m + sch_discwodis_expwe_tr_f +
+               sch_discwodis_expwoe_tr_m + sch_discwodis_expwoe_tr_f + 
+               sch_discwdis_expwe_idea_tr_m +sch_discwdis_expwe_idea_tr_f + 
+               sch_discwdis_expwoe_idea_tr_m + sch_discwdis_expwoe_idea_tr_f + 
+               sch_discwodis_expzt_tr_m + sch_discwodis_expzt_tr_f + 
+               sch_discwdis_expzt_idea_tr_m + sch_discwdis_expzt_idea_tr_f,
+             lep= sch_psdisc_exp_lep_m + sch_psdisc_exp_lep_m + 
+               sch_discwodis_expwe_lep_m + sch_discwodis_expwe_lep_f + 
+               sch_discwodis_expwoe_lep_m + sch_discwodis_expwoe_lep_m + 
+               sch_discwdis_expwe_lep_m + sch_discwdis_expwe_lep_m +
+               sch_discwodis_expwoe_lep_m + sch_discwodis_expwoe_lep_f + 
+               sch_discwodis_expzt_lep_m + sch_discwodis_expzt_lep_m +
+               sch_discwdis_expzt_lep_m + sch_discwdis_expzt_lep_f,
+             idea= sch_psdisc_exp_idea_m + sch_psdisc_exp_idea_m +
+               tot_discwdis_expwe_idea_m + tot_discwdis_expwe_idea_f +
+               tot_discwdis_expwoe_idea_m + tot_discwdis_expwoe_idea_f +
+               tot_discwdis_expzt_idea_m + tot_discwdis_expzt_idea_m +
+               sch_discwdis_expwe_504_m + sch_discwdis_expwe_504_f)
+```
+```{r}
+b %>% 
+colSums(., na.rm= TRUE)
+```
