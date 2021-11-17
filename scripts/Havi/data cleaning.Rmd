@@ -29,10 +29,10 @@ Quick summary:
 
 * There are `r ncol(hnb)` variables in this dataset.   
 * First 8 are school characteristics  
-* 9-13 are Harassment and Bullying allegations -- Allegations based on sex, ethnicity, disability status, sexual orientation and religion. Total varianles: `r length(grep("SCH_HBALLEGATIONS", hnb_col))`  
+* 9-13 are Harassment and Bullying allegations -- Allegations based on sex, ethnicity, disability status, sexual orientation and religion. Total variables: `r length(grep("SCH_HBALLEGATIONS", hnb_col))`  
 * 14 - 79 are #students reported as being bullied by different intent and demographic characteristics. Total variables: `r length(grep("SCH_HBREPORTED", hnb_col))`  
-* 80 - 145 are #students discilined for bullying or harassing by different intent and demographic characteristics. Total variables: `r length(grep("SCH_DISCIPLINED", hnb_col))`  
-* Totals are available (starts with TOT) for different intent (rex, race and disability status), reported/disciplined and gender (male, female) combo. Total variables for reported: `r length(grep("TOT_HBREPORTED", hnb_col))`, and Total variables for disciplined: `r length(grep("TOT_HBDISCIPLINED", hnb_col))`   
+* 80 - 145 are #students disciplined for bullying or harassing by different intent and demographic characteristics. Total variables: `r length(grep("SCH_DISCIPLINED", hnb_col))`  
+* Totals are available (starts with TOT) for different intent (sex, race and disability status), reported/disciplined and gender (male, female) combo. Total variables for reported: `r length(grep("TOT_HBREPORTED", hnb_col))`, and Total variables for disciplined: `r length(grep("TOT_HBDISCIPLINED", hnb_col))`   
 
 _Note to self:_ `grep()` saves the indices of columns
 
