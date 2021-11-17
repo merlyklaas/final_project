@@ -1,0 +1,63 @@
+---
+title: "errol_fp"
+author: "Errol Kaylor"
+date: "11/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      error = FALSE)
+if (!require("pacman")) install.packages("pacman") 
+#pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych) 
+```
+
+```{r }
+#Importing the School Support file
+support<- read_csv(here("data", "School Support.csv")) %>%
+  as_tibble() %>% 
+  subset(select = -c(17,20:22))
+
+#Importing the Enrollment file
+enroll<- read_csv(here("data", "Enrollment.csv")) %>%
+  as_tibble() %>%
+  subset(select = -c(9:31))
+```
+
+```{r}
+
+enroll_sum <- enroll %>% 
+  mutate_all(~replace(., . < 0, NA)) %>% 
+  select(TOT_ENR_M,TOT_ENR_F,COMBOKEY) %>% 
+  mutate(sum_enr = TOT_ENR_F+TOT_ENR_M)
+
+support_new <- support %>% 
+  mutate_all(~replace(., . < 0, NA)) %>% 
+  mutate(pct_new = (SCH_FTETEACH_SY + SCH_FTETEACH_FY)/SCH_FTETEACH_TOT) %>% 
+  left_join(enroll_sum) %>% 
+  mutate(new_teacher_per_1000 = pct_new * (sum_enr/1000),
+         combined_leo_security_per_1000 = (SCH_FTESECURITY_LEO + SCH_FTESECURITY_GUA) / (sum_enr/1000),
+         leo_per_1000 = SCH_FTESECURITY_LEO / (sum_enr/1000)) #%>% 
+#  filter(leo_per_1000 >= 1000)
+
+
+
+support_new %>% 
+    ggplot(aes(y = LEA_STATE,x = new_teacher_per_1000))+
+  geom_boxplot()
+
+support_new %>% 
+    ggplot(aes(y = LEA_STATE,x = combined_leo_security_per_1000))+
+  geom_boxplot()
+
+support_new %>% 
+    ggplot(aes(y = LEA_STATE,x = leo_per_1000))+
+  geom_boxplot()
+
+
+         
+```
+
