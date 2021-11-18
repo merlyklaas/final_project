@@ -14,8 +14,8 @@ library(readr)
 library(here)
 library(janitor)
 library(skimr)
-library(dplyr)
-library(purrr)
+#library(dplyr)
+#library(purrr)
 ```
 
 Importing the dataset
@@ -43,7 +43,7 @@ Dataset with no negative values across all variables.
 
 ```{r}
 expl1 <- expl
-expl1[expl1 < 0] <- NA
+#expl1[expl1 < 0] <- NA
 
 expl1 <- expl1 %>% 
   drop_na()
@@ -55,7 +55,7 @@ expl1 <- expl1 %>%
 ```{r}
 preschool_expl <- expl %>% 
   select(1:24)
-preschool_expl[preschool_expl < 0] <- NA
+#preschool_expl[preschool_expl < 0] <- NA
 
 preschool_expl <- preschool_expl %>% 
   drop_na()
@@ -66,7 +66,7 @@ preschool_expl <- preschool_expl %>%
 ```{r}
 w_edu_expl <- expl %>% 
   select (1:8, 29:48, 85:103)
-w_edu_expl[w_edu_expl <0] <- NA
+#w_edu_expl[w_edu_expl <0] <- NA
 
 w_edu_expl <- w_edu_expl %>% 
   drop_na()
@@ -77,7 +77,7 @@ w_edu_expl <- w_edu_expl %>%
 ```{r}
 wo_edu_expl <- expl %>% 
   select (1:8, 49:64, 104:122)
-wo_edu_expl[wo_edu_expl <0] <- NA
+#wo_edu_expl[wo_edu_expl <0] <- NA
 wo_edu_expl <- wo_edu_expl %>% 
   drop_na()
 ```
@@ -87,18 +87,22 @@ wo_edu_expl <- wo_edu_expl %>%
 ```{r}
 zero_pol_expl <- expl %>% 
   select(1:8, 65:84, 123:142)
-zero_pol_expl[zero_pol_expl <0] <- NA
+#zero_pol_expl[zero_pol_expl <0] <- NA
 zero_pol_expl <- zero_pol_expl %>% 
   drop_na()
 ```
+
 ```{r}
-b <- expl %>% 
+b <- expl
+b[is.na(b)] <- 0
+b <- b %>% 
   summarize (male_female = tot_psdisc_exp_m + tot_psdisc_exp_f + 
                tot_discwodis_expwe_m + tot_discwodis_expwe_f + 
                tot_discwodis_expwoe_m + tot_discwodis_expwoe_f + 
                tot_discwodis_expzt_m + tot_discwodis_expzt_f + 
                tot_discwdis_expwe_idea_m + tot_discwdis_expwe_idea_f +
-               tot_discwdis_expwoe_idea_m + tot_discwdis_expwoe_idea_f,
+               tot_discwdis_expwoe_idea_m + tot_discwdis_expwoe_idea_f+
+                tot_discwdis_expzt_idea_m + tot_discwdis_expzt_idea_f ,
              hi= sch_psdisc_exp_hi_m + sch_psdisc_exp_hi_f + 
                sch_discwodis_expwe_hi_m + sch_discwodis_expwe_hi_f +
                sch_discwodis_expwoe_hi_m + sch_discwodis_expwoe_hi_f + 
@@ -161,7 +165,28 @@ b <- expl %>%
                tot_discwdis_expzt_idea_m + tot_discwdis_expzt_idea_m +
                sch_discwdis_expwe_504_m + sch_discwdis_expwe_504_f)
 ```
+
+
 ```{r}
 b %>% 
 colSums(., na.rm= TRUE)
+```
+
+
+```{r recoded}
+cat_sum <- function(x, y) rowSums(select(x, contains(y)), na.rm = TRUE)
+
+try <- expl %>% 
+    summarise(male_female = cat_sum(.,"tot"),
+              hi = cat_sum(., "_hi_"),
+              bl = cat_sum(.,"_bl_"),
+              am = cat_sum(.,"_am_"),
+              as = cat_sum(.,"_as_"),
+              wh = cat_sum(.,"_wh_"),
+              tr = cat_sum(.,"_tr_"),
+              lep = cat_sum(.,"_lep_"),
+              idea = cat_sum(.,"_idea_")
+              ) %>% 
+    colSums(., na.rm= TRUE)
+try
 ```
