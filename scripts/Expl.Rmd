@@ -172,7 +172,7 @@ b %>%
 colSums(., na.rm= TRUE)
 ```
 
-
+Column summary for all expulsions 
 ```{r recoded}
 cat_sum <- function(x, y) rowSums(select(x, contains(y)), na.rm = TRUE)
 
@@ -182,6 +182,7 @@ try <- expl %>%
               bl = cat_sum(.,"_bl_"),
               am = cat_sum(.,"_am_"),
               as = cat_sum(.,"_as_"),
+              hp = cat_sum (.,"_hp_"),
               wh = cat_sum(.,"_wh_"),
               tr = cat_sum(.,"_tr_"),
               lep = cat_sum(.,"_lep_"),
