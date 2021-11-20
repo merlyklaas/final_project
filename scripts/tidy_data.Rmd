@@ -11,13 +11,14 @@ output:
 knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
                       warning = FALSE,
-                      error = FALSE,
-                      cache = TRUE)
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych)
-#tidylog
+                      error = FALSE)
+pacman::p_load(tidyverse, rio, here, janitor)
+#tidylog, , ggridges, ggthemes, skimr,, reshape2, psych
 ```
 
 ## Enrollment Data Set
+
+Read file
 
 ```{r load enroll file}
 enroll <- import(here("data", "Enrollment.csv")) %>%
@@ -26,16 +27,23 @@ enroll <- import(here("data", "Enrollment.csv")) %>%
 
 ```
 
+Change negative to NA
 
 ```{r enroll remove neg}
 #Function to remove negative numbers from data
+
 remove_neg <- function (x) ifelse(x < 0, NA, x)
 
 enroll <- enroll %>% 
-    mutate(across(c(9:123), remove_neg))
+    mutate(across(c(9:123), remove_neg)) %>% 
+    select(-c(9:31))  
 ```
 
+Now, I'm using PivotLonger and PivotWider to extract all information from columns.
+
 ```{r enroll tidy_1}
+#Extracting information for columns starting with 'tot_'
+
 enroll_total <- enroll %>% 
         select(c(1:8), matches('tot'))%>% 
         pivot_longer(
@@ -54,19 +62,22 @@ enroll_total <- enroll %>%
         values_from = total,
         names_sep = "_",
         names_prefix = "tot_"
-    )
+    ) %>% 
+  as_tibble()
 
 ```
 
 
-
 ```{r enroll tidy_2}
+#Extracting information for columns starting with 'sch_'
+
 enroll_tidy <- enroll %>% 
-        select(-matches('tot|_a3|_a4|_a5'))%>% 
+        select(-matches('tot'))%>% 
         pivot_longer(
             cols = -c(1:8), 
             names_to = c("enroll_type", "classification","gender"),
             names_sep = "_",
+            names_prefix = "sch_",
             values_to = "students" 
         )
 
@@ -76,38 +87,34 @@ enroll_tidy <- enroll_tidy %>%
             total = sum(students, na.rm = TRUE)
         ) 
 
-
 enroll_tidy <- enroll_tidy %>% 
-    pivot_wider(
-        names_from = c(2:4),
+     pivot_wider(
+        names_from = c(2:3),
         values_from = total,
         names_sep = "_",
         names_prefix = "sch_"
-    ) 
-
-enroll_tidy <- enroll_tidy %>% 
-    right_join(enroll[,1:8],by = 'combokey') %>% 
-    right_join(enroll_total,by = 'combokey') %>%
-    select(c(lea_state:jj), combokey, contains("_enr_"),contains("_psenr_"), everything()) 
+    ) %>% 
+  as_tibble()
 
 ```
+
+```{r}
+#Joining all files to have information for analysis
+
+enroll_final <- enroll_tidy %>% 
+    right_join(.,enroll[,1:8],by = 'combokey') %>% 
+    right_join(., enroll_total,by = 'combokey') %>%
+    select(c(lea_state:jj), combokey, 'tot_enr',contains("_enr_"), everything()) %>% 
+    as_tibble()
+```
+
+
 ```{r total, eval = FALSE}
-enroll_total <- enroll %>% 
-        select(c(1:8),matches('tot'))%>% 
-        pivot_longer(
-            cols = -c(1:8), 
-            names_to = c("enroll_type", "classification","gender"),
-            names_sep = "_",
-            names_prefix = "sch_",
-            values_to = "students" 
-        ) %>%
-        group_by(combokey, enroll_type,classification) %>% 
-        summarize(
-            total = sum(students, na.rm = TRUE)
-        ) 
-enroll_longer %>% 
-    right_join(enroll[,1:8],by = 'combokey') %>%     
-    select(c(lea_state:jj), combokey, starts_with("enr"),everything())
+# Expressing enrollment across categories as percentage of total enrollment
+
+enroll_final <- enroll_final %>%
+  mutate(across(-c(1:9), ~ . / !! enroll_final$tot_enr * 100)) 
 ```
 
+Note: For 11 schools, total enrollment is 0. Therefore, the percentages come as NA for them.
 
