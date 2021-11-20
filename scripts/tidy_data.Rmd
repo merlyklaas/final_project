@@ -1,0 +1,113 @@
+---
+title: "Tidy Data"
+author: "Havisha Khurana"
+date: "11/20/2021"
+output: 
+    html_document:
+        toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      error = FALSE,
+                      cache = TRUE)
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych)
+#tidylog
+```
+
+## Enrollment Data Set
+
+```{r load enroll file}
+enroll <- import(here("data", "Enrollment.csv")) %>%
+    as_tibble() %>%
+    clean_names()
+
+```
+
+
+```{r enroll remove neg}
+#Function to remove negative numbers from data
+remove_neg <- function (x) ifelse(x < 0, NA, x)
+
+enroll <- enroll %>% 
+    mutate(across(c(9:123), remove_neg))
+```
+
+```{r enroll tidy_1}
+enroll_total <- enroll %>% 
+        select(c(1:8), matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("enroll_type", "gender"),
+            names_sep = "_",
+            names_prefix = "tot_",
+            values_to = "students" 
+        ) %>%
+    group_by(combokey, enroll_type) %>% 
+        summarize(
+            total = sum(students, na.rm = TRUE)
+        ) %>% 
+    pivot_wider(
+        names_from = 2,
+        values_from = total,
+        names_sep = "_",
+        names_prefix = "tot_"
+    )
+
+```
+
+
+
+```{r enroll tidy_2}
+enroll_tidy <- enroll %>% 
+        select(-matches('tot|_a3|_a4|_a5'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("enroll_type", "classification","gender"),
+            names_sep = "_",
+            values_to = "students" 
+        )
+
+enroll_tidy <- enroll_tidy %>%         
+        group_by(combokey, enroll_type, classification) %>% 
+        summarize(
+            total = sum(students, na.rm = TRUE)
+        ) 
+
+
+enroll_tidy <- enroll_tidy %>% 
+    pivot_wider(
+        names_from = c(2:4),
+        values_from = total,
+        names_sep = "_",
+        names_prefix = "sch_"
+    ) 
+
+enroll_tidy <- enroll_tidy %>% 
+    right_join(enroll[,1:8],by = 'combokey') %>% 
+    right_join(enroll_total,by = 'combokey') %>%
+    select(c(lea_state:jj), combokey, contains("_enr_"),contains("_psenr_"), everything()) 
+
+```
+```{r total, eval = FALSE}
+enroll_total <- enroll %>% 
+        select(c(1:8),matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("enroll_type", "classification","gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students" 
+        ) %>%
+        group_by(combokey, enroll_type,classification) %>% 
+        summarize(
+            total = sum(students, na.rm = TRUE)
+        ) 
+enroll_longer %>% 
+    right_join(enroll[,1:8],by = 'combokey') %>%     
+    select(c(lea_state:jj), combokey, starts_with("enr"),everything())
+```
+
+
