@@ -11,7 +11,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
                       warning = FALSE,
-                      error = FALSE)
+                      error = FALSE,
+                      cache = TRUE)
 pacman::p_load(tidyverse, rio, here, janitor)
 #tidylog, , ggridges, ggthemes, skimr,, reshape2, psych
 ```
@@ -36,7 +37,7 @@ remove_neg <- function (x) ifelse(x < 0, NA, x)
 
 enroll <- enroll %>% 
     mutate(across(c(9:123), remove_neg)) %>% 
-    select(-c(9:31))  
+    select(-c(9:31))  #removing pre-K enrollment data
 ```
 
 Now, I'm using PivotLonger and PivotWider to extract all information from columns.
@@ -79,26 +80,22 @@ enroll_tidy <- enroll %>%
             names_sep = "_",
             names_prefix = "sch_",
             values_to = "students" 
-        )
-
-enroll_tidy <- enroll_tidy %>%         
+        ) %>%         
         group_by(combokey, enroll_type, classification) %>% 
         summarize(
             total = sum(students, na.rm = TRUE)
-        ) 
-
-enroll_tidy <- enroll_tidy %>% 
-     pivot_wider(
+        ) %>% 
+      pivot_wider(
         names_from = c(2:3),
         values_from = total,
         names_sep = "_",
         names_prefix = "sch_"
     ) %>% 
-  as_tibble()
+    as_tibble()
 
 ```
 
-```{r}
+```{r enroll joining}
 #Joining all files to have information for analysis
 
 enroll_final <- enroll_tidy %>% 
@@ -109,12 +106,150 @@ enroll_final <- enroll_tidy %>%
 ```
 
 
-```{r total, eval = FALSE}
+```{r enrol pct}
 # Expressing enrollment across categories as percentage of total enrollment
 
 enroll_final <- enroll_final %>%
   mutate(across(-c(1:9), ~ . / !! enroll_final$tot_enr * 100)) 
 ```
 
-Note: For 11 schools, total enrollment is 0. Therefore, the percentages come as NA for them.
+Note: For 11 schools, total enrollment is 0. Therefore, the percentages come as NA for them. Probably because these schools only have preK enrollment. 
+
+```{r enroll errors}
+enroll_100 <- enroll_final %>% 
+  select(c(1:19)) %>% 
+  filter_at(vars(c(10:19)),any_vars(.>100))
+```
+
+Note: For `r nrow(enroll_100)`, the pct over one sub-group is greater than 100 - this mostly happens in the `idea` enrollment. 
+
+## Suspension Data set
+
+```{r load suspension data and susset}
+susp <- import(here("data", "Suspensions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:189), remove_neg))
+
+#preK suspension data
+susp_ps <- susp %>% 
+  select(c(1:50)) 
+
+#K12 suspension
+susp_k12 <- susp %>% 
+  select(c(1:8,51:167))
+
+```
+
+Tidy data for regression
+
+```{r susp_sum}
+
+#K-12 summary data
+susp_sum <- susp_k12 %>% 
+  select(combokey, matches('tot|_504_')) %>% 
+  mutate(
+    tot_susp = rowSums(across(where(is.numeric)), na.rm = TRUE)
+  ) %>% 
+  select(combokey, tot_susp)
+  
+
+```
+
+
+```{r susp tidy, eval = FALSE}
+# Long data for descriptive analysis
+#incomplete
+
+susp_ps_tidy <- susp_ps %>% 
+        select(-matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8, 45,46), 
+            names_to = c("type", "classification","gender"),
+            names_sep = "_",
+            names_prefix = "sch_psdisc_",
+            values_to = "students" 
+        )
+
+susp_k12_tidy <- susp_k12 %>% 
+        select(-matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("disability", "type","classification", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_disc_",
+            values_to = "students" 
+        )
+```
+
+## Expulsion Data Set
+
+```{r load expulsion data and subset}
+expl <- import(here("data", "Expulsions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:142), remove_neg))
+
+#preK expulsion data
+expl_ps <- expl %>% 
+  select(c(1:8), matches('psdisc')) 
+
+#K12 data expulsion data
+expl_k12 <- expl %>% 
+  select(c(1:142), -matches('psdisc'))
+
+```
+
+Tidy data for regression
+
+```{r expl_sum }
+
+#K-12 summary data
+expl_sum <- expl_k12  %>% 
+  select(combokey, matches('tot|_504_')) %>% 
+  mutate(
+    tot_expl = rowSums(across(where(is.numeric)), na.rm = TRUE)
+  ) %>% 
+  select(combokey, tot_expl)
+  
+```
+
+## Referals and Arrest Data Set
+
+```{r ra_sum}
+ra_sum <- import(here("data", "Referrals and Arrests.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:84), remove_neg)) %>% 
+    select(combokey, matches('tot|_504_')) %>% 
+    mutate(
+    tot_ref = rowSums(select(., contains('_ref_')), na.rm = TRUE),
+    tot_arr = rowSums(select(., contains('_arr_')), na.rm = TRUE)
+    ) %>% 
+  select(combokey, tot_ref, tot_arr)
+```
+
+## Joined Data
+
+```{r joined}
+# Function to calculate rates per 1000 student
+rate <- function(x) (x*1000 / enroll_final$tot_enr)
+
+data_join <- enroll_final %>% 
+  select(c(1:9, 11:15, 18:19, 17, 16, 10)) %>% 
+  left_join(susp_sum, by = 'combokey') %>% 
+  left_join(expl_sum, by = 'combokey') %>% 
+  left_join(ra_sum, by = 'combokey') %>% 
+  mutate(
+  susp_std = rate(tot_susp),
+  expl_std = rate(tot_expl),
+  ref_std = rate(tot_ref),
+  arr_std = rate(tot_arr)
+  )
+
+```
+
+```{r export}
+#export(data_join)
+```
 
