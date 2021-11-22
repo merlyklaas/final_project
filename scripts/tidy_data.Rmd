@@ -247,6 +247,57 @@ data_join <- enroll_final %>%
   arr_std = rate(tot_arr)
   )
 
+
+
+```
+
+```{r load_support_data}
+support<- read_csv(here("data", "School Support.csv")) %>%
+  as_tibble() %>%
+  mutate(across(c(9:22),remove_neg)) %>% 
+  mutate(pct_new = (SCH_FTETEACH_SY + SCH_FTETEACH_FY)/SCH_TEACHERS_CURR_TOT)
+
+support_tidy <- support %>% 
+  pivot_longer(cols = -c(1:8,23),
+               names_to = c("untidy1","detail1","detail2"),
+               values_to = "count",
+               names_prefix = "SCH_",
+               names_sep = "_"
+  ) %>% 
+  mutate(
+    fte = case_when(
+      str_detect(untidy1,"FTE") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    untidy1 = str_remove(untidy1,"FTE"),
+    tot = case_when(
+      str_detect(detail1,"TOT") ~ "Yes",
+      str_detect(detail2,"TOT") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    detail1 = str_remove(detail1,"TOT"),
+    employee_category = untidy1,
+    employee_detail = detail1
+  ) %>% 
+  select(-c(detail2,detail1,untidy1))
+
+
+          
+```
+
+```{r load and tidy characteristics}
+
+sch_characteristics_raw <- import(here("data","School Characteristics.csv")) %>% 
+  as_tibble()
+sch_characteristics <- sch_characteristics_raw %>%
+  mutate(across(c(9:32),remove_neg)) %>% 
+  select(-c(9:26,31,32))
+
+characteristics_tidy <- sch_characteristics %>% 
+  pivot_longer(cols = (9:12),
+               names_to = "type",
+               values_to = "status",
+               names_prefix = "SCH_STATUS_")
 ```
 
 ```{r export}
