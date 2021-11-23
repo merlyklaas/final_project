@@ -156,6 +156,66 @@ susp_sum <- susp_k12 %>%
 
 ```
 
+##School Support Import and Tidying
+
+```{r load_support_data}
+support<- read_csv(here("data", "School Support.csv")) %>%
+  as_tibble() %>%
+  clean_names() %>% 
+  mutate(across(c(9:22),remove_neg)) %>% 
+  mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
+    pct_new_teachers = sum_new_teachers/sch_teachers_curr_tot,
+        )
+
+support_tidy <- support %>% 
+  pivot_longer(cols = -c(1:8,23,24),
+               names_to = c("untidy1","detail1","detail2"),
+               values_to = "count_teachers",
+               names_prefix = "sch_",
+               names_sep = "_"
+  ) %>% 
+  mutate(
+    fte = case_when(
+      str_detect(untidy1,"fte") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    untidy1 = str_remove(untidy1,"fte"),
+    tot = case_when(
+      str_detect(detail1,"tot") ~ "Yes",
+      str_detect(detail2,"tot") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    detail1 = str_remove(detail1,"tot"),
+    employee_category = untidy1,
+  ) %>% 
+  filter(tot == "Yes" & fte == "Yes") %>% 
+  select(-c(detail2,detail1,untidy1,tot,fte,employee_category)) %>% 
+  select(-c(1:6,8))
+
+
+          
+```
+
+
+## School Characteristics Tidying
+```{r load and tidy characteristics}
+
+sch_characteristics_raw <- import(here("data","School Characteristics.csv")) %>% 
+  as_tibble() %>% 
+  clean_names()
+sch_characteristics <- sch_characteristics_raw %>%
+  mutate(across(c(9:32),remove_neg)) %>% 
+  select(-c(9:26,31,32))
+
+characteristics_tidy <- sch_characteristics %>% 
+  pivot_longer(cols = (8:12),
+               names_to = "type",
+               values_to = "status",
+               names_prefix = "sch_status_") %>% 
+  pivot_wider(names_from = type,
+              values_from = status) %>% 
+  select(-(1:6))
+```
 
 ```{r susp tidy, eval = FALSE}
 # Long data for descriptive analysis
@@ -237,68 +297,23 @@ rate <- function(x) (x*1000 / enroll_final$tot_enr)
 
 data_join <- enroll_final %>% 
   select(c(1:9, 11:15, 18:19, 17, 16, 10)) %>% 
-  left_join(susp_sum, by = 'combokey') %>% 
+#  left_join(susp_sum, by = 'combokey') %>% 
   left_join(expl_sum, by = 'combokey') %>% 
   left_join(ra_sum, by = 'combokey') %>% 
+  left_join(support_tidy, by = "combokey") %>% 
+  left_join(characteristics_tidy, by = "combokey") %>% 
   mutate(
-  susp_std = rate(tot_susp),
+#  susp_std = rate(tot_susp),
   expl_std = rate(tot_expl),
   ref_std = rate(tot_ref),
-  arr_std = rate(tot_arr)
+  arr_std = rate(tot_arr),
+  new_teacher_std = rate(sum_new_teachers)
   )
 
 
 
 ```
 
-```{r load_support_data}
-support<- read_csv(here("data", "School Support.csv")) %>%
-  as_tibble() %>%
-  mutate(across(c(9:22),remove_neg)) %>% 
-  mutate(pct_new = (SCH_FTETEACH_SY + SCH_FTETEACH_FY)/SCH_TEACHERS_CURR_TOT)
-
-support_tidy <- support %>% 
-  pivot_longer(cols = -c(1:8,23),
-               names_to = c("untidy1","detail1","detail2"),
-               values_to = "count",
-               names_prefix = "SCH_",
-               names_sep = "_"
-  ) %>% 
-  mutate(
-    fte = case_when(
-      str_detect(untidy1,"FTE") ~ "Yes",
-      TRUE ~ "No"
-    ),
-    untidy1 = str_remove(untidy1,"FTE"),
-    tot = case_when(
-      str_detect(detail1,"TOT") ~ "Yes",
-      str_detect(detail2,"TOT") ~ "Yes",
-      TRUE ~ "No"
-    ),
-    detail1 = str_remove(detail1,"TOT"),
-    employee_category = untidy1,
-    employee_detail = detail1
-  ) %>% 
-  select(-c(detail2,detail1,untidy1))
-
-
-          
-```
-
-```{r load and tidy characteristics}
-
-sch_characteristics_raw <- import(here("data","School Characteristics.csv")) %>% 
-  as_tibble()
-sch_characteristics <- sch_characteristics_raw %>%
-  mutate(across(c(9:32),remove_neg)) %>% 
-  select(-c(9:26,31,32))
-
-characteristics_tidy <- sch_characteristics %>% 
-  pivot_longer(cols = (9:12),
-               names_to = "type",
-               values_to = "status",
-               names_prefix = "SCH_STATUS_")
-```
 
 ```{r export}
 #export(data_join)
