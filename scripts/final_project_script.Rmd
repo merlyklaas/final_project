@@ -14,7 +14,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
                       warning = FALSE,
-                      error = FALSE)
+                      error = FALSE,
+                      fig.width = 9, 
+                      fig.height = 9)
 
 # Add your packages that you need here. This will load the libraries
 #removed purr - part of tidyverse
@@ -23,6 +25,24 @@ if (!require("pacman")) install.packages("pacman")
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
 pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych) 
 
+library(rio)
+library(dplyr)
+library(here)
+library(tidyr)
+# install.packages(naniar)
+library(naniar)
+library(readr)
+library(magrittr)
+# install.packages(sjmisc)
+library(sjmisc)
+library(skimr)
+library(janitor)
+library(ggplot2)
+library(tidyverse)
+library(psych)
+library(tinytex)
+library(crayon)
+library(ggthemes)
 ```
 
 # Abstract
@@ -803,6 +823,220 @@ Y_jks= π_0ks+X_j+ 〖γ1〗_j Noviceteachers+ ε_jks
 Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level measure of counselor caseload. The γ1 coefficient represents the relationship between counselor caseload and study outcomes and addresses the first research question.
 
 To answer the second research question...
+
+## Second Research Question
+```{r}
+getwd()
+```
+
+```{r}
+na_strings <- c(-3, -5, -6, -8, -9, -11)
+```
+
+```{r}
+RA <- import(here("data", "Referrals and Arrests.csv")) %>%
+as_tibble() %>%
+ 
+set_na(na = c(-3, -5, -6, -8, -9, -11))
+RA
+```
+
+```{r}
+skim(RA)
+```
+
+Verify that COMBOKEY is the key for joining
+```{r}
+RA %>%
+count(COMBOKEY)
+```
+
+Describe the RA data set
+```{r}
+RA %>%
+  describeBy()
+```
+
+```{r}
+str(RA)
+```
+
+```{r}
+enroll <- import(here("data", "enroll.csv")) %>%
+as_tibble() %>%
+ 
+set_na(na = c(-3, -5, -6, -8, -9, -11))
+```
+
+Describe the enroll data set
+```{r}
+enroll %>%
+  describeBy()
+```
+
+```{r}
+str(enroll)
+```
+
+```{r}
+ra_full <- full_join(enroll, RA)
+
+ra_full
+```
+
+```{r}
+export(ra_full, here("data", "ra_full.csv"))
+```
+
+```{r}
+sch_su <- import(here("data", "sch_su.csv")) %>%
+as_tibble() %>%
+ 
+set_na(na = c(-3, -5, -6, -8, -9, -11))
+
+sch_su
+```
+
+```{r}
+ra_full_c <- ra_full %>%
+  clean_names()
+```
+
+Complete data set
+```{r}
+ra_final <- full_join(ra_full_c, sch_su)
+
+ra_final
+```
+
+
+```{r}
+export(ra_final, here("data", "ra_final.csv"))
+```
+
+Dropping variables to show just the state and totals
+```{r}
+ra_lawst <- ra_final %>%
+select(lea_state_name, starts_with("tot")) %>%
+  set_na(na = c(-3, -5, -6, -8, -9, -11))
+
+ra_lawst
+```
+
+Sum by state
+```{r}
+ra_sum <- ra_lawst %>%
+  group_by(lea_state_name) %>%
+  summarise_all(sum, na.rm = TRUE) %>%
+  filter(lea_state_name != "NA")
+
+ra_sum
+```
+
+```{r}
+# export(ra_lawst, here("data", "ra_lawst.xlsx"))
+```
+
+pivot_longer to rearrange the data with less columns & more rows
+```{r}
+ra_sum2 <- ra_sum %>%
+  pivot_longer(cols = starts_with("tot_"),
+    names_to = "student_type",
+    names_prefix = "tot_disc",
+    values_to = "tot_st",
+    values_drop_na = TRUE)
+
+ra_sum2
+```
+
+IDEA (Individuals with Disabilities Education Act)
+LEP stands for limited English Proficient
+arr = Arrests, ref = referrals, wdis = with disability, & wodis = with out disability
+```{r}
+ra_sum3 <- ra_sum2 %>%
+  mutate_at("student_type", str_replace, "_idea", "") %>%
+  separate(student_type, c("status", "dis_act", "gender"), "_")
+
+ra_sum3
+```
+
+```{r}
+new_labels <- c("ref" = "Referrals", "arr" = "Arrests")
+```
+
+How to get it to show a break in the gender indicating disability status or a percentage of each gender that is disabled?
+fct_rev added to flip state names alphabetical
+labeller used to spell out facet_wrap labels
+```{r}
+ra_sum3 %>%
+  ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
+  geom_col(aes(fill = gender)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip() +
+  facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
+  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="gold1")) +
+  labs(x = "State",
+       y = "Total",
+       title = "Number of Student Arrests and Referrals by State",
+       subtitle = "Visulalized by Gender") +
+  scale_fill_discrete (name = "Gender", labels = c("Female", "Male"))
+```
+
+```{r}
+ra_sum3 %>%
+  ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
+  geom_col(aes(fill = status)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip() +
+  facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
+  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="darkolivegreen3")) +
+  labs(x = "State",
+       y = "Total",
+       title = "Number of Student Arrests and Referrals by State",
+       subtitle = "Visulalized by Disability Status") +
+  scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))
+```
+
+Multiple Regression
+```{r}
+ra_final %>%
+  colnames ()
+```
+
+Changed "Not Reported" data to NA; checked that code worked by searching for the phrase in the view data pane
+```{r}
+ra_reg <- ra_final %>%
+select(lea_state, lea_state_name, leaid, lea_name, schid, sch_name, combokey, jj, enroll_all, starts_with("tot"), sch_ftesecurity_leo, sch_ftesecurity_gua) %>%
+  set_na(na = c("Not Reported"))
+
+ra_reg
+```
+
+Still working on this code & will update soon...
+```{r}
+ra_tidy <- ra_lawst %>%
+  group_by(lea_state_name) %>%
+  summarise_all(sum, na.rm = TRUE) %>%
+  filter(lea_state_name != "NA")
+
+pivot_longer(cols = starts_with("tot_"),
+    names_to = "student_type",
+    names_prefix = "tot_disc",
+    values_to = "tot_st",
+    values_drop_na = TRUE)
+
+mutate_at("student_type", str_replace, "_idea", "") %>%
+  separate(student_type, c("status", "dis_act", "gender"), "_")
+
+ra_sum2
+```
+
+
+```{r}
+ra_tidy %>%
+  describeBy()
+```
+
 
 
 # Results
