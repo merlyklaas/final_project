@@ -9,7 +9,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Havisha Khurana" />
 
 <meta name="date" content="2021-11-20" />
 
@@ -166,7 +165,6 @@ pre code {
 
 
 <h1 class="title toc-ignore">Tidy Data</h1>
-<h4 class="author">Havisha Khurana</h4>
 <h4 class="date">11/20/2021</h4>
 
 </div>
@@ -175,6 +173,8 @@ pre code {
 <ul>
 <li><a href="#enrollment-data-set">Enrollment Data Set</a></li>
 <li><a href="#suspension-data-set">Suspension Data set</a></li>
+<li><a href="#school-support">School Support</a></li>
+<li><a href="#school-characteristics-tidying">School Characteristics Tidying</a></li>
 <li><a href="#expulsion-data-set">Expulsion Data Set</a></li>
 <li><a href="#referals-and-arrest-data-set">Referals and Arrest Data Set</a></li>
 <li><a href="#joined-data">Joined Data</a></li>
@@ -279,28 +279,76 @@ susp_sum &lt;- susp_k12 %&gt;%
     tot_susp = rowSums(across(where(is.numeric)), na.rm = TRUE)
   ) %&gt;% 
   select(combokey, tot_susp)</code></pre>
-<pre class="r"><code># Long data for descriptive analysis
-#incomplete
-
-susp_ps_tidy &lt;- susp_ps %&gt;% 
-        select(-matches(&#39;tot&#39;))%&gt;% 
-        pivot_longer(
-            cols = -c(1:8, 45,46), 
-            names_to = c(&quot;type&quot;, &quot;classification&quot;,&quot;gender&quot;),
-            names_sep = &quot;_&quot;,
-            names_prefix = &quot;sch_psdisc_&quot;,
-            values_to = &quot;students&quot; 
+</div>
+<div id="school-support" class="section level2">
+<h2>School Support</h2>
+<p>Import and Tidying</p>
+<pre class="r"><code>support&lt;- read_csv(here(&quot;data&quot;, &quot;School Support.csv&quot;)) %&gt;%
+  as_tibble() %&gt;%
+  clean_names() %&gt;% 
+  mutate(across(c(9:22),remove_neg)) %&gt;% 
+  mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
+    pct_new_teachers = sum_new_teachers*100/sch_fteteach_tot, #should be sch_fteteach_tot instead of sch_teachers_curr_total
+    tot_law = rowSums(select(., contains(&#39;_ftesecurity_&#39;)), na.rm = TRUE)
         )
+support_sum &lt;- support %&gt;% 
+  select(c(combokey, pct_new_teachers, sch_fteteach_tot, tot_law))
 
-susp_k12_tidy &lt;- susp_k12 %&gt;% 
-        select(-matches(&#39;tot&#39;))%&gt;% 
-        pivot_longer(
-            cols = -c(1:8), 
-            names_to = c(&quot;disability&quot;, &quot;type&quot;,&quot;classification&quot;, &quot;gender&quot;),
-            names_sep = &quot;_&quot;,
-            names_prefix = &quot;sch_disc_&quot;,
-            values_to = &quot;students&quot; 
-        )</code></pre>
+# Tidy data for descriptive analysis
+
+support_tidy &lt;- support %&gt;% 
+  pivot_longer(cols = -c(1:8,23,24),
+               names_to = c(&quot;untidy1&quot;,&quot;detail1&quot;,&quot;detail2&quot;),
+               values_to = &quot;count_teachers&quot;,
+               names_prefix = &quot;sch_&quot;,
+               names_sep = &quot;_&quot;
+  ) %&gt;% 
+  mutate(
+    fte = case_when(
+      str_detect(untidy1,&quot;fte&quot;) ~ &quot;Yes&quot;,
+      TRUE ~ &quot;No&quot;
+    ),
+    untidy1 = str_remove(untidy1,&quot;fte&quot;),
+    tot = case_when(
+      str_detect(detail1,&quot;tot&quot;) ~ &quot;Yes&quot;,
+      str_detect(detail2,&quot;tot&quot;) ~ &quot;Yes&quot;,
+      TRUE ~ &quot;No&quot;
+    ),
+    detail1 = str_remove(detail1,&quot;tot&quot;),
+    employee_category = untidy1,
+  ) %&gt;% 
+  filter(tot == &quot;Yes&quot; &amp; fte == &quot;Yes&quot;) %&gt;% 
+  select(-c(detail2,detail1,untidy1,tot,fte,employee_category)) %&gt;% 
+  select(-c(1:6,8))</code></pre>
+</div>
+<div id="school-characteristics-tidying" class="section level2">
+<h2>School Characteristics Tidying</h2>
+<pre class="r"><code>sch_characteristics_raw &lt;- import(here(&quot;data&quot;,&quot;School Characteristics.csv&quot;)) %&gt;% 
+  as_tibble() %&gt;% 
+  clean_names()
+
+#function to change Yes to 1, and No to 0
+helperFunction &lt;- function(x){
+    ifelse(x==&quot;Yes&quot;, 1,0)
+}
+
+sch_characteristics &lt;- sch_characteristics_raw %&gt;%
+  mutate(across(c(9:32),remove_neg)) %&gt;% 
+  select(combokey, c(27:30)) %&gt;% 
+  mutate(across(c(2:5),helperFunction))
+
+ #Just pivoting longer and wider w/o any manipulation
+# characteristics_tidy &lt;- sch_characteristics %&gt;% 
+#   pivot_longer(cols = (8:12),
+#                names_to = &quot;type&quot;,
+#                values_to = &quot;status&quot;,
+#                names_prefix = &quot;sch_status_&quot;,
+#                names_transform = list(
+#     gender = ~ readr::parse_factor(.x, levels = c(&quot;f&quot;, &quot;m&quot;)),
+#     ) %&gt;% 
+#   pivot_wider(names_from = type,
+#               values_from = status) %&gt;% 
+#   select(-(1:6))</code></pre>
 </div>
 <div id="expulsion-data-set" class="section level2">
 <h2>Expulsion Data Set</h2>
@@ -344,16 +392,48 @@ expl_sum &lt;- expl_k12  %&gt;%
 rate &lt;- function(x) (x*1000 / enroll_final$tot_enr)
 
 data_join &lt;- enroll_final %&gt;% 
-  select(c(1:9, 11:15, 18:19, 17, 16, 10)) %&gt;% 
+  left_join(sch_characteristics, by = &#39;combokey&#39;) %&gt;% 
+  select(c(1:8, 55:58, 9, 11:15, 18:19, 17, 16, 10)) %&gt;% 
   left_join(susp_sum, by = &#39;combokey&#39;) %&gt;% 
   left_join(expl_sum, by = &#39;combokey&#39;) %&gt;% 
   left_join(ra_sum, by = &#39;combokey&#39;) %&gt;% 
+  left_join(support_sum, by = &#39;combokey&#39;) %&gt;%
+  # select(c(1:9, 11:15, 18:19, 17, 16, 10)) %&gt;%
+  # left_join(support_sum, by = &quot;combokey&quot;) %&gt;%
+  # left_join(susp_sum, by = &#39;combokey&#39;) %&gt;%
+  # left_join(expl_sum, by = &#39;combokey&#39;) %&gt;%
+  # left_join(ra_sum, by = &#39;combokey&#39;) %&gt;%
+  # left_join(sch_characteristics, by = &quot;combokey&quot;) %&gt;%
   mutate(
   susp_std = rate(tot_susp),
   expl_std = rate(tot_expl),
   ref_std = rate(tot_ref),
-  arr_std = rate(tot_arr)
+  arr_std = rate(tot_arr),
+  law_std = rate(tot_law)
   )</code></pre>
+<pre class="r"><code>#export(data_join, here(&quot;data&quot;,&quot;data_join.csv&quot;))</code></pre>
+<pre class="r"><code># Long data for descriptive analysis
+#incomplete
+
+susp_ps_tidy &lt;- susp_ps %&gt;% 
+        select(-matches(&#39;tot&#39;))%&gt;% 
+        pivot_longer(
+            cols = -c(1:8, 45,46), 
+            names_to = c(&quot;type&quot;, &quot;classification&quot;,&quot;gender&quot;),
+            names_sep = &quot;_&quot;,
+            names_prefix = &quot;sch_psdisc_&quot;,
+            values_to = &quot;students&quot; 
+        )
+
+susp_k12_tidy &lt;- susp_k12 %&gt;% 
+        select(-matches(&#39;tot&#39;))%&gt;% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c(&quot;disability&quot;, &quot;type&quot;,&quot;classification&quot;, &quot;gender&quot;),
+            names_sep = &quot;_&quot;,
+            names_prefix = &quot;sch_disc_&quot;,
+            values_to = &quot;students&quot; 
+        )</code></pre>
 </div>
 
 

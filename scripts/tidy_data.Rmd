@@ -1,6 +1,5 @@
 ---
 title: "Tidy Data"
-author: "Havisha Khurana"
 date: "11/20/2021"
 output: 
     html_document:
@@ -156,7 +155,9 @@ susp_sum <- susp_k12 %>%
 
 ```
 
-##School Support Import and Tidying
+## School Support 
+
+Import and Tidying
 
 ```{r load_support_data}
 support<- read_csv(here("data", "School Support.csv")) %>%
@@ -164,8 +165,13 @@ support<- read_csv(here("data", "School Support.csv")) %>%
   clean_names() %>% 
   mutate(across(c(9:22),remove_neg)) %>% 
   mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
-    pct_new_teachers = sum_new_teachers/sch_teachers_curr_tot,
+    pct_new_teachers = sum_new_teachers*100/sch_fteteach_tot, #should be sch_fteteach_tot instead of sch_teachers_curr_total
+    tot_law = rowSums(select(., contains('_ftesecurity_')), na.rm = TRUE)
         )
+support_sum <- support %>% 
+  select(c(combokey, pct_new_teachers, sch_fteteach_tot, tot_law))
+
+# Tidy data for descriptive analysis
 
 support_tidy <- support %>% 
   pivot_longer(cols = -c(1:8,23,24),
@@ -198,48 +204,36 @@ support_tidy <- support %>%
 
 
 ## School Characteristics Tidying
+
 ```{r load and tidy characteristics}
 
 sch_characteristics_raw <- import(here("data","School Characteristics.csv")) %>% 
   as_tibble() %>% 
   clean_names()
+
+#function to change Yes to 1, and No to 0
+helperFunction <- function(x){
+    ifelse(x=="Yes", 1,0)
+}
+
 sch_characteristics <- sch_characteristics_raw %>%
   mutate(across(c(9:32),remove_neg)) %>% 
-  select(-c(9:26,31,32))
+  select(combokey, c(27:30)) %>% 
+  mutate(across(c(2:5),helperFunction))
 
-characteristics_tidy <- sch_characteristics %>% 
-  pivot_longer(cols = (8:12),
-               names_to = "type",
-               values_to = "status",
-               names_prefix = "sch_status_") %>% 
-  pivot_wider(names_from = type,
-              values_from = status) %>% 
-  select(-(1:6))
-```
+ #Just pivoting longer and wider w/o any manipulation
+# characteristics_tidy <- sch_characteristics %>% 
+#   pivot_longer(cols = (8:12),
+#                names_to = "type",
+#                values_to = "status",
+#                names_prefix = "sch_status_",
+#                names_transform = list(
+#     gender = ~ readr::parse_factor(.x, levels = c("f", "m")),
+#     ) %>% 
+#   pivot_wider(names_from = type,
+#               values_from = status) %>% 
+#   select(-(1:6))
 
-```{r susp tidy, eval = FALSE}
-# Long data for descriptive analysis
-#incomplete
-
-susp_ps_tidy <- susp_ps %>% 
-        select(-matches('tot'))%>% 
-        pivot_longer(
-            cols = -c(1:8, 45,46), 
-            names_to = c("type", "classification","gender"),
-            names_sep = "_",
-            names_prefix = "sch_psdisc_",
-            values_to = "students" 
-        )
-
-susp_k12_tidy <- susp_k12 %>% 
-        select(-matches('tot'))%>% 
-        pivot_longer(
-            cols = -c(1:8), 
-            names_to = c("disability", "type","classification", "gender"),
-            names_sep = "_",
-            names_prefix = "sch_disc_",
-            values_to = "students" 
-        )
 ```
 
 ## Expulsion Data Set
@@ -296,18 +290,24 @@ ra_sum <- import(here("data", "Referrals and Arrests.csv")) %>%
 rate <- function(x) (x*1000 / enroll_final$tot_enr)
 
 data_join <- enroll_final %>% 
-  select(c(1:9, 11:15, 18:19, 17, 16, 10)) %>% 
-#  left_join(susp_sum, by = 'combokey') %>% 
+  left_join(sch_characteristics, by = 'combokey') %>% 
+  select(c(1:8, 55:58, 9, 11:15, 18:19, 17, 16, 10)) %>% 
+  left_join(susp_sum, by = 'combokey') %>% 
   left_join(expl_sum, by = 'combokey') %>% 
   left_join(ra_sum, by = 'combokey') %>% 
-  left_join(support_tidy, by = "combokey") %>% 
-  left_join(characteristics_tidy, by = "combokey") %>% 
+  left_join(support_sum, by = 'combokey') %>%
+  # select(c(1:9, 11:15, 18:19, 17, 16, 10)) %>%
+  # left_join(support_sum, by = "combokey") %>%
+  # left_join(susp_sum, by = 'combokey') %>%
+  # left_join(expl_sum, by = 'combokey') %>%
+  # left_join(ra_sum, by = 'combokey') %>%
+  # left_join(sch_characteristics, by = "combokey") %>%
   mutate(
-#  susp_std = rate(tot_susp),
+  susp_std = rate(tot_susp),
   expl_std = rate(tot_expl),
   ref_std = rate(tot_ref),
   arr_std = rate(tot_arr),
-  new_teacher_std = rate(sum_new_teachers)
+  law_std = rate(tot_law)
   )
 
 
@@ -316,6 +316,31 @@ data_join <- enroll_final %>%
 
 
 ```{r export}
-#export(data_join)
+#export(data_join, here("data","data_join.csv"))
 ```
 
+
+```{r susp tidy, eval = FALSE}
+# Long data for descriptive analysis
+#incomplete
+
+susp_ps_tidy <- susp_ps %>% 
+        select(-matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8, 45,46), 
+            names_to = c("type", "classification","gender"),
+            names_sep = "_",
+            names_prefix = "sch_psdisc_",
+            values_to = "students" 
+        )
+
+susp_k12_tidy <- susp_k12 %>% 
+        select(-matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("disability", "type","classification", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_disc_",
+            values_to = "students" 
+        )
+```
