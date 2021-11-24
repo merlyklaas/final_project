@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo = TRUE,
 #let's only include libraries we are using so that others don't have to install the irrelevant ones 
 if (!require("pacman")) install.packages("pacman") 
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot) 
 
 library(rio)
 library(dplyr)
@@ -1040,6 +1040,41 @@ ra_tidy %>%
 
 
 # Results
+
+## Research Quesiton 1
+
+```{r }
+rq1 <- import(here("data","data_join.csv")) %>%
+  as_tibble() %>%
+  mutate(leaid = as.numeric(leaid),
+         lea_state = as.factor(lea_state)) %>%
+  filter(!is.na(susp_std)) %>%
+  filter(!is.na(pct_new_teachers)) %>%
+  filter(pct_new_teachers != Inf)
+
+control <- c("tot_enr","sch_enr_am", "sch_enr_as", "sch_enr_bl", "sch_enr_hi",
+             "sch_enr_hp", "sch_enr_tr","sch_enr_wh","sch_enr_lep","sch_enr_idea",
+             "sch_status_sped","sch_status_magnet", "sch_status_charter","sch_status_alt")
+rq1_m0 <- lmer(susp_std ~ pct_new_teachers + (1 | leaid) + (1 | lea_state), 
+               data = rq1, na.action = na.pass)
+
+lm(susp_std ~ pct_new_teachers, data = rq1 )
+
+rq1_m1 <- lmer(susp_std ~ pct_new_teachers + tot_enr + sch_enr_am + sch_enr_as + 
+                 sch_enr_bl + sch_enr_hi + sch_enr_hp + sch_enr_tr + sch_enr_wh + 
+                 sch_enr_wh + sch_enr_lep + sch_enr_idea + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + 
+                 (1 | leaid) + (1 | lea_state), 
+               data = rq1)
+
+tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
+          pred.labels = c("Intercept", "Percent New Teachers", "Total Enrollment",
+                        "Percent American Indian", "Percent Asian",
+                        "Percent Black", "Percent Latinx", "Percent Hawaiian/Pacific Islander",
+                        "Percent Multiracial", "Percent EL Classified", "Percent Special Ed.",
+                        "Special Ed School (Y/N)", "Magnet school ((Y/N)", 
+                        "Charter School (Y/N)", "Alternative School (Y/N)"))
+```
 
 # Discussion
 
