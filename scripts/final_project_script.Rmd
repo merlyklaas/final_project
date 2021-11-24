@@ -4,7 +4,8 @@ author: "TEAM QRME"
 date: "11/10/2021"
 output: 
     html_document:
-        toc_flot: true
+        toc: true
+        toc_float: true
         toc_depth: 3
         highlight: pygments
         code_folding: hide
