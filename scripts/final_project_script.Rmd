@@ -26,221 +26,449 @@ if (!require("pacman")) install.packages("pacman")
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
 pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot) 
 
-library(rio)
-library(dplyr)
-library(here)
-library(tidyr)
-# install.packages(naniar)
+
 library(naniar)
 library(readr)
 library(magrittr)
-# install.packages(sjmisc)
 library(sjmisc)
-library(skimr)
-library(janitor)
-library(ggplot2)
-library(tidyverse)
-library(psych)
 library(tinytex)
 library(crayon)
-library(ggthemes)
 ```
 
 # Abstract
 
 # Introduction 
 
-## Cleaning different files {.tabset}
+This research project will be conducted using High School and Middle School level data from the [**Civil Rights Data Collection (CRDC)**](https://ocrdata.ed.gov/), 2017-2018 data set. The CRDC contains multiple data sets that cover a range of topics. From the overall data set, we are focusing on frequency data reported in the following areas: 
 
-### School Enrollment Cleaning
+1. School Support (count of enrolled novice teachers, sworn LEO)
+2. Referrals & Arrests (count of referrals and arrests of students by subgroup)
+3. Suspensions and Expulsions (count of suspensions and expulsions of students by subgroup)
+4. Enrollment (count of enrolled students by subgroup)
+5. School characteristics (magnet, alternate, charter, special ed)
 
-In this section, I will import the enrollment file and subset it to keep relevant variables. This file will be the base file. 
+## Research Questions  
 
-```{r }
-#Importing the Enrollment file
-enroll<- read_csv(here("data", "Enrollment.csv")) %>%
-  as_tibble() %>%
-  subset(select = -c(9:31))
+**1. Relationship of Concentration of novice teachers and rate of exclusionary discipline (i.e., suspensions, expulsions) in K-12 school students** 
+
+* Vary by student subgroups? (i.e. race, disability)
+* Vary district?
+* Vary by state?
+
+
+**2. Relationship of security guard density and referrals + arrests in K-12 school students** 
+
+* Should we see if there is any correlation between corporal punishment and security guard presence?
+* Might vary by student characteristic (e.g., students with disabilities, gender, grade level, or race)
+* Number of transfers out of schools with guards might be at an increased level
+
+## Cleaning different files
+
+Since we're using multiple files, we created a master file to have all the necessary variables in one data set, called data_joined. We exported this file to reduce the run-time of the code. Below is our data cleaning process, but `eval = FALSE` as we don't want to run this code each time.
+
+### Enrollment Data Set
+
+Read file
+
+```{r load enroll file, eval = FALSE}
+enroll <- import(here("data", "Enrollment.csv")) %>%
+    as_tibble() %>%
+    clean_names()
+
 ```
 
-Exploring the file - I notice that there are some minimum values that are less than
-zero, negative values don't make sense for enrollment. Need to replace those to 
-missing.
+Change negative to NA
 
-```{r }
-skim(enroll)
-``` 
+```{r enroll remove neg, eval = FALSE}
+#Function to remove negative numbers from data
 
+remove_neg <- function (x) ifelse(x < 0, NA, x)
 
-First, need to replace values that have negative values with a missing value, then
-creating enrollment counts for race/ethnicity groups as well as EL and SPED.
-
-```{r }
-enroll <- enroll %>%
-  mutate_all(~replace(., . < 0, NA)) %>%
-  mutate(enroll_all = TOT_ENR_M + TOT_ENR_F,
-         enroll_latinx = SCH_ENR_HI_M + SCH_ENR_HI_F,
-         enroll_aian = SCH_ENR_AM_M + SCH_ENR_AM_F,
-         enroll_asianam = SCH_ENR_AS_M + SCH_ENR_AS_F,
-         enroll_nhpi = SCH_ENR_HP_M + SCH_ENR_HP_F,
-         enroll_black = SCH_ENR_BL_M + SCH_ENR_BL_F,
-         enroll_white = SCH_ENR_WH_M + SCH_ENR_WH_F,
-         enroll_twomore = SCH_ENR_TR_M + SCH_ENR_TR_F,
-         enroll_el = SCH_ENR_LEP_M + SCH_ENR_LEP_F,
-         enroll_elserv = TOT_LEPPROGENR_M + TOT_LEPPROGENR_F,
-         enroll_sped = SCH_ENR_IDEA_M + SCH_ENR_IDEA_F)
+enroll <- enroll %>% 
+    mutate(across(c(9:123), remove_neg)) %>% 
+    select(-c(9:31))  #removing pre-K enrollment data
 ```
 
-Checking to see if the code worked by checking the distribution of all the variables. 
-In theory, none should go below zero in these box graphs. Based on the results, it appears
-as if this worked out well 
+Now, I'm using PivotLonger and PivotWider to extract all information from columns.
 
-```{r }
-enroll %>% 
-  melt(id.vars = "SCH_NAME", 
-       measure.vars = c("enroll_all", "enroll_latinx", "enroll_aian", "enroll_asianam",
-                        "enroll_nhpi", "enroll_black", "enroll_white", "enroll_twomore",
-                        "enroll_el", "enroll_elserv", "enroll_sped"),
-       variable.name = "Group",
-       value.name = "Count") %>%
-  ggplot(aes(x = Count, y = Group)) +
-  geom_boxplot() + 
-  theme_minimal()
-```
+```{r enroll tidy_1, eval = FALSE}
+#Extracting information for columns starting with 'tot_'
 
-Now creating a set of new variables. I am creating enrollment percents for each
-race/ethnicity group as well as EL and SPED.
-
-```{r }
-enroll <- enroll %>%
-  mutate(enroll_latinx_pct = (enroll_latinx/enroll_all)*100,
-         enroll_aian_pct = (enroll_aian/enroll_all)*100,
-         enroll_asianam_pct = (enroll_asianam/enroll_all)*100,
-         enroll_nhpi_pct = (enroll_nhpi/enroll_all)*100,
-         enroll_black_pct = (enroll_black/enroll_all)*100,
-         enroll_white_pct = (enroll_white/enroll_all)*100,
-         enroll_twomore_pct = (enroll_twomore/enroll_all)*100,
-         enroll_el_pct = (enroll_el/enroll_all)*100,
-         enroll_elserv_pct = (enroll_elserv/enroll_all)*100,
-         enroll_sped_pct = (enroll_sped/enroll_all)*100)
-```
-
-Also checking to see distribution of all the variables by ploting them. I notice some 
-are reporting percents higher than 100. For example, some schools, the percent of students
-who are EL enrolled is greater than 100. This shouldn't be the case.
-
-```{r }
-enroll %>% 
-  melt(id.vars = "SCH_NAME", 
-       measure.vars = c( "enroll_latinx_pct", "enroll_aian_pct", "enroll_asianam_pct",
-                        "enroll_nhpi_pct", "enroll_black_pct", "enroll_white_pct", "enroll_twomore_pct",
-                        "enroll_el_pct", "enroll_elserv_pct", "enroll_sped_pct"),
-       variable.name = "Group",
-       value.name = "Count") %>%
-  ggplot(aes(x = Count, y = Group)) +
-  geom_boxplot() + 
-  theme_minimal()
-
-enroll %>%
-    filter(enroll_el_pct > 100) %>%
-    select(SCH_NAME,SCH_ENR_LEP_F,SCH_ENR_LEP_M, enroll_el, enroll_all, enroll_el_pct)
-```
-
-Recoding those schools that report percentages higher than 100. Doing this for EL% and SPED%.
-For those cases, I just recoded back to 100 percent. It appears like it worked based on the visual.
-Afterwards, I subset the file to only keep the school information, enrollment totals, and percent enrollment.
-
-```{r }
-enroll <- enroll %>%
-  mutate(enroll_el_pct = ifelse(enroll_el_pct > 100,100,enroll_el_pct),
-         enroll_elserv_pct = ifelse(enroll_elserv_pct > 100,100,enroll_elserv_pct),
-         enroll_sped_pct = ifelse(enroll_sped_pct > 100,100,enroll_sped_pct)) 
-```
-  
-Creating  District Level Independent variables (% EL, % SPED, % students of color)
-
-```{r }
-enroll <- enroll %>%
-  group_by(LEAID) %>%
-  mutate(dist_enrollment = sum(enroll_all),
-         dist_percent_white = (sum(enroll_white)/dist_enrollment)*100,
-         dist_percent_latinx = (sum(enroll_latinx)/dist_enrollment)*100,
-         dist_percent_black = (sum(enroll_black)/dist_enrollment)*100,
-         dist_percent_twomore = (sum(enroll_twomore)/dist_enrollment)*100,
-         dist_percent_asianam= (sum(enroll_asianam)/dist_enrollment)*100,
-         dist_percent_nhpi = (sum(enroll_nhpi)/dist_enrollment)*100,
-         dist_percent_aian = (sum(enroll_aian)/dist_enrollment)*100,
-         dist_percent_el = (sum(enroll_el)/dist_enrollment)*100,
-         dist_percent_sped = (sum(enroll_sped)/dist_enrollment)*100
-         )
-
-enroll %>%
-  melt(id.vars = "SCH_NAME", 
-       measure.vars = c( "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
-                        "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
-                        "dist_percent_aian", "dist_percent_el", "dist_percent_sped"),
-       variable.name = "Group",
-       value.name = "Percent") %>%
-  ggplot(aes(x = Percent, y = Group)) +
-  geom_boxplot() + 
-  theme_minimal()
-  
-
-
-enroll %>%
-  ggplot(aes(x = dist_enrollment, y = LEA_STATE_NAME)) +
-  geom_density_ridges() + theme_minimal()
-```
-
-Replacing district rates with values greater than 100 to just 100
-
-```{r }
-
-enroll <- enroll %>%
-  mutate(dist_percent_el = ifelse(dist_percent_el > 100,100,dist_percent_el),
-         dist_percent_sped = ifelse(dist_percent_sped > 100,100,dist_percent_sped))
-
-enroll %>%
-  melt(id.vars = "SCH_NAME", 
-       measure.vars = c( "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
-                        "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
-                        "dist_percent_aian", "dist_percent_el", "dist_percent_sped"),
-       variable.name = "Group",
-       value.name = "Percent") %>%
-  ggplot(aes(x = Percent, y = Group)) +
-  geom_boxplot() + 
-  theme_minimal()
-``` 
-  
-Making the dataset smaller and just keeping variables that we need  
-  
-```{r }  
-enroll <- enroll %>%  
-select(c("LEA_STATE", "LEA_STATE_NAME", "LEAID", "LEA_NAME", "SCHID", "SCH_NAME", 
-          "COMBOKEY", "JJ",  "enroll_all", "enroll_latinx", "enroll_aian", "enroll_asianam",
-           "enroll_nhpi", "enroll_black", "enroll_white", "enroll_twomore",
-           "enroll_el", "enroll_elserv", "enroll_sped","enroll_latinx_pct", 
-          "enroll_aian_pct", "enroll_asianam_pct", "enroll_nhpi_pct", "enroll_black_pct", 
-          "enroll_white_pct", "enroll_twomore_pct","enroll_el_pct", "enroll_elserv_pct", "enroll_sped_pct",
-          "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
-          "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
-          "dist_percent_aian", "dist_percent_el", "dist_percent_sped"))
-```
-
-*END OF ENROLLMENT DATA CLEANING*
-
-### School Characteristic Cleaning
-
-### Expulsions and Suspensions Cleaning
-
-The first step of suspension and expulsion data cleaning is importing data
-
-```{r import-data, include=FALSE}
-susp <- read.csv(here("data", "Suspensions.csv")) %>% 
-  clean_names() %>%  
+enroll_total <- enroll %>% 
+        select(c(1:8), matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("enroll_type", "gender"),
+            names_sep = "_",
+            names_prefix = "tot_",
+            values_to = "students" 
+        ) %>%
+    group_by(combokey, enroll_type) %>% 
+        summarize(
+            total = sum(students, na.rm = TRUE)
+        ) %>% 
+    pivot_wider(
+        names_from = 2,
+        values_from = total,
+        names_sep = "_",
+        names_prefix = "tot_"
+    ) %>% 
   as_tibble()
 
 ```
+
+
+```{r enroll tidy_2, eval = FALSE}
+#Extracting information for columns starting with 'sch_'
+
+enroll_tidy <- enroll %>% 
+        select(-matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("enroll_type", "classification","gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students" 
+        ) %>%         
+        group_by(combokey, enroll_type, classification) %>% 
+        summarize(
+            total = sum(students, na.rm = TRUE)
+        ) %>% 
+      pivot_wider(
+        names_from = c(2:3),
+        values_from = total,
+        names_sep = "_",
+        names_prefix = "sch_"
+    ) %>% 
+    as_tibble()
+
+```
+
+```{r enroll joining, eval = FALSE}
+#Joining all files to have information for analysis
+
+enroll_final <- enroll_tidy %>% 
+    right_join(.,enroll[,1:8],by = 'combokey') %>% 
+    right_join(., enroll_total,by = 'combokey') %>%
+    select(c(lea_state:jj), combokey, 'tot_enr',contains("_enr_"), everything()) %>% 
+    as_tibble()
+```
+
+
+```{r enrol pct, eval = FALSE}
+# Expressing enrollment across categories as percentage of total enrollment
+
+enroll_final <- enroll_final %>%
+  mutate(across(-c(1:9), ~ . / !! enroll_final$tot_enr * 100)) 
+```
+
+Note: For 11 schools, total enrollment is 0. Therefore, the percentages come as NA for them. Probably because these schools only have preK enrollment. 
+
+```{r enroll errors, eval = FALSE}
+enroll_100 <- enroll_final %>% 
+  select(c(1:19)) %>% 
+  filter_at(vars(c(10:19)),any_vars(.>100))
+```
+
+Note: For `r nrow(enroll_100)`, the pct over one sub-group is greater than 100 - this mostly happens in the `idea` enrollment. 
+
+### Suspension Data set
+
+```{r load suspension data and susset, eval = FALSE}
+susp <- import(here("data", "Suspensions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:189), remove_neg))
+
+#preK suspension data
+susp_ps <- susp %>% 
+  select(c(1:50)) 
+
+#K12 suspension
+susp_k12 <- susp %>% 
+  select(c(1:8,51:167))
+
+```
+
+Tidy data for regression
+
+```{r susp_sum, eval = FALSE}
+
+#K-12 summary data
+susp_sum <- susp_k12 %>% 
+  select(combokey, matches('tot|_504_')) %>% 
+  mutate(
+    tot_susp = rowSums(across(where(is.numeric)), na.rm = TRUE)
+  ) %>% 
+  select(combokey, tot_susp)
+  
+
+```
+
+### School Support 
+
+Import and Tidying
+
+```{r load_support_data, eval = FALSE}
+support<- read_csv(here("data", "School Support.csv")) %>%
+  as_tibble() %>%
+  clean_names() %>% 
+  mutate(across(c(9:22),remove_neg)) %>% 
+  mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
+    pct_new_teachers = sum_new_teachers*100/sch_fteteach_tot, #should be sch_fteteach_tot instead of sch_teachers_curr_total
+    tot_law = rowSums(select(., contains('_ftesecurity_')), na.rm = TRUE)
+        )
+support_sum <- support %>% 
+  select(c(combokey, pct_new_teachers, sch_fteteach_tot, tot_law))
+
+# Tidy data for descriptive analysis
+
+support_tidy <- support %>% 
+  pivot_longer(cols = -c(1:8,23,24),
+               names_to = c("untidy1","detail1","detail2"),
+               values_to = "count_teachers",
+               names_prefix = "sch_",
+               names_sep = "_"
+  ) %>% 
+  mutate(
+    fte = case_when(
+      str_detect(untidy1,"fte") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    untidy1 = str_remove(untidy1,"fte"),
+    tot = case_when(
+      str_detect(detail1,"tot") ~ "Yes",
+      str_detect(detail2,"tot") ~ "Yes",
+      TRUE ~ "No"
+    ),
+    detail1 = str_remove(detail1,"tot"),
+    employee_category = untidy1,
+  ) %>% 
+  filter(tot == "Yes" & fte == "Yes") %>% 
+  select(-c(detail2,detail1,untidy1,tot,fte,employee_category)) %>% 
+  select(-c(1:6,8))
+
+
+          
+```
+
+
+### School Characteristics Tidying
+
+```{r load and tidy characteristics, eval = FALSE}
+
+sch_characteristics_raw <- import(here("data","School Characteristics.csv")) %>% 
+  as_tibble() %>% 
+  clean_names()
+
+#function to change Yes to 1, and No to 0
+helperFunction <- function(x){
+    ifelse(x=="Yes", 1,0)
+}
+
+sch_characteristics <- sch_characteristics_raw %>%
+  mutate(across(c(9:32),remove_neg)) %>% 
+  select(combokey, c(27:30)) %>% 
+  mutate(across(c(2:5),helperFunction))
+
+ #Just pivoting longer and wider w/o any manipulation
+# characteristics_tidy <- sch_characteristics %>% 
+#   pivot_longer(cols = (8:12),
+#                names_to = "type",
+#                values_to = "status",
+#                names_prefix = "sch_status_",
+#                names_transform = list(
+#     gender = ~ readr::parse_factor(.x, levels = c("f", "m")),
+#     ) %>% 
+#   pivot_wider(names_from = type,
+#               values_from = status) %>% 
+#   select(-(1:6))
+
+```
+
+### Expulsion Data Set
+
+```{r load expulsion data and subset, eval = FALSE}
+expl <- import(here("data", "Expulsions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:142), remove_neg))
+
+#preK expulsion data
+expl_ps <- expl %>% 
+  select(c(1:8), matches('psdisc')) 
+
+#K12 data expulsion data
+expl_k12 <- expl %>% 
+  select(c(1:142), -matches('psdisc'))
+
+```
+
+Tidy data for regression
+
+```{r expl_sum, eval = FALSE}
+
+#K-12 summary data
+expl_sum <- expl_k12  %>% 
+  select(combokey, matches('tot|_504_')) %>% 
+  mutate(
+    tot_expl = rowSums(across(where(is.numeric)), na.rm = TRUE)
+  ) %>% 
+  select(combokey, tot_expl)
+  
+```
+
+### Referals and Arrest Data Set
+
+```{r ra_sum, eval = FALSE}
+ra_sum <- import(here("data", "Referrals and Arrests.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:84), remove_neg)) %>% 
+    select(combokey, matches('tot|_504_')) %>% 
+    mutate(
+    tot_ref = rowSums(select(., contains('_ref_')), na.rm = TRUE),
+    tot_arr = rowSums(select(., contains('_arr_')), na.rm = TRUE)
+    ) %>% 
+  select(combokey, tot_ref, tot_arr)
+```
+
+### Joined Data
+
+```{r joined, eval = FALSE}
+# Function to calculate rates per 1000 student
+rate <- function(x) (x*1000 / enroll_final$tot_enr)
+
+data_join <- enroll_final %>% 
+  left_join(sch_characteristics, by = 'combokey') %>% 
+  select(c(1:8, 55:58, 9, 11:15, 18:19, 17, 16, 10)) %>% 
+  left_join(susp_sum, by = 'combokey') %>% 
+  left_join(expl_sum, by = 'combokey') %>% 
+  left_join(ra_sum, by = 'combokey') %>% 
+  left_join(support_sum, by = 'combokey') %>%
+  mutate(
+  susp_std = rate(tot_susp),
+  expl_std = rate(tot_expl),
+  ref_std = rate(tot_ref),
+  arr_std = rate(tot_arr),
+  law_std = rate(tot_law)
+  )
+
+
+
+```
+
+
+```{r export, eval = FALSE}
+#export(data_join, here("data","data_join.csv"))
+```
+
+
+
+## Descriptive Findings {.tabset}
+
+From the different data sets, we'll be creating some figures.
+
+
+### Expulsions and Suspensions Cleaning
+
+We'll be creating longer version for this data-set.
+
+
+```{r load suspension and expulsion}
+susp <- import(here("data", "Suspensions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:189), remove_neg))
+
+#preK suspension data
+susp_ps <- susp %>% 
+  select(c(1:50)) 
+
+#K12 suspension
+susp_k12 <- susp %>% 
+  select(c(1:8,51:167))
+
+expl <- import(here("data", "Expulsions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>% 
+    mutate(across(c(9:142), remove_neg))
+
+#preK expulsion data
+expl_ps <- expl %>% 
+  select(c(1:8), matches('psdisc')) 
+
+#K12 data expulsion data
+expl_k12 <- expl %>% 
+  select(c(1:142), -matches('psdisc'))
+
+```
+
+
+```{r tidy data}
+
+susp_k12_504 <- susp_k12 %>% 
+        select(combokey, matches('_504_')) %>% 
+        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+
+susp_k12_tidy <- susp_k12 %>% 
+        select(-matches('tot|_504|oosinstances')) %>% 
+        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
+        left_join(susp_k12_504, by = "combokey") %>% 
+        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE)))
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("disability", "type","ethnicity/lep", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students",
+        )
+
+susp_ps_tidy <- susp_ps %>% 
+        select(-matches('tot|oosinstances'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("type", "ethnicity/lep/idea","gender"),
+            names_sep = "_",
+            names_prefix = "sch_psdisc_",
+            values_to = "students" 
+        )
+
+expl_k12_504 <- expl_k12 %>% 
+        select(combokey, matches('_504_')) %>% 
+        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+
+expl_k12_tidy <- expl_k12 %>% 
+        select(-matches('tot')) %>% 
+        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
+        left_join(expl_k12_504, by = "combokey") %>% 
+        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("disability", "type","ethnicity/lep", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students",
+        )
+
+expl_ps_tidy <- expl_ps %>% 
+        select(-matches('tot'))%>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("type", "ethnicity/lep/idea","gender"),
+            names_sep = "_",
+            names_prefix = "sch_psdisc_",
+            values_to = "students" 
+        )
+
+```
+
+
+**Note: The below code was written before we learnt pivot_longer. We plan to recreate the figure using the tidy data we created above.**
 
 The data we use contains negative values for missing data. Let's create a data set with no negative values across all variables. 
 
@@ -661,145 +889,13 @@ all_race_female %>%
   
 
 
-### Harassemnt/Bullying Cleaning
+### Arrest and Referrals
 
-Let's read the data.
-```{r read data}
-hnb <- import(here("data","Harassment and Bullying.csv")) %>% 
-    as_tibble()
-hnb_col <- colnames(hnb)
-```
+We'll add some figures here.
 
-**Quick summary:**
+### Joined Data
 
-* There are `r ncol(hnb)` variables in this dataset.   
-* First 8 are school characteristics  
-* 9-13 are Harassment and Bullying allegations -- Allegations based on sex, ethnicity, disability status, sexual orientation and religion. Total varianles: `r length(grep("SCH_HBALLEGATIONS", hnb_col))`  
-* 14 - 79 are #students reported as being bullied by different intent and demographic characteristics. Total variables: `r length(grep("SCH_HBREPORTED", hnb_col))`  
-* 80 - 145 are #students discilined for bullying or harassing by different intent and demographic characteristics. Total variables: `r length(grep("SCH_DISCIPLINED", hnb_col))`  
-* Totals are available (starts with TOT) for different intent (rex, race and disability status), reported/disciplined and gender (male, female) combo. Total variables for reported: `r length(grep("TOT_HBREPORTED", hnb_col))`, and Total variables for disciplined: `r length(grep("TOT_HBDISCIPLINED", hnb_col))`   
-
-//_Note to self:_ `grep()` saves the indices of columns
-
-First, let's change all negative numbers to NA. 
-
-```{r hnb_pos}
-#function to remove negative values
-remove_neg <- function (x) ifelse(x < 0, NA, x)
-hnb_pos <- hnb %>% 
-    mutate(across(c(9:145), remove_neg))
-```
-
-Nice!
-
-Let's make a shorter dataset to work with. I have allegations, reported and disciplined for the following intents: sex, race and disability. Let's just take these forward.
-
-```{r hnb_sub}
-#function to find relevant columns and sum them
-cat_sum <- function(x, y) rowSums(select(x, starts_with(y)), na.rm = TRUE)
-
-hnb_sub <- hnb_pos %>% 
-    select("LEA_STATE","LEA_NAME","COMBOKEY", starts_with(c("SCH_HBALLEGATIONS","TOT_HBREPORTED","TOT_HBDISCIPLINED"))) %>% 
-    mutate(TOT_HBREPORTED_SEX = cat_sum(.,"TOT_HBREPORTED_SEX"),
-           TOT_HBREPORTED_RAC = cat_sum(.,"TOT_HBREPORTED_RAC"),
-           TOT_HBREPORTED_DIS = cat_sum(.,"TOT_HBREPORTED_DIS"),
-           TOT_HBDISCIPLINED_SEX = cat_sum(.,"TOT_HBDISCIPLINED_SEX"),
-           TOT_HBDISCIPLINED_RAC = cat_sum(.,"TOT_HBDISCIPLINED_RAC"),
-           TOT_HBDISCIPLINED_DIS = cat_sum(.,"TOT_HBDISCIPLINED_DIS"),
-           TOT_HBALLEGATIONS = cat_sum(.,"SCH_HBALLEGATIONS"),
-           TOT_HBREPORTED = cat_sum(.,"TOT_HBREPORTED"),
-           TOT_HBDISCIPLINED = cat_sum(.,"TOT_HBDISCIPLINED")) %>% 
-    filter(if_any(c(27:29),~ . > 0))
-```
-
-That looks like a neat data set. We have total `r ncol(hnb_sub)` variables - 3 are identifiers and rest are numeric. Also, we have filtered out rows where all numeric columns are 0.
-
-Let's find some summary of cols.
-
-```{r summary}
-skim(hnb_sub)
-
-```
-
-This is super interesting! Some conclusions: 
-
-* Allegations are highest, followed by disciplined and then reported. Probably, some teacher/adult saw the incident and disciplined the students involved, and hence things were not reported. Or, one student reported multiple people, hence the whole group was disciplined.    
-* Allegation, reported and disciplined have highest raw count for the 'Disability' intent, followed by 'sex' and 'race'. However, the mean in all categories follow the order: 'sex', 'race' and 'disability'
-* In reported, often female students report more frequencty for 'sex' intent, but male students report more often for 'race' and 'disability'
-* In disciplined, for all intents, male students are more often disciplined than female students.
-
-Let's do some plots now.
-
-```{r scatter plot matrix allegations, out.width="100%"}
-
-pairs.panels(hnb_sub[,4:8], 
-             method = "pearson", # correlation method
-             hist.col = "#00AFBB",
-             density = TRUE,  # show density plots
-             ellipses = TRUE # show correlation ellipses
-             )
-
-#pairs(hnb_sub[,4:8], pch = 19, lower.panel = NULL)
-#plotmatrix(hnb_sub[,27:29], colour="gray20")
-```
-
-```{r total, out.width="100%"}
-pairs.panels(hnb_sub[,27:29], 
-             method = "pearson", # correlation method
-             hist.col = "#00AFBB",
-             density = TRUE,  # show density plots
-             ellipses = TRUE # show correlation ellipses
-             )
-```
-        
-```{r group total, out.width="100%"}
-pairs.panels(hnb_sub[,21:26], 
-             method = "pearson", # correlation method
-             hist.col = "#00AFBB",
-             density = TRUE,  # show density plots
-             ellipses = TRUE # show correlation ellipses
-             )
-```
-
-Let's look at state-wide boxplot, but each point represents the district
-
-```{r state and district, out.width="100%"}
-hnb_sub2 <- hnb_sub %>% 
-    group_by(LEA_NAME) %>% 
-    mutate(district_all = mean(TOT_HBALLEGATIONS),
-           district_rep = mean(TOT_HBREPORTED),
-           district_dis = mean(TOT_HBDISCIPLINED))
-
-hnb_sub2 %>% 
-    group_by(LEA_STATE) %>% 
-    ggplot() +
-    geom_boxplot(aes(LEA_STATE, district_all))
-```
-
-Though exciting to do initial data analysis, let's make a data file we'll be using for the final analysis.
-
-```{r columns from enroll and hnb}
-hnb_trim <- hnb_pos %>% 
-   mutate(TOT_HBDISCIPLINED = cat_sum(., "TOT_HBDISCIPLINED")) %>% 
-   select("COMBOKEY", "TOT_HBDISCIPLINED")
-
-enroll_trim <- enroll %>% 
-      select(c(1:9))
-
-dis_enrol <- left_join(enroll_trim,hnb_trim, by = "COMBOKEY") %>% 
-    mutate(HNB_ENROL = ((TOT_HBDISCIPLINED*1000)/enroll_all)) %>% 
-    filter(HNB_ENROL <= 1000)
-```
-
-```{r}
-dis_enrol %>% 
-    ggplot() +
-        geom_histogram(aes(x = HNB_ENROL), bins = 200)+
-        xlim(0,1000)+
-        ylim(0, 300)
-```
-
-### Arrests and Referrals
+We'll add some figures here.
 
 # Methods
 
@@ -1081,4 +1177,183 @@ tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
 
 # References
 
+# Appendix
 
+
+**Note: This section was written early during the term. We'll probably remove it for the final submission.**
+
+
+In this section, I will import the enrollment file and subset it to keep relevant variables. This file will be the base file. 
+
+```{r, eval = FALSE}
+#Importing the Enrollment file
+enroll<- read_csv(here("data", "Enrollment.csv")) %>%
+  as_tibble() %>%
+  subset(select = -c(9:31))
+```
+
+Exploring the file - I notice that there are some minimum values that are less than
+zero, negative values don't make sense for enrollment. Need to replace those to 
+missing.
+
+```{r, eval = FALSE }
+skim(enroll)
+``` 
+
+
+First, need to replace values that have negative values with a missing value, then
+creating enrollment counts for race/ethnicity groups as well as EL and SPED.
+
+```{r, eval = FALSE }
+enroll <- enroll %>%
+  mutate_all(~replace(., . < 0, NA)) %>%
+  mutate(enroll_all = TOT_ENR_M + TOT_ENR_F,
+         enroll_latinx = SCH_ENR_HI_M + SCH_ENR_HI_F,
+         enroll_aian = SCH_ENR_AM_M + SCH_ENR_AM_F,
+         enroll_asianam = SCH_ENR_AS_M + SCH_ENR_AS_F,
+         enroll_nhpi = SCH_ENR_HP_M + SCH_ENR_HP_F,
+         enroll_black = SCH_ENR_BL_M + SCH_ENR_BL_F,
+         enroll_white = SCH_ENR_WH_M + SCH_ENR_WH_F,
+         enroll_twomore = SCH_ENR_TR_M + SCH_ENR_TR_F,
+         enroll_el = SCH_ENR_LEP_M + SCH_ENR_LEP_F,
+         enroll_elserv = TOT_LEPPROGENR_M + TOT_LEPPROGENR_F,
+         enroll_sped = SCH_ENR_IDEA_M + SCH_ENR_IDEA_F)
+```
+
+Checking to see if the code worked by checking the distribution of all the variables. 
+In theory, none should go below zero in these box graphs. Based on the results, it appears
+as if this worked out well 
+
+```{r, eval = FALSE }
+enroll %>% 
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c("enroll_all", "enroll_latinx", "enroll_aian", "enroll_asianam",
+                        "enroll_nhpi", "enroll_black", "enroll_white", "enroll_twomore",
+                        "enroll_el", "enroll_elserv", "enroll_sped"),
+       variable.name = "Group",
+       value.name = "Count") %>%
+  ggplot(aes(x = Count, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+```
+
+Now creating a set of new variables. I am creating enrollment percents for each
+race/ethnicity group as well as EL and SPED.
+
+```{r, eval = FALSE }
+enroll <- enroll %>%
+  mutate(enroll_latinx_pct = (enroll_latinx/enroll_all)*100,
+         enroll_aian_pct = (enroll_aian/enroll_all)*100,
+         enroll_asianam_pct = (enroll_asianam/enroll_all)*100,
+         enroll_nhpi_pct = (enroll_nhpi/enroll_all)*100,
+         enroll_black_pct = (enroll_black/enroll_all)*100,
+         enroll_white_pct = (enroll_white/enroll_all)*100,
+         enroll_twomore_pct = (enroll_twomore/enroll_all)*100,
+         enroll_el_pct = (enroll_el/enroll_all)*100,
+         enroll_elserv_pct = (enroll_elserv/enroll_all)*100,
+         enroll_sped_pct = (enroll_sped/enroll_all)*100)
+```
+
+Also checking to see distribution of all the variables by ploting them. I notice some 
+are reporting percents higher than 100. For example, some schools, the percent of students
+who are EL enrolled is greater than 100. This shouldn't be the case.
+
+```{r, eval = FALSE }
+enroll %>% 
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c( "enroll_latinx_pct", "enroll_aian_pct", "enroll_asianam_pct",
+                        "enroll_nhpi_pct", "enroll_black_pct", "enroll_white_pct", "enroll_twomore_pct",
+                        "enroll_el_pct", "enroll_elserv_pct", "enroll_sped_pct"),
+       variable.name = "Group",
+       value.name = "Count") %>%
+  ggplot(aes(x = Count, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+
+enroll %>%
+    filter(enroll_el_pct > 100) %>%
+    select(SCH_NAME,SCH_ENR_LEP_F,SCH_ENR_LEP_M, enroll_el, enroll_all, enroll_el_pct)
+```
+
+Recoding those schools that report percentages higher than 100. Doing this for EL% and SPED%.
+For those cases, I just recoded back to 100 percent. It appears like it worked based on the visual.
+Afterwards, I subset the file to only keep the school information, enrollment totals, and percent enrollment.
+
+```{r, eval = FALSE }
+enroll <- enroll %>%
+  mutate(enroll_el_pct = ifelse(enroll_el_pct > 100,100,enroll_el_pct),
+         enroll_elserv_pct = ifelse(enroll_elserv_pct > 100,100,enroll_elserv_pct),
+         enroll_sped_pct = ifelse(enroll_sped_pct > 100,100,enroll_sped_pct)) 
+```
+  
+Creating  District Level Independent variables (% EL, % SPED, % students of color)
+
+```{r, eval = FALSE }
+enroll <- enroll %>%
+  group_by(LEAID) %>%
+  mutate(dist_enrollment = sum(enroll_all),
+         dist_percent_white = (sum(enroll_white)/dist_enrollment)*100,
+         dist_percent_latinx = (sum(enroll_latinx)/dist_enrollment)*100,
+         dist_percent_black = (sum(enroll_black)/dist_enrollment)*100,
+         dist_percent_twomore = (sum(enroll_twomore)/dist_enrollment)*100,
+         dist_percent_asianam= (sum(enroll_asianam)/dist_enrollment)*100,
+         dist_percent_nhpi = (sum(enroll_nhpi)/dist_enrollment)*100,
+         dist_percent_aian = (sum(enroll_aian)/dist_enrollment)*100,
+         dist_percent_el = (sum(enroll_el)/dist_enrollment)*100,
+         dist_percent_sped = (sum(enroll_sped)/dist_enrollment)*100
+         )
+
+enroll %>%
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c( "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
+                        "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
+                        "dist_percent_aian", "dist_percent_el", "dist_percent_sped"),
+       variable.name = "Group",
+       value.name = "Percent") %>%
+  ggplot(aes(x = Percent, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+  
+
+
+enroll %>%
+  ggplot(aes(x = dist_enrollment, y = LEA_STATE_NAME)) +
+  geom_density_ridges() + theme_minimal()
+```
+
+Replacing district rates with values greater than 100 to just 100
+
+```{r, eval = FALSE }
+
+enroll <- enroll %>%
+  mutate(dist_percent_el = ifelse(dist_percent_el > 100,100,dist_percent_el),
+         dist_percent_sped = ifelse(dist_percent_sped > 100,100,dist_percent_sped))
+
+enroll %>%
+  melt(id.vars = "SCH_NAME", 
+       measure.vars = c( "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
+                        "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
+                        "dist_percent_aian", "dist_percent_el", "dist_percent_sped"),
+       variable.name = "Group",
+       value.name = "Percent") %>%
+  ggplot(aes(x = Percent, y = Group)) +
+  geom_boxplot() + 
+  theme_minimal()
+``` 
+  
+Making the dataset smaller and just keeping variables that we need  
+  
+```{r, eval = FALSE }  
+enroll <- enroll %>%  
+select(c("LEA_STATE", "LEA_STATE_NAME", "LEAID", "LEA_NAME", "SCHID", "SCH_NAME", 
+          "COMBOKEY", "JJ",  "enroll_all", "enroll_latinx", "enroll_aian", "enroll_asianam",
+           "enroll_nhpi", "enroll_black", "enroll_white", "enroll_twomore",
+           "enroll_el", "enroll_elserv", "enroll_sped","enroll_latinx_pct", 
+          "enroll_aian_pct", "enroll_asianam_pct", "enroll_nhpi_pct", "enroll_black_pct", 
+          "enroll_white_pct", "enroll_twomore_pct","enroll_el_pct", "enroll_elserv_pct", "enroll_sped_pct",
+          "dist_percent_white", "dist_percent_latinx", "dist_percent_black",
+          "dist_percent_twomore", "dist_percent_asianam", "dist_percent_nhpi",
+          "dist_percent_aian", "dist_percent_el", "dist_percent_sped"))
+```
+
+*END OF ENROLLMENT DATA CLEANING*

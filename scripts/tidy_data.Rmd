@@ -322,25 +322,64 @@ data_join <- enroll_final %>%
 
 ```{r susp tidy, eval = FALSE}
 # Long data for descriptive analysis
-#incomplete
+
+susp_k12_504 <- susp_k12 %>% 
+        select(combokey, matches('_504_')) %>% 
+        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+
+susp_k12_tidy <- susp_k12 %>% 
+        select(-matches('tot|_504|oosinstances')) %>% 
+        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
+        left_join(susp_k12_504, by = "combokey") %>% 
+        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE)))
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("disability", "type","ethnicity/lep", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students",
+        )
 
 susp_ps_tidy <- susp_ps %>% 
-        select(-matches('tot'))%>% 
+        select(-matches('tot|oosinstances'))%>% 
         pivot_longer(
-            cols = -c(1:8, 45,46), 
-            names_to = c("type", "classification","gender"),
+            cols = -c(1:8), 
+            names_to = c("type", "ethnicity/lep/idea","gender"),
             names_sep = "_",
             names_prefix = "sch_psdisc_",
             values_to = "students" 
         )
 
-susp_k12_tidy <- susp_k12 %>% 
+expl_k12_504 <- expl_k12 %>% 
+        select(combokey, matches('_504_')) %>% 
+        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+
+expl_k12_tidy <- expl_k12 %>% 
+        select(-matches('tot')) %>% 
+        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
+        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
+        left_join(expl_k12_504, by = "combokey") %>% 
+        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>% 
+        pivot_longer(
+            cols = -c(1:8), 
+            names_to = c("disability", "type","ethnicity/lep", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students",
+        )
+
+expl_ps_tidy <- expl_ps %>% 
         select(-matches('tot'))%>% 
         pivot_longer(
             cols = -c(1:8), 
-            names_to = c("disability", "type","classification", "gender"),
+            names_to = c("type", "ethnicity/lep/idea","gender"),
             names_sep = "_",
-            names_prefix = "sch_disc_",
+            names_prefix = "sch_psdisc_",
             values_to = "students" 
         )
+
+
 ```
