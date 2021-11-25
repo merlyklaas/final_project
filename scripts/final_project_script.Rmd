@@ -22,17 +22,18 @@ knitr::opts_chunk$set(echo = TRUE,
 # Add your packages that you need here. This will load the libraries
 #removed purr - part of tidyverse
 #let's only include libraries we are using so that others don't have to install the irrelevant ones 
-if (!require("pacman")) install.packages("pacman") 
+#if (!require("pacman")) install.packages("pacman") 
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, sjmisc) 
 
+#library(tidylog) #uncheck when writing code for log
 
-library(naniar)
-library(readr)
-library(magrittr)
-library(sjmisc)
-library(tinytex)
-library(crayon)
+# library(naniar)
+# library(readr)
+# library(magrittr)
+# library(sjmisc)
+# library(tinytex)
+# library(crayon)
 ```
 
 # Abstract
@@ -170,7 +171,7 @@ enroll_100 <- enroll_final %>%
   filter_at(vars(c(10:19)),any_vars(.>100))
 ```
 
-Note: For `r nrow(enroll_100)`, the pct over one sub-group is greater than 100 - this mostly happens in the `idea` enrollment. 
+Note: For very few schools, the pct over one sub-group is greater than 100 - this mostly happens in the `idea` enrollment. 
 
 ### Suspension Data set
 
@@ -376,6 +377,10 @@ We'll be creating longer version for this data-set.
 
 
 ```{r load suspension and expulsion}
+#Function to remove negative numbers from data
+
+remove_neg <- function (x) ifelse(x < 0, NA, x)
+
 susp <- import(here("data", "Suspensions.csv")) %>%
     as_tibble() %>%
     clean_names() %>% 
@@ -417,7 +422,7 @@ susp_k12_tidy <- susp_k12 %>%
         rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
         rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
         left_join(susp_k12_504, by = "combokey") %>% 
-        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE)))
+        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>% 
         pivot_longer(
             cols = -c(1:8), 
             names_to = c("disability", "type","ethnicity/lep", "gender"),
@@ -923,7 +928,7 @@ To answer the second research question...
 
 ## Second Research Question
 ```{r}
-getwd()
+#getwd()
 ```
 
 ```{r}
@@ -982,7 +987,7 @@ ra_full
 ```
 
 ```{r}
-export(ra_full, here("data", "ra_full.csv"))
+#export(ra_full, here("data", "ra_full.csv"))
 ```
 
 ```{r}
@@ -1008,7 +1013,7 @@ ra_final
 
 
 ```{r}
-export(ra_final, here("data", "ra_final.csv"))
+#export(ra_final, here("data", "ra_final.csv"))
 ```
 
 Dropping variables to show just the state and totals
@@ -1110,7 +1115,9 @@ ra_reg
 ```
 
 Still working on this code & will update soon...
-```{r}
+```{r, eval= FALSE}
+#Some error in this chunk 
+
 ra_tidy <- ra_lawst %>%
   group_by(lea_state_name) %>%
   summarise_all(sum, na.rm = TRUE) %>%
@@ -1129,7 +1136,7 @@ ra_sum2
 ```
 
 
-```{r}
+```{r, eval = FALSE}
 ra_tidy %>%
   describeBy()
 ```
@@ -1140,7 +1147,10 @@ ra_tidy %>%
 
 ## Research Quesiton 1
 
-```{r }
+```{r}
+
+#This throws error for me because of space. Guess we have a lot of data loaded in the prev. chunks
+
 rq1 <- import(here("data","data_join.csv")) %>%
   as_tibble() %>%
   mutate(leaid = as.numeric(leaid),
