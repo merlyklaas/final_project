@@ -477,7 +477,7 @@ expl_ps_tidy <- expl_ps %>%
 
 The data we use contains negative values for missing data. Let's create a data set with no negative values across all variables. 
 
-```{r no-na, include=FALSE}
+```{r no-na, include=FALSE, eval = FALSE}
 susp1 <- susp
 susp1[susp1 < 0] <- NA
 
@@ -489,7 +489,7 @@ However, if we only select row with complete information, we will miss too many 
 
 *Preschool students suspension by race/ethnicity, gender, disability status*
 * Only one out-of-school suspension
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 preschool_one_susp <- susp %>% 
   select (1:8, 9:28, 49:50 )
 preschool_one_susp[preschool_one_susp < 0] <- NA
@@ -499,7 +499,7 @@ preschool_one_susp <- preschool_one_susp %>%
 preschool_one_susp
 ```
 * more than one out-of-school suspensions
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 preschool_more_susp <- 
   preschool_more_susp <- susp %>% 
   select (1:8, 29:50 )
@@ -512,7 +512,7 @@ preschool_more_susp
 
 *Students who received one or more in-school suspension, by race/etchnicity, gender, disability status*
 
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 one_in_susp <- susp %>% 
   select (1:8, 51:68, 105: 124 )
 one_in_susp[one_in_susp < 0] <- NA
@@ -524,7 +524,7 @@ one_in_susp
 
 *Students who received one out-of-school suspension, by race/etchnicity, gender, disability status*
 
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 one_out_susp <- susp %>% 
   select (1:8, 69:86, 125: 144 )
 one_out_susp[one_out_susp < 0] <- NA
@@ -535,7 +535,7 @@ one_out_susp
 ```
 
 *Students who received more than one out-of-school suspension, by race/etchnicity, gender, disability status*
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 
 more_out_susp <- susp %>% 
   select (1:8, 87:104, 145: 167 )
@@ -548,7 +548,7 @@ more_out_susp
 
 *School days missed by gender, race, and disability status*
 
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 days_missed <- susp %>% 
   select (1:8, 168:189 )
 days_missed[days_missed < 0] <- NA
@@ -564,7 +564,7 @@ days_missed
 * Preschool students one suspension by Race and Gender
   * Preschool Male Students 
 
-```{r}
+```{r, eval = FALSE}
 pre_one_susp_race_m <- preschool_one_susp %>% 
  summarize(bl_m = sum(sch_psdisc_singoos_bl_m)/sum(tot_psdisc_singoos_m) * 100, 
            hi_m = sum(sch_psdisc_singoos_hi_m)/sum(tot_psdisc_singoos_m)* 100,
@@ -583,7 +583,7 @@ pre_one_susp_race_m
   
   * Preschool one suspension Female students
 
-```{r}
+```{r, eval = FALSE}
 pre_one_susp_race_f  <- preschool_one_susp %>% 
  summarize(bl_f = sum(sch_psdisc_singoos_bl_f)/sum(tot_psdisc_singoos_f) * 100, 
            hi_f = sum(sch_psdisc_singoos_hi_f)/sum(tot_psdisc_singoos_f)* 100,
@@ -602,7 +602,7 @@ pre_one_susp_race_f
   * Preschool Students with more than one suspension by race and gender
     - Male Students
 
-```{r}
+```{r, eval = FALSE}
 pre_more_susp_race_m <- preschool_more_susp %>% 
   summarize(bl_m = sum(sch_psdisc_multoos_bl_m)/sum(tot_psdisc_multoos_m) * 100, 
            hi_m = sum(sch_psdisc_multoos_hi_m)/sum(tot_psdisc_multoos_m)* 100,
@@ -619,7 +619,7 @@ pre_more_susp_race_m
 
 ```
     - Female Students 
-```{r}
+```{r, eval = FALSE}
 pre_more_susp_race_f  <- preschool_more_susp%>% 
  summarize(bl_f = sum(sch_psdisc_multoos_bl_f)/sum(tot_psdisc_multoos_f) * 100, 
            hi_f = sum(sch_psdisc_multoos_hi_f)/sum(tot_psdisc_multoos_f)* 100,
@@ -637,7 +637,7 @@ pre_more_susp_race_f
 
   * Students without disability with one or more in-school-suspensions by race and gender
 
-```{r include=FALSE}
+```{r include=FALSE, eval = FALSE}
 in_susp_wodis_race_m <- one_in_susp %>% 
   summarize(bl_m = sum(sch_discwodis_iss_bl_m)/sum(tot_discwodis_iss_m) * 100, 
            hi_m = sum(sch_discwodis_iss_hi_m)/sum(tot_discwodis_iss_m)* 100,
@@ -669,7 +669,7 @@ in_susp_wodis_race_f
 ```
 
   * Students with disability with one or more in-school-suspensions by race and gender
-```{r}
+```{r, eval = FALSE}
 
 in_susp_wdis_race_m <- one_in_susp %>%   
   summarize(bl_m = sum(sch_discwdis_iss_idea_bl_m)/sum(tot_discwdis_iss_idea_m) * 100, 
@@ -702,7 +702,7 @@ in_susp_wdis_race_f
 
   * Students without disability with only one out-of-school-suspensions by race and gender
 
-```{r}
+```{r, eval = FALSE}
 
 one_out_susp_wodis_race_m <- one_out_susp %>% 
   summarize(bl_m = sum(sch_discwodis_singoos_bl_m)/sum(tot_discwodis_singoos_m) * 100, 
@@ -735,7 +735,7 @@ one_out_susp_wodis_race_f
 
   * Students with disability with one out-of-school-suspensions by race and gender
 
-```{r}
+```{r, eval = FALSE}
 
 one_out_susp_wdis_race_m <- one_out_susp %>% 
   summarize(bl_m = sum(sch_discwdis_singoos_idea_bl_m)/sum(tot_discwdis_singoos_idea_m) * 100, 
@@ -767,7 +767,7 @@ one_out_susp_wdis_race_f
 
   * Student without disability with more than one out-of-school-suspensions by race and gender
 
-```{r}
+```{r, eval = FALSE}
 more_out_susp_wodis_race_m <- more_out_susp %>% 
   summarize(bl_m = sum(sch_discwodis_multoos_bl_m)/sum(tot_discwodis_multoos_m) * 100, 
            hi_m = sum(sch_discwodis_multoos_hi_m)/sum(tot_discwodis_multoos_m)* 100,
@@ -799,7 +799,7 @@ more_out_susp_wodis_race_f
 
   * Student with disability with more than one out-of-school-suspensions by race and gender
 
-```{r}
+```{r, eval = FALSE}
 more_out_susp_wdis_race_m <- more_out_susp %>% 
   summarize(bl_m = sum(sch_discwdis_multoos_idea_bl_m)/sum(tot_discwdis_multoos_idea_m) * 100, 
            hi_m = sum(sch_discwdis_multoos_idea_hi_m)/sum(tot_discwdis_multoos_idea_m)* 100,
@@ -833,7 +833,7 @@ more_out_susp_wdis_race_f
 *The next step is combining all suspensions categories based on gender*
 
 
-```{r}
+```{r, eval = FALSE}
 all_race_m <- left_join(pre_one_susp_race_m, pre_more_susp_race_m) %>% 
   left_join(in_susp_wdis_race_m) %>% 
   left_join(one_out_susp_wodis_race_m) %>% 
@@ -850,7 +850,7 @@ all_race_f <- left_join(pre_one_susp_race_f,pre_more_susp_race_f) %>%
 ```
 
 
-```{r}
+```{r, eval = FALSE}
 all_race_male <- cbind(all_race_m[1], stack(all_race_m[2:8])) %>% 
   select(race, ind, values) %>% 
   mutate_at(vars(values), funs(round(., 1)))
@@ -865,7 +865,7 @@ all_race_female <- cbind(all_race_f[1], stack(all_race_f[2:8])) %>%
 
   * Suspensions for male students by race
 
-```{r Plot-race-suspensions, echo=FALSE, fig.height=10, fig.width=10}
+```{r Plot-race-suspensions, echo=FALSE, fig.height=10, fig.width=10, eval = FALSE}
 all_race_male %>% 
   ggplot(aes(fill= race, x=ind, y=values))+
   geom_bar(position = "stack", stat= "identity", color = "black", width = 0.9)+
@@ -879,7 +879,7 @@ all_race_male %>%
 ```
 
   * Suspension for female students by race
-```{r echo=FALSE, fig.height=10, fig.width=10}
+```{r echo=FALSE, fig.height=10, fig.width=10, eval = FALSE}
 all_race_female %>% 
   ggplot(aes(fill= race, x=ind, y=values))+
   geom_bar(position = "stack", stat= "identity", color = "black", width = 0.9)+
@@ -947,20 +947,11 @@ RA
 skim(RA)
 ```
 
-Verify that COMBOKEY is the key for joining
-```{r}
-RA %>%
-count(COMBOKEY)
-```
 
 Describe the RA data set
 ```{r}
 RA %>%
   describeBy()
-```
-
-```{r}
-str(RA)
 ```
 
 ```{r}
@@ -974,10 +965,6 @@ Describe the enroll data set
 ```{r}
 enroll %>%
   describeBy()
-```
-
-```{r}
-str(enroll)
 ```
 
 ```{r}
@@ -1190,7 +1177,7 @@ tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
 # Appendix
 
 
-**Note: This section was written early during the term. We'll probably remove it for the final submission.**
+**Note: This section was written early in the term. We'll most probably remove it for the final submission.**
 
 
 In this section, I will import the enrollment file and subset it to keep relevant variables. This file will be the base file. 
