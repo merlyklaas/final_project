@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE,
 #let's only include libraries we are using so that others don't have to install the irrelevant ones 
 if (!require("pacman")) install.packages("pacman") 
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance) 
 
 library(rio)
 library(dplyr)
@@ -1045,36 +1045,133 @@ ra_tidy %>%
 ## Research Quesiton 1
 
 ```{r }
+#Importing the file and doing some cleaning to  make sure it runs, dropping Puerto Rico because they don't appear to report suspensions -rates were zero. 
 rq1 <- import(here("data","data_join.csv")) %>%
   as_tibble() %>%
+  filter(lea_state != "PR") %>%
   mutate(leaid = as.numeric(leaid),
          lea_state = as.factor(lea_state)) %>%
   filter(!is.na(susp_std)) %>%
   filter(!is.na(pct_new_teachers)) %>%
-  filter(pct_new_teachers != Inf)
+  filter(pct_new_teachers != Inf) %>%
+  mutate(pct_new_teachers = ifelse(pct_new_teachers > 100,100, pct_new_teachers))
 
-control <- c("tot_enr","sch_enr_am", "sch_enr_as", "sch_enr_bl", "sch_enr_hi",
-             "sch_enr_hp", "sch_enr_tr","sch_enr_wh","sch_enr_lep","sch_enr_idea",
-             "sch_status_sped","sch_status_magnet", "sch_status_charter","sch_status_alt")
+```
+
+Explore the extent to which rate of novice teachers and rate of suspensions vary
+across states. Appears to have wide variation within state and across states.
+
+```{r }
+#Creating a data frame with state averages and using this to plot district rates
+state_means <- rq1 %>% 
+  group_by(lea_state) %>% 
+  summarise(state_mean_susp = mean(susp_std,weights = tot_enr, na.rm = TRUE),
+            state_mean_susp_se = sd(susp_std, na.rm = TRUE)/sqrt(n()),
+            state_mean_newtch = mean(pct_new_teachers,weights = tot_enr, na.rm = TRUE),
+            state_mean_newtch_se = sd(pct_new_teachers, na.rm = TRUE)/sqrt(n()),
+            ) 
+
+#Rate of Novice teachers across states
+state_means %>%  
+  mutate(lea_state = reorder(lea_state,state_mean_newtch)) %>%
+  ggplot(aes(state_mean_newtch, lea_state)) +
+    geom_point(color = "#0aadff")  +
+    geom_vline(xintercept = mean(rq1$pct_new_teachers, na.rm = TRUE),
+             color = "red",
+             size = 1) +
+  geom_errorbarh(aes(xmin = state_mean_newtch - 1.96*state_mean_newtch_se,
+                     xmax = state_mean_newtch+ 1.96*state_mean_newtch_se)) +
+  labs( y = "State", x = "Percent novice teachers") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
+
+#Rate of Suspensions expulsion across States
+state_means %>%  
+  mutate(lea_state = reorder(lea_state,state_mean_susp)) %>%
+  ggplot(aes(state_mean_susp, lea_state)) +
+    geom_point(color = "#0aadff")  +
+    geom_vline(xintercept = mean(rq1$susp_std, na.rm = TRUE),
+             color = "red",
+             size = 1) +
+  geom_errorbarh(aes(xmin = state_mean_susp - 1.96*state_mean_susp_se,
+                     xmax = state_mean_susp+ 1.96*state_mean_susp_se)) +
+  labs( y = "State", x = "Mean rate of student suspensions per 1000") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
+
+```
+
+Explore the visual relationship between percent new teachers and rates of suspension. It looks like it is a positive relationship. As the percent of new teachers increases, the rate of suspension increases. Looking at this by state, it looks like starting point (intercept) and the slope between these two variables vary. Some states have steeper slopes or start higher. Indicates need for a hierchichal linear model.
+
+```{r }
+# Rate of suspensions per 1000 students across states
+# Explore the relationship between novice teachers and rate of suspension
+rq1 %>%
+  ggplot(aes(x = pct_new_teachers, y = susp_std)) +
+    geom_point() +   
+    geom_smooth(method = lm)
+         
+#When looking at regression lines by state, we see different intercepts and slopes of relationship
+rq1 %>%
+  ggplot(aes(x = pct_new_teachers, y = susp_std, color = lea_state)) +
+  geom_smooth(method = lm, se = FALSE) + theme(legend.position="none")
+
+```
+
+**Regression analysis** As part of the analysis, conducted 4 models that explored the relaitonship between percent new teachers and rate of suspensions. The first model only included the variable of interest as a control with random intercepts for district and state. The second model added enrollment covariates and school characterstics with random intercept. The third model allowed the relationship between pct new teachers and rate of suspension vary across district. The last model included interactions between enrollment and percent new teachers. Model comparison tests found that the third model was the best model. 
+
+Results from the analysis indicates that a one percentage point increase in rate of novice teachers is associated with an increase of 1 student suspended per 1000 students, while accounting for other enrollment and school characteristics. This relationship was statistically significant (p <.001).
+
+This suggests that new teachers may need more support/training so that they are not suspending students. 
+
+```{r }
+#Null model
 rq1_m0 <- lmer(susp_std ~ pct_new_teachers + (1 | leaid) + (1 | lea_state), 
                data = rq1, na.action = na.pass)
 
-lm(susp_std ~ pct_new_teachers, data = rq1 )
-
+#Model with covariates and random intercepts
 rq1_m1 <- lmer(susp_std ~ pct_new_teachers + tot_enr + sch_enr_am + sch_enr_as + 
-                 sch_enr_bl + sch_enr_hi + sch_enr_hp + sch_enr_tr + sch_enr_wh + 
-                 sch_enr_wh + sch_enr_lep + sch_enr_idea + sch_status_sped + 
+                 sch_enr_bl + sch_enr_hi + sch_enr_hp + sch_enr_tr + 
+                 sch_enr_lep + sch_enr_idea + sch_status_sped + 
                  sch_status_magnet + sch_status_charter + sch_status_alt + 
                  (1 | leaid) + (1 | lea_state), 
                data = rq1)
 
-tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
+#Model with covariates, random intercepts, and random slopes - no interactions
+rq1_m2 <- lmer(susp_std ~ pct_new_teachers + tot_enr + sch_enr_am + sch_enr_as + 
+                 sch_enr_bl + sch_enr_hi + sch_enr_hp + sch_enr_tr + 
+                 sch_enr_lep + sch_enr_idea + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + 
+                 (pct_new_teachers | leaid) + (1 | lea_state), 
+               data = rq1)
+
+#Model with covariates, random intercepts,random slopes and interactions
+rq1_m3 <- lmer(susp_std ~ pct_new_teachers + tot_enr + sch_enr_am + sch_enr_as + 
+                 sch_enr_bl + sch_enr_hi + sch_enr_hp + sch_enr_tr +  
+                 sch_enr_lep + sch_enr_idea + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + 
+                 pct_new_teachers:sch_enr_bl + pct_new_teachers:sch_enr_idea +
+                 (pct_new_teachers | leaid) + (1 | lea_state), 
+               data = rq1)
+# Checking model performance
+compare_performance(rq1_m0,rq1_m1,rq1_m2,rq1_m3, rank = TRUE) %>%
+  print_md()
+
+
+tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
+          dv.labels = c("Model 1 - No covariates", "Model 2 - Random Intercepts", 
+                      "Model 3 - Random Int/Slopes", 
+                      "Model 4 - Random Int/Sopes & Interactions"),
           pred.labels = c("Intercept", "Percent New Teachers", "Total Enrollment",
                         "Percent American Indian", "Percent Asian",
-                        "Percent Black", "Percent Latinx", "Percent Hawaiian/Pacific Islander",
-                        "Percent Multiracial", "Percent EL Classified", "Percent Special Ed.",
+                        "Percent Black", "Percent Latinx", 
+                        "Percent Hawaiian/Pacific Islander",
+                        "Percent Multiracial", "Percent EL Classified", 
+                        "Percent Special Ed.",
                         "Special Ed School (Y/N)", "Magnet school ((Y/N)", 
-                        "Charter School (Y/N)", "Alternative School (Y/N)"))
+                        "Charter School (Y/N)", "Alternative School (Y/N)",
+                        "Percent New Teachers X Black Enrollment", 
+                        "Percent New Teachers X Special Education"))
 ```
 
 # Discussion
