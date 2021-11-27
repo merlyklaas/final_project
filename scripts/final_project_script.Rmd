@@ -26,6 +26,9 @@ knitr::opts_chunk$set(echo = TRUE,
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
 pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, sjmisc) 
 
+#^^this is a cool way to load packages. thanks for showing me! I'll certainly use in the future. 
+#it was neat to see the request to load a package the program knew i needed but didn't have. Great job! 
+
 #library(tidylog) #uncheck when writing code for log
 
 # library(naniar)
@@ -35,6 +38,7 @@ pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor
 # library(tinytex)
 # library(crayon)
 ```
+#fun new packages! i like crayon for adding style to text. Naniar sounds like it is so helpful when working with a big dataset and missing values. I'm curious about how you found these packages, and will ask during your presentation :) 
 
 # Abstract
 
@@ -65,7 +69,9 @@ This research project will be conducted using High School and Middle School leve
 
 ## Cleaning different files
 
-Since we're using multiple files, we created a master file to have all the necessary variables in one data set, called data_joined. We exported this file to reduce the run-time of the code. Below is our data cleaning process, but `eval = FALSE` as we don't want to run this code each time.
+Since we're using multiple files, we created a master file to have all the necessary variables in one data set, called data_joined. We exported this file to reduce the run-time of the code. Below is our data cleaning process #and our creation of the master file#, but `eval = FALSE` as we don't want to run this code each time.
+
+#good use of eval=FALSE to be able to show the code and process
 
 ### Enrollment Data Set
 
@@ -88,6 +94,8 @@ remove_neg <- function (x) ifelse(x < 0, NA, x)
 enroll <- enroll %>% 
     mutate(across(c(9:123), remove_neg)) %>% 
     select(-c(9:31))  #removing pre-K enrollment data
+
+#We also had to change a value '-9' to NA and then get rid of NA in our data set and did it in a different way. It's interesting to see how you modified your data set and how you added a function. Great use of mutate and select
 ```
 
 Now, I'm using PivotLonger and PivotWider to extract all information from columns.
@@ -107,7 +115,7 @@ enroll_total <- enroll %>%
     group_by(combokey, enroll_type) %>% 
         summarize(
             total = sum(students, na.rm = TRUE)
-        ) %>% 
+        ) %>%  #very clever! great combination of functions
     pivot_wider(
         names_from = 2,
         values_from = total,
@@ -115,6 +123,9 @@ enroll_total <- enroll %>%
         names_prefix = "tot_"
     ) %>% 
   as_tibble()
+
+#good use of pivot_longer and pivot_wider to get the information you want. 
+#seems like the first section of code (pivot_longer) makes a clean set by itself and then the pivot_wider gets you information you want all together, but makes it messier again (data in the labels). i might be misunderstanding the goal and data though
 
 ```
 
