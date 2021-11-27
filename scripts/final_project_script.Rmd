@@ -154,6 +154,7 @@ enroll_tidy <- enroll %>%
     ) %>% 
     as_tibble()
 
+#similar comment to above. great job extracting the information you want for the analysis. the final set seems 'messy' with data in the tables, but that may be how you want it for analysis as far as categories and organizing the data (i know that's the way it is for some data in our set) 
 ```
 
 ```{r enroll joining, eval = FALSE}
@@ -165,7 +166,7 @@ enroll_final <- enroll_tidy %>%
     select(c(lea_state:jj), combokey, 'tot_enr',contains("_enr_"), everything()) %>% 
     as_tibble()
 ```
-
+#3 way join-- cool! i'm learning a lot from your code! 
 
 ```{r enrol pct, eval = FALSE}
 # Expressing enrollment across categories as percentage of total enrollment
@@ -175,12 +176,14 @@ enroll_final <- enroll_final %>%
 ```
 
 Note: For 11 schools, total enrollment is 0. Therefore, the percentages come as NA for them. Probably because these schools only have preK enrollment. 
+#i like how your clarified this data. an example of how NA actually tells us something when considered in context of the data.
 
 ```{r enroll errors, eval = FALSE}
 enroll_100 <- enroll_final %>% 
   select(c(1:19)) %>% 
   filter_at(vars(c(10:19)),any_vars(.>100))
 ```
+#^^well done!
 
 Note: For very few schools, the pct over one sub-group is greater than 100 - this mostly happens in the `idea` enrollment. 
 
