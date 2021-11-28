@@ -473,6 +473,36 @@ expl_ps_tidy <- expl_ps %>%
 ```
 
 
+#### Data visualization
+  * suspension rate by ethnicity in preschool
+```{r}
+susp_ps_tidy %>% 
+  filter(`ethnicity/lep/idea` != "lep" | `ethnicity/lep/idea` != "idea" ) %>% 
+  ggplot(aes(type, students)) + 
+  geom_col(aes(fill = `ethnicity/lep/idea`), 
+           alpha = 0.7, na.rm = TRUE) +
+  scale_fill_brewer(palette = "Set1")
+```
+  * suspension rate by ethnicity in k12
+```{r}
+susp_k12_tidy %>% 
+  filter(`ethnicity/lep` != "lep") %>% 
+   ggplot(aes(type, students)) +
+     geom_col(aes(fill = `ethnicity/lep`),
+              alpha = 0.7, na.rm = TRUE) 
+
+```
+
+  * Multiple Out of school suspension rate by gender and race
+```{r}
+susp_k12_tidy %>% 
+  filter(type == "multoos") %>% 
+  ggplot(aes(`ethnicity/lep/idea`)) +
+  geom_col(aes(fill = gender),
+           position = "dodge") 
+```
+
+
 **Note: The below code was written before we learnt pivot_longer. We plan to recreate the figure using the tidy data we created above.**
 
 The data we use contains negative values for missing data. Let's create a data set with no negative values across all variables. 

@@ -991,25 +991,57 @@ div.tocify {
 <span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set_na</span>(<span class="at">na =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">8</span>, <span class="sc">-</span><span class="dv">9</span>, <span class="sc">-</span><span class="dv">11</span>))</span>
 <span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>RA</span></code></pre></div>
 <pre><code>## # A tibble: 97,632 x 84
-##    LEA_STATE LEA_STATE_NAME LEAID   LEA_NAME   SCHID SCH_NAME     COMBOKEY JJ   
-##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;      &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
-##  1 AL        ALABAMA        0100002 Alabama Y~  1017 Wallace Sch~ 0100002~ Yes  
-##  2 AL        ALABAMA        0100002 Alabama Y~  1017 McNeel Sch ~ 0100002~ Yes  
-##  3 AL        ALABAMA        0100002 Alabama Y~  1018 Alabama You~ 0100002~ No   
-##  4 AL        ALABAMA        0100002 Alabama Y~  1999 AUTAUGA CAM~ 0100002~ Yes  
-##  5 AL        ALABAMA        0100005 Albertvil~  1008 Albertville~ 0100005~ No   
-##  6 AL        ALABAMA        0100005 Albertvil~  1008 Albertville~ 0100005~ No   
-##  7 AL        ALABAMA        0100005 Albertvil~  1008 Evans Eleme~ 0100005~ No   
-##  8 AL        ALABAMA        0100005 Albertvil~  1008 Albertville~ 0100005~ No   
-##  9 AL        ALABAMA        0100005 Albertvil~  1016 Big Spring ~ 0100005~ No   
-## 10 AL        ALABAMA        0100005 Albertvil~  1021 Albertville~ 0100005~ No   
+##    LEA_STATE LEA_STATE_NAME LEAID  LEA_NAME    SCHID SCH_NAME     COMBOKEY JJ   
+##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
+##  1 AL        ALABAMA        01000~ Alabama Yo~  1017 Wallace Sch~ 0100002~ Yes  
+##  2 AL        ALABAMA        01000~ Alabama Yo~  1017 McNeel Sch ~ 0100002~ Yes  
+##  3 AL        ALABAMA        01000~ Alabama Yo~  1018 Alabama You~ 0100002~ No   
+##  4 AL        ALABAMA        01000~ Alabama Yo~  1999 AUTAUGA CAM~ 0100002~ Yes  
+##  5 AL        ALABAMA        01000~ Albertvill~  1008 Albertville~ 0100005~ No   
+##  6 AL        ALABAMA        01000~ Albertvill~  1008 Albertville~ 0100005~ No   
+##  7 AL        ALABAMA        01000~ Albertvill~  1008 Evans Eleme~ 0100005~ No   
+##  8 AL        ALABAMA        01000~ Albertvill~  1008 Albertville~ 0100005~ No   
+##  9 AL        ALABAMA        01000~ Albertvill~  1016 Big Spring ~ 0100005~ No   
+## 10 AL        ALABAMA        01000~ Albertvill~  1021 Albertville~ 0100005~ No   
 ## # ... with 97,622 more rows, and 76 more variables:
 ## #   SCH_DISCWODIS_REF_HI_M &lt;int&gt;, SCH_DISCWODIS_REF_HI_F &lt;int&gt;,
 ## #   SCH_DISCWODIS_REF_AM_M &lt;int&gt;, SCH_DISCWODIS_REF_AM_F &lt;int&gt;,
 ## #   SCH_DISCWODIS_REF_AS_M &lt;int&gt;, SCH_DISCWODIS_REF_AS_F &lt;int&gt;,
 ## #   SCH_DISCWODIS_REF_HP_M &lt;int&gt;, SCH_DISCWODIS_REF_HP_F &lt;int&gt;,
 ## #   SCH_DISCWODIS_REF_BL_M &lt;int&gt;, SCH_DISCWODIS_REF_BL_F &lt;int&gt;,
-## #   SCH_DISCWODIS_REF_WH_M &lt;int&gt;, SCH_DISCWODIS_REF_WH_F &lt;int&gt;, ...</code></pre>
+## #   SCH_DISCWODIS_REF_WH_M &lt;int&gt;, SCH_DISCWODIS_REF_WH_F &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_TR_M &lt;int&gt;, SCH_DISCWODIS_REF_TR_F &lt;int&gt;,
+## #   TOT_DISCWODIS_REF_M &lt;int&gt;, TOT_DISCWODIS_REF_F &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_LEP_M &lt;int&gt;, SCH_DISCWODIS_REF_LEP_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_HI_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_HI_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_AM_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_AM_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_AS_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_AS_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_HP_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_HP_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_BL_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_BL_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_WH_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_WH_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_TR_M &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_TR_F &lt;int&gt;,
+## #   TOT_DISCWDIS_REF_IDEA_M &lt;int&gt;, TOT_DISCWDIS_REF_IDEA_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_LEP_M &lt;int&gt;, SCH_DISCWDIS_REF_LEP_F &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_504_M &lt;int&gt;, SCH_DISCWDIS_REF_504_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_HI_M &lt;int&gt;, SCH_DISCWODIS_ARR_HI_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_AM_M &lt;int&gt;, SCH_DISCWODIS_ARR_AM_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_AS_M &lt;int&gt;, SCH_DISCWODIS_ARR_AS_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_HP_M &lt;int&gt;, SCH_DISCWODIS_ARR_HP_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_BL_M &lt;int&gt;, SCH_DISCWODIS_ARR_BL_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_WH_M &lt;int&gt;, SCH_DISCWODIS_ARR_WH_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_TR_M &lt;int&gt;, SCH_DISCWODIS_ARR_TR_F &lt;int&gt;,
+## #   TOT_DISCWODIS_ARR_M &lt;int&gt;, TOT_DISCWODIS_ARR_F &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_LEP_M &lt;int&gt;, SCH_DISCWODIS_ARR_LEP_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_HI_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_HI_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_AM_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_AM_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_AS_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_AS_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_HP_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_HP_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_BL_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_BL_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_WH_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_WH_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_TR_M &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_TR_F &lt;int&gt;,
+## #   TOT_DISCWDIS_ARR_IDEA_M &lt;int&gt;, TOT_DISCWDIS_ARR_IDEA_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_LEP_M &lt;int&gt;, SCH_DISCWDIS_ARR_LEP_F &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_504_M &lt;int&gt;, SCH_DISCWDIS_ARR_504_F &lt;int&gt;</code></pre>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(RA)</span></code></pre></div>
 <table>
 <caption>Data summary</caption>
@@ -2422,25 +2454,65 @@ div.tocify {
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>ra_full</span></code></pre></div>
 <pre><code>## # A tibble: 195,262 x 114
-##    LEA_STATE LEA_STATE_NAME LEAID   LEA_NAME   SCHID SCH_NAME     COMBOKEY JJ   
-##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;      &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
-##  1 AL        ALABAMA        0100002 Alabama Y~  1705 Wallace Sch~ 0100002~ Yes  
-##  2 AL        ALABAMA        0100002 Alabama Y~  1706 McNeel Sch ~ 0100002~ Yes  
-##  3 AL        ALABAMA        0100002 Alabama Y~  1876 Alabama You~ 0100002~ No   
-##  4 AL        ALABAMA        0100002 Alabama Y~ 99995 AUTAUGA CAM~ 0100002~ Yes  
-##  5 AL        ALABAMA        0100005 Albertvil~   870 Albertville~ 0100005~ No   
-##  6 AL        ALABAMA        0100005 Albertvil~   871 Albertville~ 0100005~ No   
-##  7 AL        ALABAMA        0100005 Albertvil~   879 Evans Eleme~ 0100005~ No   
-##  8 AL        ALABAMA        0100005 Albertvil~   889 Albertville~ 0100005~ No   
-##  9 AL        ALABAMA        0100005 Albertvil~  1616 Big Spring ~ 0100005~ No   
-## 10 AL        ALABAMA        0100005 Albertvil~  2150 Albertville~ 0100005~ No   
+##    LEA_STATE LEA_STATE_NAME LEAID  LEA_NAME    SCHID SCH_NAME     COMBOKEY JJ   
+##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
+##  1 AL        ALABAMA        01000~ Alabama Yo~  1705 Wallace Sch~ 0100002~ Yes  
+##  2 AL        ALABAMA        01000~ Alabama Yo~  1706 McNeel Sch ~ 0100002~ Yes  
+##  3 AL        ALABAMA        01000~ Alabama Yo~  1876 Alabama You~ 0100002~ No   
+##  4 AL        ALABAMA        01000~ Alabama Yo~ 99995 AUTAUGA CAM~ 0100002~ Yes  
+##  5 AL        ALABAMA        01000~ Albertvill~   870 Albertville~ 0100005~ No   
+##  6 AL        ALABAMA        01000~ Albertvill~   871 Albertville~ 0100005~ No   
+##  7 AL        ALABAMA        01000~ Albertvill~   879 Evans Eleme~ 0100005~ No   
+##  8 AL        ALABAMA        01000~ Albertvill~   889 Albertville~ 0100005~ No   
+##  9 AL        ALABAMA        01000~ Albertvill~  1616 Big Spring ~ 0100005~ No   
+## 10 AL        ALABAMA        01000~ Albertvill~  2150 Albertville~ 0100005~ No   
 ## # ... with 195,252 more rows, and 106 more variables: enroll_all &lt;int&gt;,
 ## #   enroll_latinx &lt;int&gt;, enroll_aian &lt;int&gt;, enroll_asianam &lt;int&gt;,
 ## #   enroll_nhpi &lt;int&gt;, enroll_black &lt;int&gt;, enroll_white &lt;int&gt;,
 ## #   enroll_twomore &lt;int&gt;, enroll_el &lt;int&gt;, enroll_elserv &lt;int&gt;,
 ## #   enroll_sped &lt;int&gt;, enroll_latinx_pct &lt;dbl&gt;, enroll_aian_pct &lt;dbl&gt;,
 ## #   enroll_asianam_pct &lt;dbl&gt;, enroll_nhpi_pct &lt;dbl&gt;, enroll_black_pct &lt;dbl&gt;,
-## #   enroll_white_pct &lt;dbl&gt;, enroll_twomore_pct &lt;dbl&gt;, enroll_el_pct &lt;dbl&gt;, ...</code></pre>
+## #   enroll_white_pct &lt;dbl&gt;, enroll_twomore_pct &lt;dbl&gt;, enroll_el_pct &lt;dbl&gt;,
+## #   enroll_elserv_pct &lt;dbl&gt;, enroll_sped_pct &lt;dbl&gt;, dist_percent_white &lt;dbl&gt;,
+## #   dist_percent_latinx &lt;dbl&gt;, dist_percent_black &lt;dbl&gt;,
+## #   dist_percent_twomore &lt;dbl&gt;, dist_percent_asianam &lt;dbl&gt;,
+## #   dist_percent_nhpi &lt;dbl&gt;, dist_percent_aian &lt;dbl&gt;, dist_percent_el &lt;dbl&gt;,
+## #   dist_percent_sped &lt;dbl&gt;, SCH_DISCWODIS_REF_HI_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_HI_F &lt;int&gt;, SCH_DISCWODIS_REF_AM_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_AM_F &lt;int&gt;, SCH_DISCWODIS_REF_AS_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_AS_F &lt;int&gt;, SCH_DISCWODIS_REF_HP_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_HP_F &lt;int&gt;, SCH_DISCWODIS_REF_BL_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_BL_F &lt;int&gt;, SCH_DISCWODIS_REF_WH_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_WH_F &lt;int&gt;, SCH_DISCWODIS_REF_TR_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_TR_F &lt;int&gt;, TOT_DISCWODIS_REF_M &lt;int&gt;,
+## #   TOT_DISCWODIS_REF_F &lt;int&gt;, SCH_DISCWODIS_REF_LEP_M &lt;int&gt;,
+## #   SCH_DISCWODIS_REF_LEP_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_HI_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_HI_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_AM_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_AM_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_AS_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_AS_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_HP_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_HP_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_BL_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_BL_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_WH_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_WH_F &lt;int&gt;, SCH_DISCWDIS_REF_IDEA_TR_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_IDEA_TR_F &lt;int&gt;, TOT_DISCWDIS_REF_IDEA_M &lt;int&gt;,
+## #   TOT_DISCWDIS_REF_IDEA_F &lt;int&gt;, SCH_DISCWDIS_REF_LEP_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_LEP_F &lt;int&gt;, SCH_DISCWDIS_REF_504_M &lt;int&gt;,
+## #   SCH_DISCWDIS_REF_504_F &lt;int&gt;, SCH_DISCWODIS_ARR_HI_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_HI_F &lt;int&gt;, SCH_DISCWODIS_ARR_AM_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_AM_F &lt;int&gt;, SCH_DISCWODIS_ARR_AS_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_AS_F &lt;int&gt;, SCH_DISCWODIS_ARR_HP_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_HP_F &lt;int&gt;, SCH_DISCWODIS_ARR_BL_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_BL_F &lt;int&gt;, SCH_DISCWODIS_ARR_WH_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_WH_F &lt;int&gt;, SCH_DISCWODIS_ARR_TR_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_TR_F &lt;int&gt;, TOT_DISCWODIS_ARR_M &lt;int&gt;,
+## #   TOT_DISCWODIS_ARR_F &lt;int&gt;, SCH_DISCWODIS_ARR_LEP_M &lt;int&gt;,
+## #   SCH_DISCWODIS_ARR_LEP_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_HI_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_HI_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_AM_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_AM_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_AS_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_AS_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_HP_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_HP_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_BL_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_BL_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_WH_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_WH_F &lt;int&gt;, SCH_DISCWDIS_ARR_IDEA_TR_M &lt;int&gt;,
+## #   SCH_DISCWDIS_ARR_IDEA_TR_F &lt;int&gt;, ...</code></pre>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#export(ra_full, here(&quot;data&quot;, &quot;ra_full.csv&quot;))</span></span></code></pre></div>
 <div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>sch_su <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;sch_su.csv&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
@@ -2449,18 +2521,18 @@ div.tocify {
 <span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>sch_su</span></code></pre></div>
 <pre><code>## # A tibble: 97,632 x 11
-##    leaid   lea_name               combokey     schid sch_ftecounselo~ sch_fteteach_fy
-##    &lt;chr&gt;   &lt;chr&gt;                  &lt;chr&gt;        &lt;int&gt;            &lt;dbl&gt;           &lt;dbl&gt;
-##  1 0100002 Alabama Youth Services 010000201705  1705                1               0
-##  2 0100002 Alabama Youth Services 010000201706  1706                1               0
-##  3 0100002 Alabama Youth Services 010000201876  1876                1               1
-##  4 0100002 Alabama Youth Services 010000299995 99995                0               0
-##  5 0100005 Albertville City       010000500870   870                2               2
-##  6 0100005 Albertville City       010000500871   871                4               6
-##  7 0100005 Albertville City       010000500879   879                2               8
-##  8 0100005 Albertville City       010000500889   889                2               5
-##  9 0100005 Albertville City       010000501616  1616                2               1
-## 10 0100005 Albertville City       010000502150  2150                2               7
+##    leaid   lea_name           combokey    schid sch_ftecounselo~ sch_fteteach_fy
+##    &lt;chr&gt;   &lt;chr&gt;              &lt;chr&gt;       &lt;int&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+##  1 0100002 Alabama Youth Ser~ 0100002017~  1705                1               0
+##  2 0100002 Alabama Youth Ser~ 0100002017~  1706                1               0
+##  3 0100002 Alabama Youth Ser~ 0100002018~  1876                1               1
+##  4 0100002 Alabama Youth Ser~ 0100002999~ 99995                0               0
+##  5 0100005 Albertville City   0100005008~   870                2               2
+##  6 0100005 Albertville City   0100005008~   871                4               6
+##  7 0100005 Albertville City   0100005008~   879                2               8
+##  8 0100005 Albertville City   0100005008~   889                2               5
+##  9 0100005 Albertville City   0100005016~  1616                2               1
+## 10 0100005 Albertville City   0100005021~  2150                2               7
 ## # ... with 97,622 more rows, and 5 more variables: sch_fteteach_sy &lt;dbl&gt;,
 ## #   sch_ftesecurity_leo &lt;dbl&gt;, sch_ftesecurity_gua &lt;chr&gt;,
 ## #   sch_fteservices_nur &lt;dbl&gt;, sch_fteservices_soc &lt;dbl&gt;</code></pre>
@@ -2471,25 +2543,65 @@ div.tocify {
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>ra_final</span></code></pre></div>
 <pre><code>## # A tibble: 195,264 x 121
-##    lea_state lea_state_name leaid   lea_name   schid sch_name     combokey jj   
-##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;      &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
-##  1 AL        ALABAMA        0100002 Alabama Y~  1705 Wallace Sch~ 0100002~ Yes  
-##  2 AL        ALABAMA        0100002 Alabama Y~  1706 McNeel Sch ~ 0100002~ Yes  
-##  3 AL        ALABAMA        0100002 Alabama Y~  1876 Alabama You~ 0100002~ No   
-##  4 AL        ALABAMA        0100002 Alabama Y~ 99995 AUTAUGA CAM~ 0100002~ Yes  
-##  5 AL        ALABAMA        0100005 Albertvil~   870 Albertville~ 0100005~ No   
-##  6 AL        ALABAMA        0100005 Albertvil~   871 Albertville~ 0100005~ No   
-##  7 AL        ALABAMA        0100005 Albertvil~   879 Evans Eleme~ 0100005~ No   
-##  8 AL        ALABAMA        0100005 Albertvil~   889 Albertville~ 0100005~ No   
-##  9 AL        ALABAMA        0100005 Albertvil~  1616 Big Spring ~ 0100005~ No   
-## 10 AL        ALABAMA        0100005 Albertvil~  2150 Albertville~ 0100005~ No   
+##    lea_state lea_state_name leaid  lea_name    schid sch_name     combokey jj   
+##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
+##  1 AL        ALABAMA        01000~ Alabama Yo~  1705 Wallace Sch~ 0100002~ Yes  
+##  2 AL        ALABAMA        01000~ Alabama Yo~  1706 McNeel Sch ~ 0100002~ Yes  
+##  3 AL        ALABAMA        01000~ Alabama Yo~  1876 Alabama You~ 0100002~ No   
+##  4 AL        ALABAMA        01000~ Alabama Yo~ 99995 AUTAUGA CAM~ 0100002~ Yes  
+##  5 AL        ALABAMA        01000~ Albertvill~   870 Albertville~ 0100005~ No   
+##  6 AL        ALABAMA        01000~ Albertvill~   871 Albertville~ 0100005~ No   
+##  7 AL        ALABAMA        01000~ Albertvill~   879 Evans Eleme~ 0100005~ No   
+##  8 AL        ALABAMA        01000~ Albertvill~   889 Albertville~ 0100005~ No   
+##  9 AL        ALABAMA        01000~ Albertvill~  1616 Big Spring ~ 0100005~ No   
+## 10 AL        ALABAMA        01000~ Albertvill~  2150 Albertville~ 0100005~ No   
 ## # ... with 195,254 more rows, and 113 more variables: enroll_all &lt;int&gt;,
 ## #   enroll_latinx &lt;int&gt;, enroll_aian &lt;int&gt;, enroll_asianam &lt;int&gt;,
 ## #   enroll_nhpi &lt;int&gt;, enroll_black &lt;int&gt;, enroll_white &lt;int&gt;,
 ## #   enroll_twomore &lt;int&gt;, enroll_el &lt;int&gt;, enroll_elserv &lt;int&gt;,
 ## #   enroll_sped &lt;int&gt;, enroll_latinx_pct &lt;dbl&gt;, enroll_aian_pct &lt;dbl&gt;,
 ## #   enroll_asianam_pct &lt;dbl&gt;, enroll_nhpi_pct &lt;dbl&gt;, enroll_black_pct &lt;dbl&gt;,
-## #   enroll_white_pct &lt;dbl&gt;, enroll_twomore_pct &lt;dbl&gt;, enroll_el_pct &lt;dbl&gt;, ...</code></pre>
+## #   enroll_white_pct &lt;dbl&gt;, enroll_twomore_pct &lt;dbl&gt;, enroll_el_pct &lt;dbl&gt;,
+## #   enroll_elserv_pct &lt;dbl&gt;, enroll_sped_pct &lt;dbl&gt;, dist_percent_white &lt;dbl&gt;,
+## #   dist_percent_latinx &lt;dbl&gt;, dist_percent_black &lt;dbl&gt;,
+## #   dist_percent_twomore &lt;dbl&gt;, dist_percent_asianam &lt;dbl&gt;,
+## #   dist_percent_nhpi &lt;dbl&gt;, dist_percent_aian &lt;dbl&gt;, dist_percent_el &lt;dbl&gt;,
+## #   dist_percent_sped &lt;dbl&gt;, sch_discwodis_ref_hi_m &lt;int&gt;,
+## #   sch_discwodis_ref_hi_f &lt;int&gt;, sch_discwodis_ref_am_m &lt;int&gt;,
+## #   sch_discwodis_ref_am_f &lt;int&gt;, sch_discwodis_ref_as_m &lt;int&gt;,
+## #   sch_discwodis_ref_as_f &lt;int&gt;, sch_discwodis_ref_hp_m &lt;int&gt;,
+## #   sch_discwodis_ref_hp_f &lt;int&gt;, sch_discwodis_ref_bl_m &lt;int&gt;,
+## #   sch_discwodis_ref_bl_f &lt;int&gt;, sch_discwodis_ref_wh_m &lt;int&gt;,
+## #   sch_discwodis_ref_wh_f &lt;int&gt;, sch_discwodis_ref_tr_m &lt;int&gt;,
+## #   sch_discwodis_ref_tr_f &lt;int&gt;, tot_discwodis_ref_m &lt;int&gt;,
+## #   tot_discwodis_ref_f &lt;int&gt;, sch_discwodis_ref_lep_m &lt;int&gt;,
+## #   sch_discwodis_ref_lep_f &lt;int&gt;, sch_discwdis_ref_idea_hi_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_hi_f &lt;int&gt;, sch_discwdis_ref_idea_am_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_am_f &lt;int&gt;, sch_discwdis_ref_idea_as_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_as_f &lt;int&gt;, sch_discwdis_ref_idea_hp_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_hp_f &lt;int&gt;, sch_discwdis_ref_idea_bl_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_bl_f &lt;int&gt;, sch_discwdis_ref_idea_wh_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_wh_f &lt;int&gt;, sch_discwdis_ref_idea_tr_m &lt;int&gt;,
+## #   sch_discwdis_ref_idea_tr_f &lt;int&gt;, tot_discwdis_ref_idea_m &lt;int&gt;,
+## #   tot_discwdis_ref_idea_f &lt;int&gt;, sch_discwdis_ref_lep_m &lt;int&gt;,
+## #   sch_discwdis_ref_lep_f &lt;int&gt;, sch_discwdis_ref_504_m &lt;int&gt;,
+## #   sch_discwdis_ref_504_f &lt;int&gt;, sch_discwodis_arr_hi_m &lt;int&gt;,
+## #   sch_discwodis_arr_hi_f &lt;int&gt;, sch_discwodis_arr_am_m &lt;int&gt;,
+## #   sch_discwodis_arr_am_f &lt;int&gt;, sch_discwodis_arr_as_m &lt;int&gt;,
+## #   sch_discwodis_arr_as_f &lt;int&gt;, sch_discwodis_arr_hp_m &lt;int&gt;,
+## #   sch_discwodis_arr_hp_f &lt;int&gt;, sch_discwodis_arr_bl_m &lt;int&gt;,
+## #   sch_discwodis_arr_bl_f &lt;int&gt;, sch_discwodis_arr_wh_m &lt;int&gt;,
+## #   sch_discwodis_arr_wh_f &lt;int&gt;, sch_discwodis_arr_tr_m &lt;int&gt;,
+## #   sch_discwodis_arr_tr_f &lt;int&gt;, tot_discwodis_arr_m &lt;int&gt;,
+## #   tot_discwodis_arr_f &lt;int&gt;, sch_discwodis_arr_lep_m &lt;int&gt;,
+## #   sch_discwodis_arr_lep_f &lt;int&gt;, sch_discwdis_arr_idea_hi_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_hi_f &lt;int&gt;, sch_discwdis_arr_idea_am_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_am_f &lt;int&gt;, sch_discwdis_arr_idea_as_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_as_f &lt;int&gt;, sch_discwdis_arr_idea_hp_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_hp_f &lt;int&gt;, sch_discwdis_arr_idea_bl_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_bl_f &lt;int&gt;, sch_discwdis_arr_idea_wh_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_wh_f &lt;int&gt;, sch_discwdis_arr_idea_tr_m &lt;int&gt;,
+## #   sch_discwdis_arr_idea_tr_f &lt;int&gt;, ...</code></pre>
 <div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co">#export(ra_final, here(&quot;data&quot;, &quot;ra_final.csv&quot;))</span></span></code></pre></div>
 <p>Dropping variables to show just the state and totals</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>ra_lawst <span class="ot">&lt;-</span> ra_final <span class="sc">%&gt;%</span></span>
@@ -2522,18 +2634,18 @@ div.tocify {
 <span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>ra_sum</span></code></pre></div>
 <pre><code>## # A tibble: 52 x 9
-##    lea_state_name       tot_discwodis_ref_m tot_discwodis_ref_f tot_discwdis_re~
-##    &lt;chr&gt;                              &lt;int&gt;               &lt;int&gt;            &lt;int&gt;
-##  1 ALABAMA                              943                 423              360
-##  2 ALASKA                               245                 105              114
-##  3 ARIZONA                             2898                1221              738
-##  4 ARKANSAS                             827                 299              233
-##  5 CALIFORNIA                         13168                6078             4056
-##  6 COLORADO                            2417                1365              879
-##  7 CONNECTICUT                          723                 424              607
-##  8 DELAWARE                             365                 228              226
-##  9 DISTRICT OF COLUMBIA                  61                  27               35
-## 10 FLORIDA                            11056                6063             4686
+##    lea_state_name     tot_discwodis_ref~ tot_discwodis_ref~ tot_discwdis_ref_id~
+##    &lt;chr&gt;                           &lt;int&gt;              &lt;int&gt;                &lt;int&gt;
+##  1 ALABAMA                           943                423                  360
+##  2 ALASKA                            245                105                  114
+##  3 ARIZONA                          2898               1221                  738
+##  4 ARKANSAS                          827                299                  233
+##  5 CALIFORNIA                      13168               6078                 4056
+##  6 COLORADO                         2417               1365                  879
+##  7 CONNECTICUT                       723                424                  607
+##  8 DELAWARE                          365                228                  226
+##  9 DISTRICT OF COLUM~                 61                 27                   35
+## 10 FLORIDA                         11056               6063                 4686
 ## # ... with 42 more rows, and 5 more variables: tot_discwdis_ref_idea_f &lt;int&gt;,
 ## #   tot_discwodis_arr_m &lt;int&gt;, tot_discwodis_arr_f &lt;int&gt;,
 ## #   tot_discwdis_arr_idea_m &lt;int&gt;, tot_discwdis_arr_idea_f &lt;int&gt;</code></pre>
@@ -2680,18 +2792,18 @@ div.tocify {
 <span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>ra_reg</span></code></pre></div>
 <pre><code>## # A tibble: 195,264 x 19
-##    lea_state lea_state_name leaid   lea_name   schid sch_name     combokey jj   
-##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;      &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
-##  1 AL        ALABAMA        0100002 Alabama Y~  1705 Wallace Sch~ 0100002~ Yes  
-##  2 AL        ALABAMA        0100002 Alabama Y~  1706 McNeel Sch ~ 0100002~ Yes  
-##  3 AL        ALABAMA        0100002 Alabama Y~  1876 Alabama You~ 0100002~ No   
-##  4 AL        ALABAMA        0100002 Alabama Y~ 99995 AUTAUGA CAM~ 0100002~ Yes  
-##  5 AL        ALABAMA        0100005 Albertvil~   870 Albertville~ 0100005~ No   
-##  6 AL        ALABAMA        0100005 Albertvil~   871 Albertville~ 0100005~ No   
-##  7 AL        ALABAMA        0100005 Albertvil~   879 Evans Eleme~ 0100005~ No   
-##  8 AL        ALABAMA        0100005 Albertvil~   889 Albertville~ 0100005~ No   
-##  9 AL        ALABAMA        0100005 Albertvil~  1616 Big Spring ~ 0100005~ No   
-## 10 AL        ALABAMA        0100005 Albertvil~  2150 Albertville~ 0100005~ No   
+##    lea_state lea_state_name leaid  lea_name    schid sch_name     combokey jj   
+##    &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;
+##  1 AL        ALABAMA        01000~ Alabama Yo~  1705 Wallace Sch~ 0100002~ Yes  
+##  2 AL        ALABAMA        01000~ Alabama Yo~  1706 McNeel Sch ~ 0100002~ Yes  
+##  3 AL        ALABAMA        01000~ Alabama Yo~  1876 Alabama You~ 0100002~ No   
+##  4 AL        ALABAMA        01000~ Alabama Yo~ 99995 AUTAUGA CAM~ 0100002~ Yes  
+##  5 AL        ALABAMA        01000~ Albertvill~   870 Albertville~ 0100005~ No   
+##  6 AL        ALABAMA        01000~ Albertvill~   871 Albertville~ 0100005~ No   
+##  7 AL        ALABAMA        01000~ Albertvill~   879 Evans Eleme~ 0100005~ No   
+##  8 AL        ALABAMA        01000~ Albertvill~   889 Albertville~ 0100005~ No   
+##  9 AL        ALABAMA        01000~ Albertvill~  1616 Big Spring ~ 0100005~ No   
+## 10 AL        ALABAMA        01000~ Albertvill~  2150 Albertville~ 0100005~ No   
 ## # ... with 195,254 more rows, and 11 more variables: enroll_all &lt;int&gt;,
 ## #   tot_discwodis_ref_m &lt;int&gt;, tot_discwodis_ref_f &lt;int&gt;,
 ## #   tot_discwdis_ref_idea_m &lt;int&gt;, tot_discwdis_ref_idea_f &lt;int&gt;,
