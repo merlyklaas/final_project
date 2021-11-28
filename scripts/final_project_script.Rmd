@@ -10,7 +10,7 @@ output:
         highlight: pygments
         code_folding: hide
 ---
-
+<!-- The table of contents was a really nice feature to have while reviewing your knitted doc -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
@@ -41,7 +41,7 @@ pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor
 # Introduction 
 
 This research project will be conducted using High School and Middle School level data from the [**Civil Rights Data Collection (CRDC)**](https://ocrdata.ed.gov/), 2017-2018 data set. The CRDC contains multiple data sets that cover a range of topics. From the overall data set, we are focusing on frequency data reported in the following areas: 
-
+<!-- What does LEO stand for? -->
 1. School Support (count of enrolled novice teachers, sworn LEO)
 2. Referrals & Arrests (count of referrals and arrests of students by subgroup)
 3. Suspensions and Expulsions (count of suspensions and expulsions of students by subgroup)
@@ -367,7 +367,7 @@ data_join <- enroll_final %>%
 
 
 ## Descriptive Findings {.tabset}
-
+<!-- I like the use of tabs to organize your figures -->
 From the different data sets, we'll be creating some figures.
 
 
@@ -919,6 +919,7 @@ The analysis had three outcomes of interest that broadly examined school climate
 Descriptive statistics and regression analysis were used to answer the two research questions. 
 
 To answer the first research question, we used a 3-level hierarchical linear model with schools nested within districts and districts nested within states. The final model is represented by the following sets of equations. 
+<!-- Would recommend separating these out from the paragraph of text so they each appear on their own line. Hard to read/follow when they just flow together on one line in the knitted document -->
 Y_jks= π_0ks+X_j+ 〖γ1〗_j Noviceteachers+ ε_jks
 π_ks=β_00s+ r_0jk 
 β_00s= γ_000+ μ_00k
@@ -947,7 +948,7 @@ RA
 skim(RA)
 ```
 
-
+<!-- Both the code chunk above and below create really long tables in the knitted document. Can you condense how much shows in the knitted document? Do you need all of those rows to show?  -->
 Describe the RA data set
 ```{r}
 RA %>%
@@ -1056,6 +1057,7 @@ new_labels <- c("ref" = "Referrals", "arr" = "Arrests")
 How to get it to show a break in the gender indicating disability status or a percentage of each gender that is disabled?
 fct_rev added to flip state names alphabetical
 labeller used to spell out facet_wrap labels
+<!-- These tables look amazing! Great job on them!  -->
 ```{r}
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
