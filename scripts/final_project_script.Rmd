@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE,
 #let's only include libraries we are using so that others don't have to install the irrelevant ones 
 #if (!require("pacman")) install.packages("pacman") 
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc) 
 
 #library(tidylog) #uncheck when writing code for log
 
