@@ -494,6 +494,7 @@ susp_k12_tidy %>%
 ```
 
   * Multiple Out of school suspension rate by gender and race
+  ###CM Comment - Is anyone else having trouble getting this chunk to run? I get the following error: Error in FUN(X[[i]], ...) : object 'ethnicity/lep/idea' not found
 ```{r}
 susp_k12_tidy %>% 
   filter(type == "multoos") %>% 
