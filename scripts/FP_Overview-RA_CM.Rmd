@@ -42,12 +42,18 @@ library(ggthemes)
 na_strings <- c(-3, -5, -6, -8, -9, -11)
 ```
 
+RA = referrals and arrests
 ```{r}
 RA <- import(here("data", "Referrals and Arrests.csv")) %>%
 as_tibble() %>%
  
 set_na(na = c(-3, -5, -6, -8, -9, -11))
+
 RA
+```
+
+```{r}
+# export(RA, here("data", "RA.xlsx"))
 ```
 
 ```{r}
@@ -88,42 +94,66 @@ str(enroll)
 ```
 
 ```{r}
-ra_full <- full_join(enroll, RA)
+RA2 <- RA %>%
+  clean_names()
+
+RA2
+```
+
+```{r}
+enroll2 <- enroll %>%
+  clean_names()
+
+enroll2
+```
+
+```{r}
+ra_full <- merge(x=RA2, y=enroll2, by="combokey") %>%
+  select(! ends_with(".y"))
+
 
 ra_full
 ```
 
 ```{r}
-export(ra_full, here("data", "ra_full.csv"))
+# export(ra_full, here("data", "ra_full.csv"))
+```
+
+```{r}
+# export(ra_full, here("data", "ra_full2.xlsx"))
 ```
 
 ```{r}
 sch_su <- import(here("data", "sch_su.csv")) %>%
 as_tibble() %>%
  
-set_na(na = c(-3, -5, -6, -8, -9, -11))
+set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
+  clean_names()
 
 sch_su
 ```
 
-```{r}
-ra_full_c <- ra_full %>%
-  clean_names()
-```
-
 Complete data set
+For rename function new name = old name
 ```{r}
-ra_final <- full_join(ra_full_c, sch_su)
+ra_final <- merge(x=ra_full, y=sch_su, by="combokey") %>%
+  select(! ends_with(".y")) %>%
+  subset(select = -c(schid, leaid, lea_name)) %>%
+    rename(lea_state=lea_state.x, lea_state_name = lea_state_name.x, leaid= leaid.x, lea_name=lea_name.x, schid=schid.x, sch_name=sch_name.x, jj=jj.x)
 
 ra_final
 ```
 
+```{r}
+# export(ra_final, here("data", "ra_final.csv"))
+```
 
 ```{r}
-export(ra_final, here("data", "ra_final.csv"))
+# export(ra_final, here("data", "ra_final4.xlsx"))
 ```
 
 Dropping variables to show just the state and totals
+ra_lawst is referrals and arrests by state
 ```{r}
 ra_lawst <- ra_final %>%
 select(lea_state_name, starts_with("tot")) %>%
@@ -143,10 +173,11 @@ ra_sum
 ```
 
 ```{r}
-export(ra_lawst, here("data", "ra_lawst.xlsx"))
+# export(ra_lawst, here("data", "ra_lawst2.xlsx"))
 ```
 
 pivot_longer to rearrange the data with less columns & more rows
+tot_st is total number of students
 ```{r}
 ra_sum2 <- ra_sum %>%
   pivot_longer(cols = starts_with("tot_"),
@@ -160,7 +191,7 @@ ra_sum2
 
 IDEA (Individuals with Disabilities Education Act)
 LEP stands for limited English Proficient
-arr = Arrests, ref = referrals, wdis = with disability, & wodis = with out disability
+arr = Arrests, ref = referrals, wdis = with disability, & wodis = with out disability, dis_act = disciplinary action
 ```{r}
 ra_sum3 <- ra_sum2 %>%
   mutate_at("student_type", str_replace, "_idea", "") %>%
@@ -206,13 +237,14 @@ ra_sum3 %>%
   scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))
 ```
 
-Multiple Regression
+Tidying Data Sets for Multiple Regression
 ```{r}
 ra_final %>%
   colnames ()
 ```
 
 Changed "Not Reported" data to NA; checked that code worked by searching for the phrase in the view data pane
+ra_reg = ra_final data set down-sized & tidied for regression analysis
 ```{r}
 ra_reg <- ra_final %>%
 select(lea_state, lea_state_name, leaid, lea_name, schid, sch_name, combokey, jj, enroll_all, starts_with("tot"), sch_ftesecurity_leo, sch_ftesecurity_gua) %>%
@@ -221,28 +253,236 @@ select(lea_state, lea_state_name, leaid, lea_name, schid, sch_name, combokey, jj
 ra_reg
 ```
 
-Just starting work on this code...
 ```{r}
-ra_tidy <- ra_lawst %>%
-  group_by(lea_state_name) %>%
-  summarise_all(sum, na.rm = TRUE) %>%
-  filter(lea_state_name != "NA")
+# library(readr)
 
-pivot_longer(cols = starts_with("tot_"),
-    names_to = "student_type",
-    names_prefix = "tot_disc",
-    values_to = "tot_st",
-    values_drop_na = TRUE)
+urlfile = "https://raw.githubusercontent.com/merlyklaas/final_project/master/data/data_join.csv"
 
-mutate_at("student_type", str_replace, "_idea", "") %>%
-  separate(student_type, c("status", "dis_act", "gender"), "_")
+joinD <- read.csv(url(urlfile))
+```
 
-ra_sum2
+```{r}
+# export(joinD, here("data", "joinD.xlsx"))
+```
+
+```{r}
+joinD %>%
+  colnames ()
+```
+
+```{r}
+ra_reg %>%
+  colnames ()
+```
+
+ra_D merges the main arrest/referral data set with the joined data set
+```{r}
+ra_D <- merge(x = ra_reg, y = joinD [, c(8, 26:28, 30, 33:35)], by = "combokey", all.x = TRUE)
+
+ra_D
+```
+
+```{r}
+ra_D %>%
+  colnames ()
+```
+
+280 population size for Alabama Youth Services LEA only
+Total population size for data set is below
+```{r}
+  sum(ra_D$enroll_all, na.rm=TRUE)
+```
+
+Changed _gua variable from character to numeric
+```{r}
+ra_reg$sch_ftesecurity_gua <- as.numeric(ra_reg$sch_ftesecurity_gua)
+```
+
+```{r}
+class(ra_reg$sch_ftesecurity_gua)
+```
+This is the problem code that creates a 216911 under _gua
+```{r}
+ra_tidy <- ra_reg %>%
+  group_by(leaid) %>%
+  summarise(wodis_ref_m = sum(tot_discwodis_ref_m),
+            wodis_ref_f = sum(tot_discwodis_ref_f),
+            wdis_ref_idea_m = sum(tot_discwdis_ref_idea_m),
+            wdis_ref_idea_f = sum(tot_discwdis_ref_idea_f),
+            wodis_arr_m = sum(tot_discwodis_arr_m),
+            wodis_arr_f = sum(tot_discwodis_arr_f),
+            wdis_arr_idea_m = sum(tot_discwdis_arr_idea_m),
+            wdis_arr_idea_f = sum(tot_discwdis_arr_idea_f),
+            sum_leo = sum(sch_ftesecurity_leo, na.rm=TRUE), 
+            sum_gua = sum(sch_ftesecurity_gua, na.rm=TRUE))
+
+ra_tidy
+```
+
+```{r}
+# export(ra_tidy, here("data", "ra_tidy.xlsx"))
+```
+
+```{r}
+# export(ra_tidy2_c, here("data", "ra_tidy2_c.xlsx"))
+```
+
+```{r}
+ra_tidy2 <- ra_tidy %>%
+  mutate(total_law = sum_leo + sum_gua) %>%
+  select(!starts_with("sum"))
+
+ra_tidy2
+```
+
+Collapsing for histogram
+total_student = total number of students with a disciplinary action
+```{r}
+ra_tidy2_c <- ra_tidy2 %>%
+  mutate(total_student = wodis_ref_m + wodis_ref_f + wdis_ref_idea_m + wdis_ref_idea_f + wodis_arr_m + wodis_arr_f + wdis_arr_idea_m + wdis_arr_idea_f)
+  
+ra_tidy2_c
+```
+
+Excluding LEA ID 4816620 as an outlier
+```{r}
+ratc <- ra_tidy2_c %>%
+  filter(leaid != "4816620")
+
+ratc
+```
+
+ratc (ra tidy2 collapsed - no outlier)
+```{r}
+ratc %>%
+  describeBy()
+```
+
+How to label this graph with LEA IDs and make easier to read?
+```{r fig3, fig.height = 10, fig.width = 10, fig.align = "center"}
+ratc %>%
+ggplot(aes(as.factor(x = leaid), y = total_student)) +
+geom_col(width = 0.3)+
+theme_minimal() +
+  coord_flip()
+```
+
+```{r}
+ggplot(ratc, aes(total_law, total_student)) +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Total Number of Law Enforcement Officials",
+    y = "Total Number of Students with a Disciplinary Action")
 ```
 
 
 ```{r}
-ra_tidy %>%
-  describeBy()
+ra_tidy3 <- ra_tidy2 %>%
+  pivot_longer(cols = 2:9,
+    names_to = "student_type",
+    values_to = "tot_st")
+  
+ra_tidy3
+```
+
+```{r}
+ra_tidy4 <- ra_tidy3 %>%
+  group_by(leaid) %>%
+  mutate_at("student_type", str_replace, "_idea", "") %>%
+  separate(student_type, c("status", "dis_act", "gender"), "_") %>%
+  filter(leaid != "4816620")
+
+ra_tidy4
+```
+
+#Multiple Regression
+Convert gender, disciplinary action, and disability status variables from characters to numeric factors.
+```{r}
+ra_tidy4$gender <- factor(ra_tidy4$gender)
+```
+
+```{r}
+levels(ra_tidy4$gender)
+```
+
+```{r}
+contrasts(ra_tidy4$gender)
+```
+
+```{r}
+ra_tidy4$status <- factor(ra_tidy4$status)
+```
+
+```{r}
+levels(ra_tidy4$status)
+```
+
+```{r}
+contrasts(ra_tidy4$status)
+```
+
+```{r}
+ra_tidy4$dis_act <- factor(ra_tidy4$dis_act)
+```
+
+```{r}
+ra_tidy4$tot_st <- as.numeric(ra_tidy4$tot_st)
+```
+
+Check data structure
+```{r}
+str(ra_tidy4)
+```
+
+```{r}
+colnames(ra_tidy4)
+```
+
+## Summary of variables:
+* leaid: The LEA's (school district) ID number.
+* total_law: The total number of FTE (full time equivalent) law enforcement officials (security guards + law enforcement officers).
+* status: A student's disability status, either wodis = without disability or wdis = with disability.
+* dis_act: The disciplinary action taken (either an arrest or a referral).
+* gender: The student's biological gender (male or female).
+* tot_st: The total number of students in the LEA with a dis_act.
+
+```{r}
+  describeBy(ra_tidy4[, -1])
+```
+
+Research hypothesis: The total number of disciplinary actions is related to the total number of law enforcement officials. A regression model will be run with total_law as a predictor of tot_st while controlling for gender and disability status.
+
+Correlation between tot_st and total_law?
+```{r}
+# corr.t <- corr.test(ra_tidy4[, c(2,5)],use="pairwise.complete.obs")
+
+# round(cor.mat,3)
+```
+
+Could this clustering effect in the corner of the graph be due to disctricts with NA or 0?
+```{r}
+scatterHist(tot_st ~ total_law,
+  data = ra_tidy4,
+  smooth=FALSE,
+  ab=FALSE,
+  correl=FALSE,
+  ellipse=FALSE,
+  xlab = "Total Number of Students with a Disciplinary Action",
+  ylab = "Total Number of Law Enforcement Officials",
+  pch=19,
+  title = "Relationship between Law Enforcement and Students with Actions")
+```
+
+
+###Results
+Add a control for total student population size
+```{r}
+mod <- lm(tot_st ~ 1 + total_law + gender + status, data=ra_tidy4)
+
+require(car)
+
+Anova(mod,type=3)
+
+summary(mod)
 ```
 
