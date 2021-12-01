@@ -477,32 +477,61 @@ expl_ps_tidy <- expl_ps %>%
   * suspension rate by ethnicity in preschool
 ```{r}
 susp_ps_tidy %>% 
-  filter(`ethnicity/lep/idea` != "lep" | `ethnicity/lep/idea` != "idea" ) %>% 
+  filter(`ethnicity/lep/idea` != "lep",
+         `ethnicity/lep/idea` != "idea" ) %>% 
+  mutate(`ethnicity/lep/idea`= factor(`ethnicity/lep/idea`, 
+         levels = c("as", "hp", "am", "tr", "hi", "wh", "bl"))) %>%
   ggplot(aes(type, students)) + 
   geom_col(aes(fill = `ethnicity/lep/idea`), 
            alpha = 0.7, na.rm = TRUE) +
-  scale_fill_brewer(palette = "Set1")
-```
-  * suspension rate by ethnicity in k12
-```{r}
-susp_k12_tidy %>% 
-  filter(`ethnicity/lep` != "lep") %>% 
-   ggplot(aes(type, students)) +
-     geom_col(aes(fill = `ethnicity/lep`),
-              alpha = 0.7, na.rm = TRUE) 
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Suspension Rate by Ethnicity in Preschool",
+       fill = "Race",
+       x = "Type of Suspensions") +
+  theme(text = element_text(size = 30, face = "bold"))
+ggsave(here("plot", "Susp_ps.jpg"))
 
 ```
-
-  * Multiple Out of school suspension rate by gender and race
-  ###CM Comment - Is anyone else having trouble getting this chunk to run? I get the following error: Error in FUN(X[[i]], ...) : object 'ethnicity/lep/idea' not found
+  * suspension rate by Disability status in k12
 ```{r}
 susp_k12_tidy %>% 
-  filter(type == "multoos") %>% 
-  ggplot(aes(`ethnicity/lep/idea`)) +
+  drop_na() %>% 
+  filter(`ethnicity/lep` != "lep",
+         `ethnicity/lep` != "all"
+         ) %>% 
+  ggplot(aes(disability, students)) +
+  geom_col() + 
+  facet_wrap(~`ethnicity/lep`) +
+  theme(text = element_text(size = 30, face = "bold"))
+ggsave(here("plot", "susp_idea_k12.jpg"))
+```
+
+  * Multiple Out of school suspension rate by gender and race in K12
+```{r}
+susp_k12_tidy %>% 
+  drop_na() %>% 
+  filter(type == "multoos",
+         `ethnicity/lep` != "lep",
+         `ethnicity/lep` != "all"
+         ) %>% 
+  mutate(`ethnicity/lep`= factor(`ethnicity/lep`, 
+         levels = c("as", "hp", "am", "tr", "wh", "hi", "bl"))) %>% 
+  ggplot(aes(`ethnicity/lep`, students)) +
   geom_col(aes(fill = gender),
-           position = "dodge") 
+           position = "dodge") +
+  labs(title = "Multiple Out of school suspension rate by gender and race in K12",
+       x = "Ethnicity",
+       y = "Number of Students") +
+  theme(text = element_text(size = 30, face = "bold"))
+ggsave(here("plot", "multoos_k12.jpg"))
 ```
 
+```{r}
+multoos_k12.jpg
+multoos_ps.jpg
+susp_idea_k12.jpg
+Susp_ps.jpg
+```
 
 **Note: The below code was written before we learnt pivot_longer. We plan to recreate the figure using the tidy data we created above.**
 
