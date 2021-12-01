@@ -359,6 +359,9 @@ ratc %>%
 ```
 
 How to label this graph with LEA IDs and make easier to read?
+Drop school district with NAs and 0s
+keep top 10 and bottom 10 to see variation
+similar graph with law officers
 ```{r fig3, fig.height = 10, fig.width = 10, fig.align = "center"}
 ratc %>%
 ggplot(aes(as.factor(x = leaid), y = total_student)) +
