@@ -125,7 +125,7 @@ enroll_total <- enroll %>%
   as_tibble()
 
 #good use of pivot_longer and pivot_wider to get the information you want. 
-#seems like the first section of code (pivot_longer) makes a clean set by itself and then the pivot_wider gets you information you want all together, but makes it messier again (data in the labels). i might be misunderstanding the goal and data though
+#seems like the first section of code (pivot_longer) makes a clean set by itself that can be used for visualizations etc (with no data in the labels) and then the pivot_wider gets you information you want all together, but makes it messier again (data in the labels). i might be misunderstanding the goal and data though
 
 ```
 
@@ -204,6 +204,8 @@ susp_k12 <- susp %>%
   select(c(1:8,51:167))
 
 ```
+#good use of select. 
+#i'm seeing the benefit of building a function to remove neg bc it can be used throughout!
 
 Tidy data for regression
 
@@ -264,7 +266,7 @@ support_tidy <- support %>%
   select(-c(1:6,8))
 
 
-          
+#i'm impressed with the code above! thanks for teaching me about str_remove and str_detect          
 ```
 
 
@@ -299,6 +301,9 @@ sch_characteristics <- sch_characteristics_raw %>%
 #               values_from = status) %>% 
 #   select(-(1:6))
 
+
+#how will you use this data above?
+#it is neat manipulation/analytics, but I don’t see it in results or helping to address a research question, so could get rid of it for overall paper/data clarity
 ```
 
 ### Expulsion Data Set
@@ -369,6 +374,7 @@ data_join <- enroll_final %>%
   law_std = rate(tot_law)
   )
 
+#wow such a comprehensive join. now i'm realizing that your use of pivots etc was likely also to help get variables to be similar to join. is that correct? that would be an interesting point to remark on in your paper as you had to tidy and manipulate a lot of data to effectively join all the different sets.
 
 
 ```
@@ -488,6 +494,7 @@ expl_ps_tidy <- expl_ps %>%
 
 
 **Note: The below code was written before we learnt pivot_longer. We plan to recreate the figure using the tidy data we created above.**
+#the descriptions/labels of each created data set add helpful clarity. it would be great to see those in the steps above too. 
 
 The data we use contains negative values for missing data. Let's create a data set with no negative values across all variables. 
 
@@ -890,6 +897,7 @@ all_race_male %>%
        y = "Percentage",
        title = "Male Students Receiving Suspension, by Race, Gender, and Disability")
 
+?paste
 ```
 
   * Suspension for female students by race
@@ -1055,6 +1063,7 @@ ra_sum2
 IDEA (Individuals with Disabilities Education Act)
 LEP stands for limited English Proficient
 arr = Arrests, ref = referrals, wdis = with disability, & wodis = with out disability
+#ah here is the definition ive been waiting for! Thank you 😊 
 ```{r}
 ra_sum3 <- ra_sum2 %>%
   mutate_at("student_type", str_replace, "_idea", "") %>%
