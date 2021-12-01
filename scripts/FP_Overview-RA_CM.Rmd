@@ -486,3 +486,8 @@ Anova(mod,type=3)
 summary(mod)
 ```
 
+```{r}
+library(sjPlot)
+tab_model(mod)
+```
+
