@@ -1234,7 +1234,7 @@ state_means %>%
                      xmax = state_mean_newtch+ 1.96*state_mean_newtch_se)) +
   labs( y = "State", x = "Percent novice teachers") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=8))
 
 #Rate of Suspensions expulsion across States
 state_means %>%  
@@ -1323,6 +1323,17 @@ tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
                         "Charter School (Y/N)", "Alternative School (Y/N)",
                         "Percent New Teachers X Black Enrollment", 
                         "Percent New Teachers X Special Education"))
+
+results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teachers"),
+           model.names = c("Model 1 - No covariates", "Model 2 - Random Intercepts", 
+                      "Model 3 - Random Int/Slopes", 
+                      "Model 4 - Random Int/Sopes & Interactions"),
+           legend.title = "Estimate relationship between rate of \n\ novice teachers and rate of suspensions",
+           ci.level = .5,
+           robust = FALSE,
+           point.shape = FALSE)
+           
+results + labs(x = "Change in number of students suspended per 1000 students \n\ for every percentage point increase in the rate of novice teachers") + xlim(-1,2) + theme(axis.text=element_text(size=16), legend.text=element_text(size = 12))
 ```
 
 # Discussion
