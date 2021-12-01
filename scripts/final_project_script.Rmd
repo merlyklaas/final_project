@@ -928,6 +928,7 @@ We'll add some figures here.
 We'll add some figures here.
 
 # Methods
+#excellent description of your methods. it adds a lot of clarity to your process of exploring and analyzing the data
 
 This analysis was conducted using publicly available data from the 2017-18 civil rights data collection. Each biennium, schools across the United States are required to respond and report key information about their school. This includes enrollment information, levels of school personnel, incidents of exclusionary discipline, harassment, and bullying.
 
@@ -948,6 +949,8 @@ Y_jks= π_0ks+X_j+ 〖γ1〗_j Noviceteachers+ ε_jks
 π_ks=β_00s+ r_0jk 
 β_00s= γ_000+ μ_00k
 Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level measure of counselor caseload. The γ1 coefficient represents the relationship between counselor caseload and study outcomes and addresses the first research question.
+
+#very interesting!
 
 To answer the second research question...
 
@@ -1040,6 +1043,8 @@ select(lea_state_name, starts_with("tot")) %>%
   set_na(na = c(-3, -5, -6, -8, -9, -11))
 
 ra_lawst
+
+#good use of select to get the info you want!
 ```
 
 Sum by state
@@ -1205,7 +1210,7 @@ tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
                         "Special Ed School (Y/N)", "Magnet school ((Y/N)", 
                         "Charter School (Y/N)", "Alternative School (Y/N)"))
 
-#Tables: nice table! Can you change the heading of the columns? Right now they are the same.. 
+#Tables: nice table! Can you change the heading of the columns? Right now they appear the same
 ```
 
 # Discussion
@@ -1313,6 +1318,7 @@ enroll %>%
 Recoding those schools that report percentages higher than 100. Doing this for EL% and SPED%.
 For those cases, I just recoded back to 100 percent. It appears like it worked based on the visual.
 Afterwards, I subset the file to only keep the school information, enrollment totals, and percent enrollment.
+#helpful description of what you are doing
 
 ```{r, eval = FALSE }
 enroll <- enroll %>%
