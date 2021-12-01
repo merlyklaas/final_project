@@ -355,6 +355,8 @@ ra_sum <- import(here("data", "Referrals and Arrests.csv")) %>%
 
 ### Joined Data
 
+#you've worked hard to get to this point! can you add a description stating that you will join all the data sets by "combokey" (and define what "combokey" is)
+
 ```{r joined, eval = FALSE}
 # Function to calculate rates per 1000 student
 rate <- function(x) (x*1000 / enroll_final$tot_enr)
@@ -390,6 +392,7 @@ data_join <- enroll_final %>%
 
 From the different data sets, we'll be creating some figures.
 
+#Good use of tabs in descriptive section. I look forward to seeing how each are filled in with summary tables or plots to visualize the different data sets and how you join them together. 
 
 ### Expulsions and Suspensions Cleaning
 
@@ -1012,6 +1015,11 @@ sch_su
 ra_full_c <- ra_full %>%
   clean_names()
 ```
+#I imagine showing these tables may be part of the process to explore the data, so may not be in the final at all. But if they are, Can these tables go in the Appendix instead of the results section? Or could you create a summary table with select variables usingn {gt} or {kable?}, and/or show as a tibble  For me, (admittedly a novice), they are clunky and don’t provide easily digestible information for the reader, and a summary table with defined variables (such as what is SCH_DISCWODIS ?) would be very helpful
+#all this said, you are working with SO much data and it is very impressive how you are making sense of it all and using it to answer interesting questions
+
+
+
 
 Complete data set
 ```{r}
@@ -1070,6 +1078,9 @@ ra_sum3 <- ra_sum2 %>%
   separate(student_type, c("status", "dis_act", "gender"), "_")
 
 ra_sum3
+
+#excellent way to continue to tidy the data after the pivot longer. 
+#it's clear you're using the functions to help you get the information you want! 
 ```
 
 ```{r}
@@ -1093,7 +1104,7 @@ ra_sum3 %>%
        subtitle = "Visulalized by Gender") +
   scale_fill_discrete (name = "Gender", labels = c("Female", "Male"))
 ```
-
+#terrific! I like how you flipped the axis. Makes it very clear
 ```{r}
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
@@ -1108,6 +1119,8 @@ ra_sum3 %>%
        subtitle = "Visulalized by Disability Status") +
   scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))
 ```
+
+#can you use a different color scheme like colorblind to make it more accessible to all readers?
 
 Multiple Regression
 ```{r}
@@ -1191,6 +1204,8 @@ tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
                         "Percent Multiracial", "Percent EL Classified", "Percent Special Ed.",
                         "Special Ed School (Y/N)", "Magnet school ((Y/N)", 
                         "Charter School (Y/N)", "Alternative School (Y/N)"))
+
+#Tables: nice table! Can you change the heading of the columns? Right now they are the same.. 
 ```
 
 # Discussion
