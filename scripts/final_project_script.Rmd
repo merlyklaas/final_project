@@ -88,6 +88,7 @@ remove_neg <- function (x) ifelse(x < 0, NA, x)
 enroll <- enroll %>% 
     mutate(across(c(9:123), remove_neg)) %>% 
     select(-c(9:31))  #removing pre-K enrollment data
+#Distributions of some variables appear to be non-normal. Did you investigate this and might it affect analyses?
 ```
 
 Now, I'm using PivotLonger and PivotWider to extract all information from columns.
@@ -482,6 +483,7 @@ susp_ps_tidy %>%
   geom_col(aes(fill = `ethnicity/lep/idea`), 
            alpha = 0.7, na.rm = TRUE) +
   scale_fill_brewer(palette = "Set1")
+#Legend is too small
 ```
   * suspension rate by ethnicity in k12
 ```{r}
@@ -501,6 +503,7 @@ susp_k12_tidy %>%
   ggplot(aes(`ethnicity/lep/idea`)) +
   geom_col(aes(fill = gender),
            position = "dodge") 
+#Throws an error
 ```
 
 
