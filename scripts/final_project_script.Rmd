@@ -40,34 +40,39 @@ pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor
 
 # Introduction 
 
-This research project will be conducted using High School and Middle School level data from the [**Civil Rights Data Collection (CRDC)**](https://ocrdata.ed.gov/), 2017-2018 data set. The CRDC contains multiple data sets that cover a range of topics. From the overall data set, we are focusing on frequency data reported in the following areas: 
+This research project will be conducted using High school, Middle school, and Elementary school level data from the [**Civil Rights Data Collection (CRDC)**] (https://ocrdata.ed.gov/), 2017-2018 data set. The CRDC contains multiple data sets that cover a range of topics. From the overall data set, we are focusing on data reported in the following areas: 
 
-1. School Support (count of enrolled novice teachers, sworn LEO)
-2. Referrals & Arrests (count of referrals and arrests of students by subgroup)
+1. School Support (count of enrolled novice teachers, sworn law enforcement officers (LEOs) and security guards)
+2. Referrals & Arrests (count of referrals and arrests of students by subgroup, which includes gender, race, and disability status)
 3. Suspensions and Expulsions (count of suspensions and expulsions of students by subgroup)
 4. Enrollment (count of enrolled students by subgroup)
 5. School characteristics (magnet, alternate, charter, special ed)
+6. Data sets are organized by both state, school district (LEA), and school level
+
+Previous research has shown that school staffing choices can have an impact on student outcomes. In particular, novice teachers and law enforcement officials located on school campuses may impact negatively the number of disciplinary actions taken with students of various subgroups. Often, poor classroom management by novice teachers leads to them sending more students to the school office for a form of disciplinary action (e.g., referrals, suspensions, and even arrests) (Taylor et al., 2018). Less research has been done on how law enforcement officials impact student disciplinary outcomes, but there have been some studies that suggest there are both benefits (i.e., deterring student to student assaults) and costs (i.e., more students reported for "non-serious violent crimes") (James & McCallion, 2013). 
+
+The following figures provide overviews of the data set at the state level.
 
 ## Introductory graphs
 ```{r}
-library(rio)
-library(dplyr)
-library(here)
-library(tidyr)
+# library(rio)
+# library(dplyr)
+# library(here)
+# library(tidyr)
 # install.packages(naniar)
-library(naniar)
-library(readr)
-library(magrittr)
+# library(naniar)
+# library(readr)
+# library(magrittr)
 # install.packages(sjmisc)
-library(sjmisc)
-library(skimr)
-library(janitor)
-library(ggplot2)
-library(tidyverse)
-library(psych)
-library(tinytex)
-library(crayon)
-library(ggthemes)
+# library(sjmisc)
+# library(skimr)
+# library(janitor)
+# library(ggplot2)
+# library(tidyverse)
+# library(psych)
+# library(tinytex)
+# library(crayon)
+# library(ggthemes)
 ```
 
 ```{r}
@@ -251,7 +256,8 @@ ra_sum3 %>%
        y = "Total",
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Gender") +
-  scale_fill_discrete (name = "Gender", labels = c("Female", "Male"))
+  scale_fill_discrete (name = "Gender", labels = c("Female", "Male")) +
+  theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
 ```
 
 ```{r}
@@ -266,7 +272,8 @@ ra_sum3 %>%
        y = "Total",
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Disability Status") +
-  scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))
+  scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))+
+  theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
 ```
 
 ## Research Questions  
