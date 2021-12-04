@@ -979,7 +979,6 @@ labs(
   y = "Number of Students") + 
 theme(text = element_text(size = 30, face = "bold"))
 ggsave(here("plot", "susp_ps.jpg"))
-  
 ```
 The graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included, the graphs show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. 
 
