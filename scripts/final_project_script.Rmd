@@ -19,9 +19,18 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.width = 9, 
                       fig.height = 9)
 
+#<<<<<<< Updated upstream
+
+# Add your packages that you need here. This will load the libraries
+#removed purr - part of tidyverse
+#let's only include libraries we are using so that others don't have to install the irrelevant ones 
+#if (!require("pacman")) install.packages("pacman") 
+#pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, sjmisc) 
+#>>>>>>> Stashed changes
 
 if (!require("pacman")) install.packages("pacman") 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary) 
 
 ```
 
@@ -702,6 +711,16 @@ To answer the second research question...
 
 # Results
 
+## Descriptive Statistics Summary 
+
+```{r}
+dat <- import(here("data", "data_join.csv")) %>% 
+  select(lea_state_name, lea_name, sch_name, starts_with("tot"))
+dat %>% tbl_summary()
+```
+
+
+
 ## Research Question 1 - Rates of Novice Teachers and Suspensions
 
 Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 by 1. 
@@ -867,485 +886,102 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 
 ## Research Question 1 - Descriptive Results. (Merly add graphs and description)
 
-#### Data visualization
-  * suspension rate by ethnicity in preschool
+### Suspension rate by ethnicity in preschool
 ```{r}
 susp_ps_tidy %>% 
-  filter(`ethnicity/lep/idea` != "lep",
+  filter(`ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>% 
-  mutate(`ethnicity/lep/idea`= factor(`ethnicity/lep/idea`, 
-         levels = c("as", "hp", "am", "tr", "hi", "wh", "bl"))) %>%
-  ggplot(aes(type, students)) + 
-  geom_col(aes(fill = `ethnicity/lep/idea`), 
+  mutate(`ethnicity/lep/idea` = factor(`ethnicity/lep/idea`,
+                                        levels = c("as", "hp", "am", "tr", "hi", "wh", "bl")))%>% 
+ggplot(aes(fill = `ethnicity/lep/idea`, 
+           x = type, 
+           y =students)) + 
+  geom_col(position = "fill",
+               stat = "identity", 
            alpha = 0.7, na.rm = TRUE) +
   scale_fill_brewer(palette = "Set1") +
   labs(title = "Suspension Rate by Ethnicity in Preschool",
-       fill = "Race",
-       x = "Type of Suspensions") +
+       fill = "Ethnicity",
+       x = "Type of Suspensions") + 
   theme(text = element_text(size = 30, face = "bold"))
-ggsave(here("plot", "Susp_ps.jpg"))
-
+ggsave(here("plot", "susp_ps.jpg"))
 ```
-  * suspension rate by Disability status in k12
+### Suspension rate by Ethnicity in k12
+
 ```{r}
 susp_k12_tidy %>% 
   drop_na() %>% 
   filter(`ethnicity/lep` != "lep",
-         `ethnicity/lep` != "all"
+         `ethnicity/lep` != "all",
+         type == "singoos"|
+         type == "multoos"
          ) %>% 
-  ggplot(aes(disability, students)) +
-  geom_col() + 
-  facet_wrap(~`ethnicity/lep`) +
+    mutate(`ethnicity/lep` = 
+             fct_relevel (`ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl")) %>% 
+  ggplot(aes(fill = `ethnicity/lep`,
+             x = type, 
+             y = students)) + 
+geom_col(position = "fill",
+         stat = "identity",
+           alpha = 0.7, na.rm = TRUE) +
+scale_fill_brewer(palette = "Set1") +
+labs(title = "Suspension Rate by Ethnicity in K12",
+       fill = "Ethnicity",
+       x = "Type of Suspensions",
+       y = "Number of Students") + 
+theme(text = element_text(size = 30, face = "bold"))
+ggsave(here("plot", "susp_k12.jpg"))
+
+
+```
+  * Multiple Out of school suspension rate by gender and race for preschool students
+```{r}
+susp_ps_tidy %>% 
+  filter(type == "multoos",
+         `ethnicity/lep/idea` != "lep" ,
+         `ethnicity/lep/idea` != "idea" ) %>% 
+  mutate(`ethnicity/lep/idea` = 
+             fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"))%>% 
+  ggplot(aes(`ethnicity/lep/idea`, students)) +
+  geom_col(aes(fill = gender),
+           position = "dodge",
+           na.rm = TRUE) +
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Multiple Out-of-school Suspension by Ethnicity & Gender in Preschool",
+       fill = "Gender",
+       x = "Multiple Out-of-School Suspensions",
+       y = "Number of Students") + 
   theme(text = element_text(size = 30, face = "bold"))
-ggsave(here("plot", "susp_idea_k12.jpg"))
+ggsave(here("plot", "susp_ps.jpg"))
+
 ```
 
-  * Multiple Out of school suspension rate by gender and race in K12
+* Multiple Out of school suspension rate by gender and race for k12 students
 ```{r}
 susp_k12_tidy %>% 
-  drop_na() %>% 
-  filter(type == "multoos",
+filter(type == "multoos",
          `ethnicity/lep` != "lep",
          `ethnicity/lep` != "all"
          ) %>% 
-  mutate(`ethnicity/lep`= factor(`ethnicity/lep`, 
-         levels = c("as", "hp", "am", "tr", "wh", "hi", "bl"))) %>% 
-  ggplot(aes(`ethnicity/lep`, students)) +
-  geom_col(aes(fill = gender),
-           position = "dodge") +
-  labs(title = "Multiple Out of school suspension rate by gender and race in K12",
-       x = "Ethnicity",
-       y = "Number of Students") +
-  theme(text = element_text(size = 30, face = "bold"))
-ggsave(here("plot", "multoos_k12.jpg"))
-```
-
-```{r}
-multoos_k12.jpg
-multoos_ps.jpg
-susp_idea_k12.jpg
-Susp_ps.jpg
-```
-
-**Note: The below code was written before we learnt pivot_longer. We plan to recreate the figure using the tidy data we created above.**
-
-The data we use contains negative values for missing data. Let's create a data set with no negative values across all variables. 
-
-```{r no-na, include=FALSE, eval = FALSE}
-susp1 <- susp
-susp1[susp1 < 0] <- NA
-
-susp1 <- susp1 %>% 
-  drop_na()
-```
-
-However, if we only select row with complete information, we will miss too many observation. Instead, we decided to create clean the datasets based on the type of suspensions given in the following: 
-
-*Preschool students suspension by race/ethnicity, gender, disability status*
-* Only one out-of-school suspension
-```{r include=FALSE, eval = FALSE}
-preschool_one_susp <- susp %>% 
-  select (1:8, 9:28, 49:50 )
-preschool_one_susp[preschool_one_susp < 0] <- NA
-
-preschool_one_susp <- preschool_one_susp %>% 
-  drop_na()
-preschool_one_susp
-```
-* more than one out-of-school suspensions
-```{r include=FALSE, eval = FALSE}
-preschool_more_susp <- 
-  preschool_more_susp <- susp %>% 
-  select (1:8, 29:50 )
-preschool_more_susp[preschool_more_susp < 0] <- NA
-
-preschool_more_susp <- preschool_more_susp %>% 
-  drop_na()
-preschool_more_susp
-```
-
-*Students who received one or more in-school suspension, by race/etchnicity, gender, disability status*
-
-```{r include=FALSE, eval = FALSE}
-one_in_susp <- susp %>% 
-  select (1:8, 51:68, 105: 124 )
-one_in_susp[one_in_susp < 0] <- NA
-
-one_in_susp<- one_in_susp %>% 
-  drop_na()
-one_in_susp
-```
-
-*Students who received one out-of-school suspension, by race/etchnicity, gender, disability status*
-
-```{r include=FALSE, eval = FALSE}
-one_out_susp <- susp %>% 
-  select (1:8, 69:86, 125: 144 )
-one_out_susp[one_out_susp < 0] <- NA
-
-one_out_susp<- one_out_susp %>% 
-  drop_na()
-one_out_susp
-```
-
-*Students who received more than one out-of-school suspension, by race/etchnicity, gender, disability status*
-```{r include=FALSE, eval = FALSE}
-
-more_out_susp <- susp %>% 
-  select (1:8, 87:104, 145: 167 )
-more_out_susp[more_out_susp < 0] <- NA
-
-more_out_susp<- more_out_susp%>% 
-  drop_na()
-more_out_susp
-```
-
-*School days missed by gender, race, and disability status*
-
-```{r include=FALSE, eval = FALSE}
-days_missed <- susp %>% 
-  select (1:8, 168:189 )
-days_missed[days_missed < 0] <- NA
-
-days_missed <- days_missed %>% 
-  drop_na()
-days_missed
-```
-
-
-*Then, we created subset and count the percentage for each category by race and gender*
-
-* Preschool students one suspension by Race and Gender
-  * Preschool Male Students 
-
-```{r, eval = FALSE}
-pre_one_susp_race_m <- preschool_one_susp %>% 
- summarize(bl_m = sum(sch_psdisc_singoos_bl_m)/sum(tot_psdisc_singoos_m) * 100, 
-           hi_m = sum(sch_psdisc_singoos_hi_m)/sum(tot_psdisc_singoos_m)* 100,
-           am_m = sum(sch_psdisc_singoos_am_m)/sum(tot_psdisc_singoos_m)* 100,
-           as_m = sum(sch_psdisc_singoos_as_m)/sum(tot_psdisc_singoos_m)* 100,
-           hp_m = sum(sch_psdisc_singoos_hp_m)/sum(tot_psdisc_singoos_m)* 100,
-           wh_m = sum(sch_psdisc_singoos_wh_m)/sum(tot_psdisc_singoos_m)* 100,
-           tr_m = sum(sch_psdisc_singoos_tr_m)/sum(tot_psdisc_singoos_m)* 100)  %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "pre_one_susp_race_m")
-pre_one_susp_race_m 
-
-```
+mutate(`ethnicity/lep/` = factor(`ethnicity/lep`,
+                                   levels = c("as", "hp",
+                                              "am","tr","wh", "hi",
+                                              "bl"))) %>% 
+ggplot(aes(fill = gender,
+           x = `ethnicity/lep`, 
+           y = students)) +
+geom_col( position = "dodge") + 
+scale_fill_brewer(palette = "Set1") +
+labs(
+  title = "Multiple Out-of-school Suspension by Ethnicity & Gender in K12",
+  fill = "Gender",
+  x = "Type of Suspensions",
+  y = "Number of Students") + 
+theme(text = element_text(size = 30, face = "bold"))
+ggsave(here("plot", "susp_ps.jpg"))
   
-  * Preschool one suspension Female students
-
-```{r, eval = FALSE}
-pre_one_susp_race_f  <- preschool_one_susp %>% 
- summarize(bl_f = sum(sch_psdisc_singoos_bl_f)/sum(tot_psdisc_singoos_f) * 100, 
-           hi_f = sum(sch_psdisc_singoos_hi_f)/sum(tot_psdisc_singoos_f)* 100,
-           am_f = sum(sch_psdisc_singoos_am_f)/sum(tot_psdisc_singoos_f)* 100,
-           as_f = sum(sch_psdisc_singoos_as_f)/sum(tot_psdisc_singoos_f)* 100,
-           hp_f = sum(sch_psdisc_singoos_hp_f)/sum(tot_psdisc_singoos_f)* 100,
-           wh_f = sum(sch_psdisc_singoos_wh_f)/sum(tot_psdisc_singoos_f)* 100,
-           tr_f = sum(sch_psdisc_singoos_tr_f)/sum(tot_psdisc_singoos_f)* 100) %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "pre_one_susp_race_f")
-pre_one_susp_race_f
-
 ```
-
-  * Preschool Students with more than one suspension by race and gender
-    - Male Students
-
-```{r, eval = FALSE}
-pre_more_susp_race_m <- preschool_more_susp %>% 
-  summarize(bl_m = sum(sch_psdisc_multoos_bl_m)/sum(tot_psdisc_multoos_m) * 100, 
-           hi_m = sum(sch_psdisc_multoos_hi_m)/sum(tot_psdisc_multoos_m)* 100,
-           am_m = sum(sch_psdisc_multoos_am_m)/sum(tot_psdisc_multoos_m)* 100,
-           as_m = sum(sch_psdisc_multoos_as_m)/sum(tot_psdisc_multoos_m)* 100,
-           hp_m = sum(sch_psdisc_multoos_hp_m)/sum(tot_psdisc_multoos_m)* 100,
-           wh_m = sum(sch_psdisc_multoos_wh_m)/sum(tot_psdisc_multoos_m)* 100,
-           tr_m = sum(sch_psdisc_multoos_tr_m)/sum(tot_psdisc_multoos_m)* 100) %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "pre_more_susp_race_m")
-pre_more_susp_race_m 
-
-```
-    - Female Students 
-```{r, eval = FALSE}
-pre_more_susp_race_f  <- preschool_more_susp%>% 
- summarize(bl_f = sum(sch_psdisc_multoos_bl_f)/sum(tot_psdisc_multoos_f) * 100, 
-           hi_f = sum(sch_psdisc_multoos_hi_f)/sum(tot_psdisc_multoos_f)* 100,
-           am_f = sum(sch_psdisc_multoos_am_f)/sum(tot_psdisc_multoos_f)* 100,
-           as_f = sum(sch_psdisc_multoos_as_f)/sum(tot_psdisc_multoos_f)* 100,
-           hp_f = sum(sch_psdisc_multoos_hp_f)/sum(tot_psdisc_multoos_f)* 100,
-           wh_f = sum(sch_psdisc_multoos_wh_f)/sum(tot_psdisc_multoos_f)* 100,
-           tr_f = sum(sch_psdisc_multoos_tr_f)/sum(tot_psdisc_multoos_f)* 100)  %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "pre_more_susp_race_f")
-pre_more_susp_race_f
-```
-
-
-  * Students without disability with one or more in-school-suspensions by race and gender
-
-```{r include=FALSE, eval = FALSE}
-in_susp_wodis_race_m <- one_in_susp %>% 
-  summarize(bl_m = sum(sch_discwodis_iss_bl_m)/sum(tot_discwodis_iss_m) * 100, 
-           hi_m = sum(sch_discwodis_iss_hi_m)/sum(tot_discwodis_iss_m)* 100,
-           am_m = sum(sch_discwodis_iss_am_m)/sum(tot_discwodis_iss_m)* 100,
-           as_m = sum(sch_discwodis_iss_as_m)/sum(tot_discwodis_iss_m)* 100,
-           hp_m = sum(sch_discwodis_iss_hp_m)/sum(tot_discwodis_iss_m)* 100,
-           wh_m = sum(sch_discwodis_iss_wh_m)/sum(tot_discwodis_iss_m)* 100,
-           tr_m = sum(sch_discwodis_iss_tr_m)/sum(tot_discwodis_iss_m)* 100) %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "in_susp_wodis_race_m")
-in_susp_wodis_race_m 
-
-
-in_susp_wodis_race_f <- one_in_susp %>%   
-summarize(bl_f = sum(sch_discwodis_iss_bl_f)/sum(tot_discwodis_iss_f) * 100, 
-           hi_f = sum(sch_discwodis_iss_hi_f)/sum(tot_discwodis_iss_f)* 100,
-           am_f = sum(sch_discwodis_iss_am_f)/sum(tot_discwodis_iss_f)* 100,
-           as_f = sum(sch_discwodis_iss_as_f)/sum(tot_discwodis_iss_f)* 100,
-           hp_f = sum(sch_discwodis_iss_hp_f)/sum(tot_discwodis_iss_f)* 100,
-           wh_f = sum(sch_discwodis_iss_wh_f)/sum(tot_discwodis_iss_f)* 100,
-           tr_f = sum(sch_discwodis_iss_tr_f)/sum(tot_discwodis_iss_f)* 100) %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "in_susp_wodis_race_f")
-  
-in_susp_wodis_race_f
-```
-
-  * Students with disability with one or more in-school-suspensions by race and gender
-```{r, eval = FALSE}
-
-in_susp_wdis_race_m <- one_in_susp %>%   
-  summarize(bl_m = sum(sch_discwdis_iss_idea_bl_m)/sum(tot_discwdis_iss_idea_m) * 100, 
-           hi_m = sum(sch_discwdis_iss_idea_hi_m)/sum(tot_discwdis_iss_idea_m)* 100,
-           am_m = sum(sch_discwdis_iss_idea_am_m)/sum(tot_discwdis_iss_idea_m)* 100,
-           as_m = sum(sch_discwdis_iss_idea_as_m)/sum(tot_discwdis_iss_idea_m)* 100,
-           hp_m = sum(sch_discwdis_iss_idea_hp_m)/sum(tot_discwdis_iss_idea_m)* 100,
-           wh_m = sum(sch_discwdis_iss_idea_wh_m)/sum(tot_discwdis_iss_idea_m)* 100,
-           tr_m = sum(sch_discwdis_iss_idea_tr_m)/sum(tot_discwdis_iss_idea_m)* 100)%>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "in_susp_wdis_race_m")
-in_susp_wdis_race_m
-
-in_susp_wdis_race_f <- one_in_susp %>%   
-  summarize(bl_f = sum(sch_discwdis_iss_idea_bl_f)/sum(tot_discwdis_iss_idea_f) * 100, 
-           hi_f = sum(sch_discwdis_iss_idea_hi_f)/sum(tot_discwdis_iss_idea_f)* 100,
-           am_f = sum(sch_discwdis_iss_idea_am_f)/sum(tot_discwdis_iss_idea_f)* 100,
-           as_f = sum(sch_discwdis_iss_idea_as_f)/sum(tot_discwdis_iss_idea_f)* 100,
-           hp_f = sum(sch_discwdis_iss_idea_hp_f)/sum(tot_discwdis_iss_idea_f)* 100,
-           wh_f = sum(sch_discwdis_iss_idea_wh_f)/sum(tot_discwdis_iss_idea_f)* 100,
-           tr_f = sum(sch_discwdis_iss_idea_tr_f)/sum(tot_discwdis_iss_idea_f)* 100) %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "in_susp_wdis_race_f")
-in_susp_wdis_race_f
-
-```
-
-  * Students without disability with only one out-of-school-suspensions by race and gender
-
-```{r, eval = FALSE}
-
-one_out_susp_wodis_race_m <- one_out_susp %>% 
-  summarize(bl_m = sum(sch_discwodis_singoos_bl_m)/sum(tot_discwodis_singoos_m) * 100, 
-           hi_m = sum(sch_discwodis_singoos_hi_m)/sum(tot_discwodis_singoos_m)* 100,
-           am_m = sum(sch_discwodis_singoos_am_m)/sum(tot_discwodis_singoos_m)* 100,
-           as_m = sum(sch_discwodis_singoos_as_m)/sum(tot_discwodis_singoos_m)* 100,
-           hp_m = sum(sch_discwodis_singoos_hp_m)/sum(tot_discwodis_singoos_m)* 100,
-           wh_m = sum(sch_discwodis_singoos_wh_m)/sum(tot_discwodis_singoos_m)* 100,
-           tr_m = sum(sch_discwodis_singoos_tr_m)/sum(tot_discwodis_singoos_m)* 100) %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "one_out_susp_wodis_race_m")
-one_out_susp_wodis_race_m 
-
-one_out_susp_wodis_race_f <- one_out_susp %>% 
-  summarize(bl_f = sum(sch_discwodis_singoos_bl_f)/sum(tot_discwodis_singoos_f) * 100, 
-           hi_f = sum(sch_discwodis_singoos_hi_f)/sum(tot_discwodis_singoos_f)* 100,
-           am_f = sum(sch_discwodis_singoos_am_f)/sum(tot_discwodis_singoos_f)* 100,
-           as_f = sum(sch_discwodis_singoos_as_f)/sum(tot_discwodis_singoos_f)* 100,
-           hp_f = sum(sch_discwodis_singoos_hp_f)/sum(tot_discwodis_singoos_f)* 100,
-           wh_f = sum(sch_discwodis_singoos_wh_f)/sum(tot_discwodis_singoos_f)* 100,
-           tr_f = sum(sch_discwodis_singoos_tr_f)/sum(tot_discwodis_singoos_f)* 100) %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "one_out_susp_wodis_race_f")
-one_out_susp_wodis_race_f
-
-```
-
-  * Students with disability with one out-of-school-suspensions by race and gender
-
-```{r, eval = FALSE}
-
-one_out_susp_wdis_race_m <- one_out_susp %>% 
-  summarize(bl_m = sum(sch_discwdis_singoos_idea_bl_m)/sum(tot_discwdis_singoos_idea_m) * 100, 
-           hi_m = sum(sch_discwdis_singoos_idea_hi_m)/sum(tot_discwdis_singoos_idea_m)* 100,
-           am_m = sum(sch_discwdis_singoos_idea_am_m)/sum(tot_discwdis_singoos_idea_m)* 100,
-           as_m = sum(sch_discwdis_singoos_idea_as_m)/sum(tot_discwdis_singoos_idea_m)* 100,
-           hp_m = sum(sch_discwdis_singoos_idea_hp_m)/sum(tot_discwdis_singoos_idea_m)* 100,
-           wh_m = sum(sch_discwdis_singoos_idea_wh_m)/sum(tot_discwdis_singoos_idea_m)* 100,
-           tr_m = sum(sch_discwdis_singoos_idea_tr_m)/sum(tot_discwdis_singoos_idea_m)* 100) %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "one_out_susp_wdis_race_m")
-one_out_susp_wdis_race_m 
-
-one_out_susp_wdis_race_f <- one_out_susp %>% 
-  summarize(bl_f = sum(sch_discwdis_singoos_idea_bl_f)/sum(tot_discwdis_singoos_idea_f) * 100, 
-           hi_f = sum(sch_discwdis_singoos_idea_hi_f)/sum(tot_discwdis_singoos_idea_f)* 100,
-           am_f = sum(sch_discwdis_singoos_idea_am_f)/sum(tot_discwdis_singoos_idea_f)* 100,
-           as_f = sum(sch_discwdis_singoos_idea_as_f)/sum(tot_discwdis_singoos_idea_f)* 100,
-           hp_f = sum(sch_discwdis_singoos_idea_hp_f)/sum(tot_discwdis_singoos_idea_f)* 100,
-           wh_f = sum(sch_discwdis_singoos_idea_wh_f)/sum(tot_discwdis_singoos_idea_f)* 100,
-           tr_f = sum(sch_discwdis_singoos_idea_tr_f)/sum(tot_discwdis_singoos_idea_f)* 100) %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "one_out_susp_wdis_race_f")
-one_out_susp_wdis_race_f
-```
-
-  * Student without disability with more than one out-of-school-suspensions by race and gender
-
-```{r, eval = FALSE}
-more_out_susp_wodis_race_m <- more_out_susp %>% 
-  summarize(bl_m = sum(sch_discwodis_multoos_bl_m)/sum(tot_discwodis_multoos_m) * 100, 
-           hi_m = sum(sch_discwodis_multoos_hi_m)/sum(tot_discwodis_multoos_m)* 100,
-           am_m = sum(sch_discwodis_multoos_am_m)/sum(tot_discwodis_multoos_m)* 100,
-           as_m = sum(sch_discwodis_multoos_as_m)/sum(tot_discwodis_multoos_m)* 100,
-           hp_m = sum(sch_discwodis_multoos_hp_m)/sum(tot_discwodis_multoos_m)* 100,
-           wh_m = sum(sch_discwodis_multoos_wh_m)/sum(tot_discwodis_multoos_m)* 100,
-           tr_m = sum(sch_discwodis_multoos_tr_m)/sum(tot_discwodis_multoos_m)* 100) %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "more_out_susp_wodis_race_m")
-more_out_susp_wodis_race_m 
-
-more_out_susp_wodis_race_f <- more_out_susp %>% 
-  summarize(bl_f = sum(sch_discwodis_multoos_bl_f)/sum(tot_discwodis_multoos_f) * 100, 
-           hi_f = sum(sch_discwodis_multoos_hi_f)/sum(tot_discwodis_multoos_f)* 100,
-           am_f = sum(sch_discwodis_multoos_am_f)/sum(tot_discwodis_multoos_f)* 100,
-           as_f = sum(sch_discwodis_multoos_as_f)/sum(tot_discwodis_multoos_f)* 100,
-           hp_f = sum(sch_discwodis_multoos_hp_f)/sum(tot_discwodis_multoos_f)* 100,
-           wh_f = sum(sch_discwodis_multoos_wh_f)/sum(tot_discwodis_multoos_f)* 100,
-           tr_f = sum(sch_discwodis_multoos_tr_f)/sum(tot_discwodis_multoos_f)* 100)  %>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "more_out_susp_wodis_race_f")
-more_out_susp_wodis_race_f
-
-```
-
-  * Student with disability with more than one out-of-school-suspensions by race and gender
-
-```{r, eval = FALSE}
-more_out_susp_wdis_race_m <- more_out_susp %>% 
-  summarize(bl_m = sum(sch_discwdis_multoos_idea_bl_m)/sum(tot_discwdis_multoos_idea_m) * 100, 
-           hi_m = sum(sch_discwdis_multoos_idea_hi_m)/sum(tot_discwdis_multoos_idea_m)* 100,
-           am_m = sum(sch_discwdis_multoos_idea_am_m)/sum(tot_discwdis_multoos_idea_m)* 100,
-           as_m = sum(sch_discwdis_multoos_idea_as_m)/sum(tot_discwdis_multoos_idea_m)* 100,
-           hp_m = sum(sch_discwdis_multoos_idea_hp_m)/sum(tot_discwdis_multoos_idea_m)* 100,
-           wh_m = sum(sch_discwdis_multoos_idea_wh_m)/sum(tot_discwdis_multoos_idea_m)* 100,
-           tr_m = sum(sch_discwdis_multoos_idea_tr_m)/sum(tot_discwdis_multoos_idea_m)* 100)  %>% 
-  pivot_longer(cols = 
-                 c(bl_m, hi_m, am_m, as_m, hp_m, wh_m,tr_m),
-               names_to = "race", 
-               values_to = "more_out_susp_wdis_race_m")
-more_out_susp_wdis_race_m 
-
-more_out_susp_wdis_race_f <- more_out_susp %>% 
-  summarize(bl_f = sum(sch_discwdis_multoos_idea_bl_f)/sum(tot_discwdis_multoos_idea_f) * 100, 
-           hi_f = sum(sch_discwdis_multoos_idea_hi_f)/sum(tot_discwdis_multoos_idea_f)* 100,
-           am_f = sum(sch_discwdis_multoos_idea_am_f)/sum(tot_discwdis_multoos_idea_f)* 100,
-           as_f = sum(sch_discwdis_multoos_idea_as_f)/sum(tot_discwdis_multoos_idea_f)* 100,
-           hp_f = sum(sch_discwdis_multoos_idea_hp_f)/sum(tot_discwdis_multoos_idea_f)* 100,
-           wh_f = sum(sch_discwdis_multoos_idea_wh_f)/sum(tot_discwdis_multoos_idea_f)* 100,
-           tr_f = sum(sch_discwdis_multoos_idea_tr_f)/sum(tot_discwdis_multoos_idea_f)* 100)%>% 
-  pivot_longer(cols = c(bl_f, hi_f, am_f, as_f, hp_f, wh_f,tr_f),
-               names_to = "race",
-               values_to = "more_out_susp_wdis_race_f")
-more_out_susp_wdis_race_f
-
-```
-
-
-*The next step is combining all suspensions categories based on gender*
-
-
-```{r, eval = FALSE}
-all_race_m <- left_join(pre_one_susp_race_m, pre_more_susp_race_m) %>% 
-  left_join(in_susp_wdis_race_m) %>% 
-  left_join(one_out_susp_wodis_race_m) %>% 
-  left_join(one_out_susp_wdis_race_m) %>% 
-  left_join(more_out_susp_wodis_race_m) %>% 
-  left_join(more_out_susp_wdis_race_m)
-  
-all_race_f <- left_join(pre_one_susp_race_f,pre_more_susp_race_f) %>% 
-  left_join(in_susp_wdis_race_f) %>% 
-  left_join(one_out_susp_wodis_race_f) %>% 
-  left_join(one_out_susp_wdis_race_f) %>% 
-  left_join(more_out_susp_wodis_race_f) %>% 
-  left_join(more_out_susp_wdis_race_f)
-```
-
-
-```{r, eval = FALSE}
-all_race_male <- cbind(all_race_m[1], stack(all_race_m[2:8])) %>% 
-  select(race, ind, values) %>% 
-  mutate_at(vars(values), funs(round(., 1)))
-
-all_race_female <- cbind(all_race_f[1], stack(all_race_f[2:8])) %>% 
-  select(race, ind, values) %>% 
-  mutate_at(vars(values), funs(round(., 1)))
-
-```
-
-*At the end, we would like to visualize our date to show the suspensions data based on race and gender proportion 
-
-  * Suspensions for male students by race
-
-```{r Plot-race-suspensions, echo=FALSE, fig.height=10, fig.width=10, eval = FALSE}
-all_race_male %>% 
-  ggplot(aes(fill= race, x=ind, y=values))+
-  geom_bar(position = "stack", stat= "identity", color = "black", width = 0.9)+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  geom_text(aes(label = paste0(values, "%")),
-            position = position_stack(vjust = 0.5), size = 2) + 
-  labs(x = "Suspensions", 
-       y = "Percentage",
-       title = "Male Students Receiving Suspension, by Race, Gender, and Disability")
-
-```
-
-  * Suspension for female students by race
-```{r echo=FALSE, fig.height=10, fig.width=10, eval = FALSE}
-all_race_female %>% 
-  ggplot(aes(fill= race, x=ind, y=values))+
-  geom_bar(position = "stack", stat= "identity", color = "black", width = 0.9)+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  geom_text(aes(label = paste0(values, "%")),
-            position = position_stack(vjust = 0.5), size = 2)+ 
-    labs(x = "Suspensions", 
-       y = "Percentage",
-       title = "Female Students Receiving Suspension, by Race, Gender, and Disability",
-       color = "Race")
-```
-  
+The graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included, the graphs show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. 
 
 
 ### Arrest and Referrals
@@ -1620,6 +1256,207 @@ library(sjPlot)
 tab_model(mod)
 ```
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+# Results
+
+## Research Quesiton 1
+
+```{r}
+
+#This throws error for me because of space. Guess we have a lot of data loaded in the prev. chunks
+
+rq1 <- import(here("data","data_join.csv")) %>%
+  as_tibble() %>%
+  mutate(leaid = as.numeric(leaid),
+         lea_state = as.factor(lea_state)) %>%
+  filter(!is.na(susp_std)) %>%
+  filter(!is.na(pct_new_teachers)) %>%
+<<<<<<< Updated upstream
+  filter(pct_new_teachers != Inf) %>%
+  mutate(pct_new_teachers = ifelse(pct_new_teachers > 100,100, pct_new_teachers))
+
+```
+
+Explore the extent to which rate of novice teachers and rate of suspensions vary
+across states. Appears to have wide variation within state and across states.
+
+```{r }
+#Creating a data frame with state averages and using this to plot district rates
+state_means <- rq1 %>% 
+  group_by(lea_state) %>% 
+  summarise(state_mean_susp = mean(susp_std,weights = tot_enr, na.rm = TRUE),
+            state_mean_susp_se = sd(susp_std, na.rm = TRUE)/sqrt(n()),
+            state_mean_newtch = mean(pct_new_teachers,weights = tot_enr, na.rm = TRUE),
+            state_mean_newtch_se = sd(pct_new_teachers, na.rm = TRUE)/sqrt(n()),
+            ) 
+
+#Rate of Novice teachers across states
+state_means %>%  
+  mutate(lea_state = reorder(lea_state,state_mean_newtch)) %>%
+  ggplot(aes(state_mean_newtch, lea_state)) +
+    geom_point(color = "#0aadff")  +
+    geom_vline(xintercept = mean(rq1$pct_new_teachers, na.rm = TRUE),
+             color = "red",
+             size = 1) +
+  geom_errorbarh(aes(xmin = state_mean_newtch - 1.96*state_mean_newtch_se,
+                     xmax = state_mean_newtch+ 1.96*state_mean_newtch_se)) +
+  labs( y = "State", x = "Percent novice teachers") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=8))
+
+#Rate of Suspensions expulsion across States
+state_means %>%  
+  mutate(lea_state = reorder(lea_state,state_mean_susp)) %>%
+  ggplot(aes(state_mean_susp, lea_state)) +
+    geom_point(color = "#0aadff")  +
+    geom_vline(xintercept = mean(rq1$susp_std, na.rm = TRUE),
+             color = "red",
+             size = 1) +
+  geom_errorbarh(aes(xmin = state_mean_susp - 1.96*state_mean_susp_se,
+                     xmax = state_mean_susp+ 1.96*state_mean_susp_se)) +
+  labs( y = "State", x = "Mean rate of student suspensions per 1000") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
+
+```
+
+Explore the visual relationship between percent new teachers and rates of suspension. It looks like it is a positive relationship. As the percent of new teachers increases, the rate of suspension increases. Looking at this by state, it looks like starting point (intercept) and the slope between these two variables vary. Some states have steeper slopes or start higher. Indicates need for a hierchichal linear model.
+
+```{r }
+# Rate of suspensions per 1000 students across states
+# Explore the relationship between novice teachers and rate of suspension
+rq1 %>%
+  ggplot(aes(x = pct_new_teachers, y = susp_std)) +
+    geom_point() +   
+    geom_smooth(method = lm)
+         
+#When looking at regression lines by state, we see different intercepts and slopes of relationship
+rq1 %>%
+  ggplot(aes(x = pct_new_teachers, y = susp_std, color = lea_state)) +
+  geom_smooth(method = lm, se = FALSE) + theme(legend.position="none")
+
+```
+
+
+
+# Results
+
+## Rates of Novice Teachers and Suspensions
+
+Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 by 1. 
+
+```{r }
+
+# As part of the analysis, conducted 4 models that explored the relationship between percent new teachers and rate of suspensions. The first model only included the variable of interest as a control with random intercepts for district and state. The second model added enrollment covariates and school characteristics with random intercepts. The third model allowed the relationship between percent new teachers and rate of suspension to vary across districts. The last model included interactions between enrollment and percent new teachers. Model comparison tests found that the third model was the best model. 
+# 
+# Results from the analysis indicates that a one percentage point increase in rate of novice teachers is associated with an increase of 1 student suspended per 1000 students, while accounting for other enrollment and school characteristics. This relationship was statistically significant (p <.001).
+
+#Mean Center the variables
+rq1 <- rq1 %>%
+  mutate(pct_new_teachers_c = pct_new_teachers - mean(pct_new_teachers),
+            tot_enr_c = tot_enr - mean(tot_enr),
+         sch_enr_am_c = sch_enr_am - mean(sch_enr_am),
+         sch_enr_as_c = sch_enr_as - mean(sch_enr_as),
+         sch_enr_bl_c = sch_enr_bl - mean(sch_enr_bl),
+         sch_enr_hi_c = sch_enr_hi - mean(sch_enr_hi),
+         sch_enr_hp_c = sch_enr_hp - mean(sch_enr_hp),
+         sch_enr_tr_c = sch_enr_tr - mean(sch_enr_tr),
+         sch_enr_wh_c = sch_enr_wh - mean(sch_enr_wh),
+         sch_enr_lep_c = sch_enr_lep - mean(sch_enr_lep),
+         sch_enr_idea_c = sch_enr_idea - mean(sch_enr_idea),
+         tot_law_c = tot_law - mean(tot_law)
+  )
+
+
+#Null model
+rq1_m0 <- lmer(susp_std ~ pct_new_teachers_c + (1 | leaid) + (1 | lea_state), 
+               data = rq1, na.action = na.pass)
+
+#Model with covariates and random intercepts
+rq1_m1 <- lmer(susp_std ~ pct_new_teachers_c + tot_enr_c + sch_enr_am_c + sch_enr_as_c + 
+                 sch_enr_bl_c + sch_enr_hi_c + sch_enr_hp_c + sch_enr_tr_c + 
+                 sch_enr_lep_c + sch_enr_idea_c + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + tot_law_c +
+                 (1 | leaid) + (1 | lea_state), 
+               data = rq1)
+
+#Model with covariates, random intercepts, and random slopes - no interactions
+rq1_m2 <- lmer(susp_std ~ pct_new_teachers_c + tot_enr_c + sch_enr_am_c + sch_enr_as_c + 
+                 sch_enr_bl_c + sch_enr_hi_c + sch_enr_hp_c + sch_enr_tr_c + 
+                 sch_enr_lep_c + sch_enr_idea_c + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + tot_law_c +
+                 (pct_new_teachers_c | leaid) + (1 | lea_state), 
+               data = rq1)
+
+#Model with covariates, random intercepts,random slopes and interactions
+rq1_m3 <- lmer(susp_std ~ pct_new_teachers_c + tot_enr_c + sch_enr_am_c + sch_enr_as_c + 
+                 sch_enr_bl_c + sch_enr_hi_c + sch_enr_hp_c + sch_enr_tr_c + 
+                 sch_enr_lep_c + sch_enr_idea_c + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + tot_law_c +
+                 pct_new_teachers:sch_enr_bl + pct_new_teachers:sch_enr_idea +
+                 (pct_new_teachers_c | leaid) + (1 | lea_state), 
+               data = rq1)
+# Checking model performance
+compare_performance(rq1_m0,rq1_m1,rq1_m2,rq1_m3, rank = TRUE) %>%
+  print_md()
+
+
+tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
+          dv.labels = c("Model 1 - Random Intercepts for states and districts, No covariates", "Model 2 - Random Intercepts for districts, with covariates", 
+                      "Model 3 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts", 
+                      "Model 4 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts and \n\ enrollment interactions"),
+=======
+  filter(pct_new_teachers != Inf)
+
+control <- c("tot_enr","sch_enr_am", "sch_enr_as", "sch_enr_bl", "sch_enr_hi",
+             "sch_enr_hp", "sch_enr_tr","sch_enr_wh","sch_enr_lep","sch_enr_idea",
+             "sch_status_sped","sch_status_magnet", "sch_status_charter","sch_status_alt")
+rq1_m0 <- lmer(susp_std ~ pct_new_teachers + (1 | leaid) + (1 | lea_state), 
+               data = rq1, na.action = na.pass)
+
+lm(susp_std ~ pct_new_teachers, data = rq1 )
+
+rq1_m1 <- lmer(susp_std ~ pct_new_teachers + tot_enr + sch_enr_am + sch_enr_as + 
+                 sch_enr_bl + sch_enr_hi + sch_enr_hp + sch_enr_tr + sch_enr_wh + 
+                 sch_enr_wh + sch_enr_lep + sch_enr_idea + sch_status_sped + 
+                 sch_status_magnet + sch_status_charter + sch_status_alt + 
+                 (1 | leaid) + (1 | lea_state), 
+               data = rq1)
+
+tab_model(rq1_m0, rq1_m1, collapse.ci = TRUE, p.style = "stars",
+>>>>>>> Stashed changes
+          pred.labels = c("Intercept", "Percent New Teachers", "Total Enrollment",
+                        "Percent American Indian", "Percent Asian",
+                        "Percent Black", "Percent Latinx", "Percent Hawaiian/Pacific Islander",
+                        "Percent Multiracial", "Percent EL Classified", "Percent Special Ed.",
+                        "Special Ed School (Y/N)", "Magnet school ((Y/N)", 
+<<<<<<< Updated upstream
+                        "Charter School (Y/N)", "Alternative School (Y/N)",
+                        "Total law enforcement officers",
+                        "Percent New Teachers X Black Enrollment", 
+                        "Percent New Teachers X Special Education"))
+
+results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teachers_c"),
+           model.names = c("Model 1 - Random Intercepts for districts and states,\n\ no covariates", "Model 2 - Random Intercepts for districts and states,\n\ with covariates", 
+                      "Model 3 - Random Intercepts for districts and states, \n\ random slope of novice teachers across districts", 
+                      "Model 4 - Random Intercepts for districts and states, \n\ random slope of novice teachers across districts and \n\ enrollment interactions"),
+           legend.title = "Models",
+           ci.level = .5,
+           robust = FALSE,
+           point.shape = FALSE)
+           
+results + labs(x = "Change in number of students suspended per 1,000 students \n\ for every percentage point increase in the rate of novice teachers") + xlim(-1,2) + theme(axis.text=element_text(size=10), legend.text=element_text(size = 10))
+=======
+                        "Charter School (Y/N)", "Alternative School (Y/N)"))
+>>>>>>> Stashed changes
+```
+
+>>>>>>> Stashed changes
 # Discussion
 
 # References
