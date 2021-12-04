@@ -23,18 +23,18 @@ library(dplyr)
 library(here)
 library(tidyr)
 # install.packages(naniar)
-library(naniar)
-library(readr)
-library(magrittr)
+#library(naniar)
+#library(readr)
+#library(magrittr)
 # install.packages(sjmisc)
 library(sjmisc)
 library(skimr)
 library(janitor)
-library(ggplot2)
+#library(ggplot2)
 library(tidyverse)
 library(psych)
 library(tinytex)
-library(crayon)
+#library(crayon)
 library(ggthemes)
 ```
 
@@ -94,6 +94,7 @@ str(enroll)
 ```
 
 ```{r}
+<<<<<<< Updated upstream
 RA2 <- RA %>%
   clean_names()
 
@@ -111,6 +112,10 @@ enroll2
 ra_full <- merge(x=RA2, y=enroll2, by="combokey") %>%
   select(! ends_with(".y"))
 
+=======
+ra_full <- full_join(enroll, RA) %>% 
+  clean_names()
+>>>>>>> Stashed changes
 
 ra_full
 ```
@@ -136,10 +141,14 @@ sch_su
 Complete data set
 For rename function new name = old name
 ```{r}
+<<<<<<< Updated upstream
 ra_final <- merge(x=ra_full, y=sch_su, by="combokey") %>%
   select(! ends_with(".y")) %>%
   subset(select = -c(schid, leaid, lea_name)) %>%
     rename(lea_state=lea_state.x, lea_state_name = lea_state_name.x, leaid= leaid.x, lea_name=lea_name.x, schid=schid.x, sch_name=sch_name.x, jj=jj.x)
+=======
+ra_final <- full_join(ra_full, sch_su)
+>>>>>>> Stashed changes
 
 ra_final
 ```
@@ -205,6 +214,12 @@ new_labels <- c("ref" = "Referrals", "arr" = "Arrests")
 ```
 
 How to get it to show a break in the gender indicating disability status or a percentage of each gender that is disabled?
+Approaches: 
+1. facet_grid
+2. Add another aesthetic to status: color, alpha - doesn't increase readability though
+3. Look for another graph
+4. merge columns
+
 fct_rev added to flip state names alphabetical
 labeller used to spell out facet_wrap labels
 ```{r}
@@ -213,7 +228,7 @@ ra_sum3 %>%
   geom_col(aes(fill = gender)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip() +
-  facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
+  facet_grid(status~dis_act, labeller = labeller(dis_act = new_labels)) +
   theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="gold1")) +
   labs(x = "State",
        y = "Total",
@@ -221,6 +236,38 @@ ra_sum3 %>%
        subtitle = "Visulalized by Gender") +
   scale_fill_discrete (name = "Gender", labels = c("Female", "Male"))
 ```
+
+```{r}
+ra_sum3 %>%
+  ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
+  geom_col(aes(fill = gender, color = status)) + #, position = "dodge"
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip() +
+  facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
+  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="gold1")) +
+  labs(x = "State",
+       y = "Total",
+       title = "Number of Student Arrests and Referrals by State",
+       subtitle = "Visulalized by Gender") +
+ # scale_fill_discrete (name = "Gender", labels = c("Female", "Male")) #+
+ scale_fill_manual(name = "Gender", values = c("beige","gray"), labels = c("Female", "Male"))
+```
+
+```{r}
+ra_sum3$group <- paste(ra_sum3$status, ra_sum3$gender, sep="_")
+ra_sum3 %>%
+  ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
+  geom_col(aes(fill = fct_rev(group))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip() +
+  facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
+  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="gold1")) +
+  labs(x = "State",
+       y = "Total",
+       title = "Number of Student Arrests and Referrals by State",
+       subtitle = "Visulalized by Gender") 
+```
+
 
 ```{r}
 ra_sum3 %>%
