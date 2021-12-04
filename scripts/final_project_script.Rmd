@@ -29,14 +29,7 @@ pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor
 
 # Relationship Between School Staffing and Student Suspensions, Referrals, and Arrests
 
-[Sentence that gives an overview of the study] This research project will be conducted using High school, Middle school, and Elementary school level data from the [**Civil Rights Data Collection (CRDC)**] (https://ocrdata.ed.gov/), 2017-2018 data set. The CRDC contains multiple data sets that cover a range of topics. From the overall data set, we are focusing on data reported in the following areas: 
-
-1. School Support (count of enrolled novice teachers, sworn law enforcement officers (LEOs) and security guards)
-2. Referrals & Arrests (count of referrals and arrests of students by subgroup, which includes gender, race, and disability status)
-3. Suspensions and Expulsions (count of suspensions and expulsions of students by subgroup)
-4. Enrollment (count of enrolled students by subgroup)
-5. School characteristics (magnet, alternate, charter, special ed)
-6. Data sets are organized by both state, school district (LEA), and school level
+[Sentence that gives an overview of the study] This research project will be conducted using High school, Middle school, and Elementary school level data from the [**Civil Rights Data Collection (CRDC)**] (https://ocrdata.ed.gov/), 2017-2018 data set. 
 
 ## Prior Literature
 
@@ -60,7 +53,7 @@ Previous research has shown that school staffing choices can have an impact on s
 * Number of transfers out of schools with guards might be at an increased level
 
 
-The rest of this document summarizes methods, results and ends with a discusion.
+The rest of this document summarizes methods, results and ends with a disscusion.
 
 ```{r}
 na_strings <- c(-3, -5, -6, -8, -9, -11)
@@ -246,6 +239,7 @@ ra_sum3 %>%
   scale_fill_discrete (name = "Gender", labels = c("Female", "Male")) +
   theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
 ```
+
 
 ```{r}
 ra_sum3 %>%
@@ -676,35 +670,7 @@ expl_ps_tidy <- expl_ps %>%
 
 # Methods
 
-This analysis was conducted using publicly available data from the 2017-18 civil rights data collection. Each biennium, schools across the United States are required to respond and report key information about their school. This includes enrollment information, levels of school personnel, incidents of exclusionary discipline, harassment, and bullying.
-
 ## Sample and Exclusion Criteria
-
-The sample in this study included K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains XXX schools who serve students in Grades K-12. {Add information about cleanings steps - what we did with missing data and 0s}  Schools categorized **{update when we figure out which schools are excluded** were excluded from the analysis.  The final sample included XX schools across the United States. Table 1 summarizes information on the study sample (see table x in the appendix). 
-
-## Add descriptive statistics table
-
-## Study Variables
-The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. This variable was calculated by dividing the number of novice teachers at a school by the total number of full time teachers. Across schools in our sample, the mean rate of novice teachers was X, and the numbers ranged from X to X. The main predictor of interest for research question two was the number of security personnel (sworn law enforcement officers and other security personnel) per 1000 students Across the school sample, the average rate of security personnel was X per 1000 students.
-
-The analysis had three outcomes of interest that broadly examined school climate — one for research question one and two for RQ2. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1000 students at a school. For research question 2, the two variables of interest were rates of harassment/bullying and rates of referrals and arrests. Rate of harassment and bulling was defined as the number of students per 1000 students who were disciplined for harassment/bullying. Rate of referral/arrests was defined as the number of students per 1000 students who received a referral or were arrested.
-
-## Analytic Approach
-Descriptive statistics and regression analysis were used to answer the two research questions. 
-
-To answer the first research question, we used a 3-level hierarchical linear model with schools nested within districts and districts nested within states. The final model is represented by the following sets of equations. 
-Y_jks= π_0ks+X_j+ 〖γ1〗_j Noviceteachers+ ε_jks
-π_ks=β_00s+ r_0jk 
-β_00s= γ_000+ μ_00k
-Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level measure of counselor caseload. The γ1 coefficient represents the relationship between counselor caseload and study outcomes and addresses the first research question.
-
-To answer the second research question...
-
-# Results
-
-## Research Question 1 - Rates of Novice Teachers and Suspensions
-
-Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 by 1. 
 
 ```{r }
 #Importing the file and doing some cleaning to  make sure it runs, dropping Puerto Rico because they don't appear to report suspensions -rates were zero. 
@@ -721,10 +687,35 @@ rq1 <- import(here("data","data_join.csv")) %>%
 
 ```
 
-Explore the extent to which rate of novice teachers and rate of suspensions vary
-across states. Appears to have wide variation within state and across states.
+This analysis was conducted using publicly available data from the 2017-18 civil rights data collection. Each biennium, schools across the United States are required to respond and report key information about their school across a range of topics. This study uses the following school level data in the following areas: 
+
+1. School Support (count of enrolled novice teachers, sworn law enforcement officers (LEOs) and security guards)
+2. Referrals & Arrests (count of referrals and arrests of students by subgroup, which includes gender, race, and disability status)
+3. Suspensions and Expulsions (count of suspensions and expulsions of students by subgroup)
+4. Enrollment (count of enrolled students by subgroup)
+5. School characteristics (magnet, alternate, charter, special ed)
+6. Data sets are organized by both state, school district (LEA), and school level
+
+The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve students in Grades K-12 during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)`` K-12 schools. Table 1 summarizes information on the study sample.
+
+Table 1. Descriptive information about the study sample
+```{r }
+#Merly to add a descriptive statistics table
+```
+
+## Outcome Measures and Predictor of Interest
+The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. A teacher was considered novice if they were in their first or second year of teaching. This variable was calculated by dividing the total FTE of novice teachers at a school by the total FTE of full time teachers. Across schools in our sample, the mean rate of novice teachers was `r pct_new_teachers,weights = tot_enr, na.rm = TRUE)`, and the numbers ranged from `r min(rq1$pct_new_teachers)` to `r min(rq1$pct_new_teachers)`. There was wide variation in the rate of novice teachers within and across states. In our sample, Florida had the highest rate of novice teachers while North Carolina had the lowest rate (see Figure 1 in the appendix). 
+
+The main predictor of interest for research question the number of security personnel (sworn law enforcement officers and other security personnel). This variable was calculated by summing the total FTE of sworn law enforcement officers and security personnel to get a count. 
+
+The analysis had two outcomes of interest that broadly examined school climate — one for research question one and one for RQ2. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(susp_std,weights = tot_enr, na.rm = TRUE)`, and the numbers ranged from `r min(rq1$susp_std)` to `r min(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix)
+
+For research question 2, the outcome measure of interest was...
 
 ```{r }
+# Explore the extent to which rate of novice teachers and rate of suspensions vary
+# across states. Appears to have wide variation within state and across states.
+
 #Creating a data frame with state averages and using this to plot district rates
 state_means <- rq1 %>% 
   group_by(lea_state) %>% 
@@ -735,7 +726,7 @@ state_means <- rq1 %>%
             ) 
 
 #Rate of Novice teachers across states
-state_means %>%  
+appendix_figure1 <- state_means %>%  
   mutate(lea_state = reorder(lea_state,state_mean_newtch)) %>%
   ggplot(aes(state_mean_newtch, lea_state)) +
     geom_point(color = "#0aadff")  +
@@ -749,7 +740,7 @@ state_means %>%
   panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=8))
 
 #Rate of Suspensions expulsion across States
-state_means %>%  
+appendix_figure2 <- state_means %>%  
   mutate(lea_state = reorder(lea_state,state_mean_susp)) %>%
   ggplot(aes(state_mean_susp, lea_state)) +
     geom_point(color = "#0aadff")  +
@@ -761,10 +752,9 @@ state_means %>%
   labs( y = "State", x = "Mean rate of student suspensions per 1000") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
   panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
-
 ```
 
-Explore the visual relationship between percent new teachers and rates of suspension. It looks like it is a positive relationship. As the percent of new teachers increases, the rate of suspension increases. Looking at this by state, it looks like starting point (intercept) and the slope between these two variables vary. Some states have steeper slopes or start higher. Indicates need for a hierchichal linear model.
+<!-- Explore the visual relationship between percent new teachers and rates of suspension. It looks like it is a positive relationship. As the percent of new teachers increases, the rate of suspension increases. Looking at this by state, it looks like starting point (intercept) and the slope between these two variables vary. Some states have steeper slopes or start higher. Indicates need for a hierchichal linear model. -->
 
 ```{r }
 # Rate of suspensions per 1000 students across states
@@ -780,6 +770,25 @@ rq1 %>%
   geom_smooth(method = lm, se = FALSE) + theme(legend.position="none")
 
 ```
+
+## Analytic Approach
+Descriptive statistics and regression analysis were used to answer the two research questions. To answer the first research question, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. The final model is represented by the following sets of equations. 
+
+Y_jks= π_0ks + X_j + π_1ks*noviceteachers+ ε_jks
+π_ks=β_00s+ r_0jk
+π_1ks=β_01s+ r_1jk
+β_00s= γ_000+ μ_00k
+β_01s= γ_100
+
+Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level rate of novice teachers. This model allows the intercept to vary by district and school and also includes a random slope for the rate of novice teachers across districts. The γ100 coefficient represents the relationship between school level rate of novice teachers and study outcomes and addresses the first research question. This model was selected through a model comparison test that compared this 3 level HLM to other model specifications and was found to be the best performing model (based on the AIC score). 
+
+To answer the second research question, we used an ordinary least squares regression. 
+
+# Results
+
+## Research Question 1 - Rates of Novice Teachers and Suspensions
+
+Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the model estimated average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative, charter, or magnet school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 students by 1 (see table 1 in the appendix). Similar estimates were found across model specifications including a simpler HLM model with no added covariates and a 3 level random intercept and slopes model with interactions between rates of novice teachers and rate of black and special education students. 
 
 ```{r }
 
@@ -837,7 +846,7 @@ compare_performance(rq1_m0,rq1_m1,rq1_m2,rq1_m3, rank = TRUE) %>%
   print_md()
 
 
-tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
+appendix_table1 <- tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
           dv.labels = c("Model 1 - Random Intercepts for states and districts, No covariates", "Model 2 - Random Intercepts for districts, with covariates", 
                       "Model 3 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts", 
                       "Model 4 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts and \n\ enrollment interactions"),
@@ -852,10 +861,14 @@ tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
                         "Total law enforcement officers",
                         "Percent New Teachers X Black Enrollment", 
                         "Percent New Teachers X Special Education"))
+```
 
+
+Figure 1. Estimated relationship between rate of novice teachers and student suspension rates across model specification
+```{r, echo=TRUE}
 results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teachers_c"),
            model.names = c("Model 1 - Random Intercepts for districts and states,\n\ no covariates", "Model 2 - Random Intercepts for districts and states,\n\ with covariates", 
-                      "Model 3 - Random Intercepts for districts and states, \n\ random slope of novice teachers across districts", 
+                      "Main Model - Random Intercepts for districts and states, \n\ random slope of novice teachers across districts", 
                       "Model 4 - Random Intercepts for districts and states, \n\ random slope of novice teachers across districts and \n\ enrollment interactions"),
            legend.title = "Models",
            ci.level = .5,
