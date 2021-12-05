@@ -23,6 +23,17 @@ knitr::opts_chunk$set(echo = FALSE,
 #if (!require("pacman")) install.packages("pacman") #uncomment code to install pacman, if you don't already have it.
 pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary) 
 
+# Add your packages that you need here. This will load the libraries
+#removed purr - part of tidyverse
+#let's only include libraries we are using so that others don't have to install the irrelevant ones 
+#if (!require("pacman")) install.packages("pacman") 
+#pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych, jtools, lme4, sjPlot, sjmisc, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
+#>>>>>>> Stashed changes
+
+if (!require("pacman")) install.packages("pacman") 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
+
 ```
 
 # Abstract
@@ -923,12 +934,12 @@ ra_sum3 %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip() +
   facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
-  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="gold1")) +
+  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="darkolivegreen3")) +
   labs(x = "State",
        y = "Total",
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Gender") +
-  scale_fill_discrete (name = "Gender", labels = c("Female", "Male")) +
+  scale_fill_manual (name = "Gender", values = c("darksalmon", "tomato4"), labels = c("Female", "Male")) +
   theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
 ```
 
@@ -1163,7 +1174,8 @@ colnames(ra_tidy4)
 * gender: The student's biological gender (male or female).
 * tot_st: The total number of students in the LEA with a dis_act. -->
 
-```{r echo = FALSE, include=FALSE}
+Table X shows descriptive statistics for the subset of data used in RQ2.
+```{r echo = FALSE}
   describeBy(ra_tidy4[, -1])
 ```
 
@@ -1206,6 +1218,7 @@ Anova(mod,type=3)
 summary(mod)
 ```
 
+Table X shows the results of the regression analysis for RQ2.
 ```{r}
 library(sjPlot)
 tab_model(mod)
