@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = FALSE,
 
 # We used the pacman library to load packages. 
 #if (!require("pacman")) install.packages("pacman") #uncomment code to install pacman, if you don't already have it.
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance, sjmisc, gtsummary, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
 
 # Add your packages that you need here. This will load the libraries
 #removed purr - part of tidyverse
