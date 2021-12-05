@@ -19,18 +19,20 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.width = 9, 
                       fig.height = 9)
 
-#<<<<<<< Updated upstream
+# We used the pacman library to load packages. 
+#if (!require("pacman")) install.packages("pacman") #uncomment code to install pacman, if you don't already have it.
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance, sjmisc, gtsummary, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
 
 # Add your packages that you need here. This will load the libraries
 #removed purr - part of tidyverse
 #let's only include libraries we are using so that others don't have to install the irrelevant ones 
 #if (!require("pacman")) install.packages("pacman") 
 #pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, sjmisc) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych, jtools, lme4, sjPlot, sjmisc, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
 #>>>>>>> Stashed changes
 
 if (!require("pacman")) install.packages("pacman") 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
 
 ```
 
@@ -85,7 +87,7 @@ enroll <- enroll %>%
     select(-c(9:31))  #removing pre-K enrollment data
 ```
 
-<!-- Now, I'm using PivotLonger and PivotWider to extract all information from columns. -->
+<!-- Now, I'm using PivotLonger and PivotWider to arrange the data in desired form. -->
 
 ```{r enroll tidy_1, eval = FALSE}
 #Extracting information for columns starting with 'tot_'
@@ -101,7 +103,7 @@ enroll_total <- enroll %>%
         ) %>%
     group_by(combokey, enroll_type) %>% 
         summarize(
-            total = sum(students, na.rm = TRUE)
+            total = sum(students, na.rm = TRUE) 
         ) %>% 
     pivot_wider(
         names_from = 2,
@@ -210,7 +212,7 @@ support<- read_csv(here("data", "School Support.csv")) %>%
   as_tibble() %>%
   clean_names() %>% 
   mutate(across(c(9:22),remove_neg)) %>% 
-  mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
+  mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy), 
     pct_new_teachers = sum_new_teachers*100/sch_fteteach_tot, #should be sch_fteteach_tot instead of sch_teachers_curr_total
     tot_law = rowSums(select(., contains('_ftesecurity_')), na.rm = TRUE)
         )
@@ -266,20 +268,6 @@ sch_characteristics <- sch_characteristics_raw %>%
   mutate(across(c(9:32),remove_neg)) %>% 
   select(combokey, c(27:30)) %>% 
   mutate(across(c(2:5),helperFunction))
-
- #Just pivoting longer and wider w/o any manipulation
-# characteristics_tidy <- sch_characteristics %>% 
-#   pivot_longer(cols = (8:12),
-#                names_to = "type",
-#                values_to = "status",
-#                names_prefix = "sch_status_",
-#                names_transform = list(
-#     gender = ~ readr::parse_factor(.x, levels = c("f", "m")),
-#     ) %>% 
-#   pivot_wider(names_from = type,
-#               values_from = status) %>% 
-#   select(-(1:6))
-
 ```
 
 <!-- ### Expulsion Data Set -->
@@ -356,16 +344,7 @@ data_join <- enroll_final %>%
 #export(data_join, here("data","data_join.csv"))
 ```
 
-
-
-## Descriptive Findings {.tabset}
-
-From the different data sets, we'll be creating some figures.
-
-
-### Expulsions and Suspensions Cleaning
-
-We'll be creating longer version for this data-set.
+<!-- To create graphs for the suspension and expulsion, we created a longer version, and subsetted per our need. Here's the process. -->
 
 
 ```{r load suspension and expulsion}
@@ -468,7 +447,7 @@ expl_ps_tidy <- expl_ps %>%
 
 ## Sample and Exclusion Criteria
 
-```{r }
+```{r}
 #Importing the file and doing some cleaning to  make sure it runs, dropping Puerto Rico because they don't appear to report suspensions -rates were zero. 
 #This throws error for me because of space. Guess we have a lot of data loaded in the prev. chunks
 rq1 <- import(here("data","data_join.csv")) %>%
@@ -489,10 +468,10 @@ This analysis was conducted using publicly available data from the 2017-18 civil
 2. Referrals & Arrests (count of referrals and arrests of students by subgroup, which includes gender and disability status)
 3. Suspensions and Expulsions (count of suspensions and expulsions of students by subgroup)
 4. Enrollment (count of enrolled students by subgroup)
-5. School characteristics (type: magnet, alternate, charter, and special ed)
+5. School characteristics (type: magnet, alternate, charter, and special education)
 6. Data sets are organized by state, school district (LEA), and school level
 
-The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)`` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
+The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve `r sum(rq1$tot_enr)`students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
 
 Table 1. Descriptive information about the study sample
 ```{r }
@@ -500,11 +479,11 @@ Table 1. Descriptive information about the study sample
 ```
 
 ## Outcome Measures and Predictors of Interest
-The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. A teacher was considered novice if they were in their first or second year of teaching. This variable was calculated by dividing the total FTE of novice teachers at a school by the total FTE of full time teachers. Across schools in our sample, the mean rate of novice teachers was `r pct_new_teachers,weights = tot_enr, na.rm = TRUE)`, and the numbers ranged from `r min(rq1$pct_new_teachers)` to `r min(rq1$pct_new_teachers)`. There was wide variation in the rate of novice teachers within and across states. In our sample, Florida had the highest rate of novice teachers while North Carolina had the lowest rate (see Figure 1 in the appendix). 
+The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. A teacher was considered novice if they were in their first or second year of teaching. This variable was calculated by dividing the total FTE of novice teachers at a school by the total FTE of full time teachers. Across schools in our sample, the mean rate of novice teachers was `r mean(rq1$pct_new_teachers)`, and the numbers ranged from `r min(rq1$pct_new_teachers)` to `r max(rq1$pct_new_teachers)`. There was wide variation in the rate of novice teachers within and across states. In our sample, Florida had the highest rate of novice teachers while North Carolina had the lowest rate (see Figure 1 in the appendix). 
 
 The main predictor of interest for research question two was the number of law enforcement officials (sworn law enforcement officers and security guards). This variable was calculated by summing the total FTE of sworn law enforcement officers and security guards to get a count. 
 
-The analysis had two outcomes of interest that broadly examined school climate — one for research question one and one for RQ2. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(susp_std,weights = tot_enr, na.rm = TRUE)`, and the numbers ranged from `r min(rq1$susp_std)` to `r min(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
+The analysis had two outcomes of interest that broadly examined school climate — one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(susp_std,weights = tot_enr, na.rm = TRUE)`, and the numbers ranged from `r min(rq1$susp_std)` to `r min(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
 
 For research question 2, the outcome measure of interest was the total number of disciplinary actions. The total number of disciplinary actions was determined by adding the number of student referrals and arrests for each district.
 
@@ -1032,12 +1011,12 @@ ra_sum3 %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   coord_flip() +
   facet_wrap(~dis_act, labeller = labeller(dis_act = new_labels)) +
-  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="gold1")) +
+  theme(panel.grid.major.y = element_line(colour = "black"), panel.background = element_blank(), strip.background =element_rect(fill="darkolivegreen3")) +
   labs(x = "State",
        y = "Total",
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Gender") +
-  scale_fill_discrete (name = "Gender", labels = c("Female", "Male")) +
+  scale_fill_manual (name = "Gender", values = c("darksalmon", "tomato4"), labels = c("Female", "Male")) +
   theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
 ```
 
@@ -1272,7 +1251,8 @@ colnames(ra_tidy4)
 * gender: The student's biological gender (male or female).
 * tot_st: The total number of students in the LEA with a dis_act. -->
 
-```{r echo = FALSE, include=FALSE}
+Table X shows descriptive statistics for the subset of data used in RQ2.
+```{r echo = FALSE}
   describeBy(ra_tidy4[, -1])
 ```
 
@@ -1315,6 +1295,7 @@ Anova(mod,type=3)
 summary(mod)
 ```
 
+Table X shows the results of the regression analysis for RQ2.
 ```{r}
 library(sjPlot)
 tab_model(mod)
