@@ -675,13 +675,52 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 
 ## Research Question 1 - Descriptive Results (Merly add graphs and description)
 
+### Descriptive Summary Statistics
+
+```{r}
+dat <- import(here("data", "data_join.csv"))
+
+dat %>%
+  drop_na() %>% 
+  select(
+         `White Students Enrollment (%)` = sch_enr_wh,
+         `Hispanic Students Enrollment (%)` = sch_enr_hi,
+         `Black Students Enrollment (%)` = sch_enr_bl,
+         `Asian Students Enrollment (%)` = sch_enr_as,
+         `Native American/Alaskan Students Enrollment (%)` = sch_enr_am,
+         `Hawaiaan and Pacific Islander Students Enrollment (%)` = sch_enr_hp,
+         `Two or more races Student Enrollment (%)` = sch_enr_tr,
+         `Students with Disability Status Enrollment (%)` = sch_enr_idea,
+         `Suspension Rate` = tot_susp,
+         `Explusion Rate` = tot_expl,
+         `Number of Arrest` = tot_arr, 
+         `Number of Referral` = tot_ref) %>% 
+tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) %>% 
+  modify_footnote(
+    all_stat_cols() ~ "Mean (SD) per school"
+  ) %>%
+  modify_caption("**Table 1. Summary Statistics**")
+
+```
+
+
 ### Suspension rate by ethnicity in preschool
 ```{r}
 susp_ps_tidy %>% 
   filter(`ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>% 
-  mutate(`ethnicity/lep/idea` = factor(`ethnicity/lep/idea`,
-                                        levels = c("as", "hp", "am", "tr", "hi", "wh", "bl")))%>% 
+  mutate(`ethnicity/lep/idea` = 
+             fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
+         `ethnicity/lep/idea` = recode(`ethnicity/lep/idea`,
+                                       as = "Asian",
+                                       hp = "Hawaiaan/Pacific Islander",
+                                       am = "Native American/Alaskan",
+                                       tr = "Two or More Races",
+                                       hi = "Hispanic",
+                                       wh = "White",
+                                       bl = "Black"), 
+         type = recode(type, multoos = "Multiple Out of School",
+                     singoos = "Single Out of School")) %>% 
 ggplot(aes(fill = `ethnicity/lep/idea`, 
            x = type, 
            y =students)) + 
@@ -689,9 +728,11 @@ ggplot(aes(fill = `ethnicity/lep/idea`,
                stat = "identity", 
            alpha = 0.7, na.rm = TRUE) +
   scale_fill_brewer(palette = "Set1") +
+  theme_tufte() +
   labs(title = "Suspension Rate by Ethnicity in Preschool",
        fill = "Ethnicity",
-       x = "Type of Suspensions") + 
+       x = "Type of Suspensions",
+       y = "Percentage of Students") + 
   theme(text = element_text(size = 30, face = "bold"))
 ggsave(here("plot", "susp_ps.jpg"))
 ```
@@ -706,18 +747,29 @@ susp_k12_tidy %>%
          type == "multoos"
          ) %>% 
     mutate(`ethnicity/lep` = 
-             fct_relevel (`ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl")) %>% 
+             fct_relevel (`ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
+           `ethnicity/lep` = recode(`ethnicity/lep`,
+                                       as = "Asian",
+                                       hp = "Hawaiaan/Pacific Islander",
+                                       am = "Native American/Alaskan",
+                                       tr = "Two or More Races",
+                                       hi = "Hispanic",
+                                       wh = "White",
+                                       bl = "Black"), 
+         type = recode(type, multoos = "Multiple Out of School",
+                     singoos = "Single Out of School")) %>% 
   ggplot(aes(fill = `ethnicity/lep`,
              x = type, 
              y = students)) + 
 geom_col(position = "fill",
          stat = "identity",
            alpha = 0.7, na.rm = TRUE) +
+  theme_tufte() +
 scale_fill_brewer(palette = "Set1") +
 labs(title = "Suspension Rate by Ethnicity in K12",
        fill = "Ethnicity",
        x = "Type of Suspensions",
-       y = "Number of Students") + 
+       y = "Percentage of Students") + 
 theme(text = element_text(size = 30, face = "bold"))
 ggsave(here("plot", "susp_k12.jpg"))
 
@@ -731,19 +783,32 @@ susp_ps_tidy %>%
          `ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>% 
   mutate(`ethnicity/lep/idea` = 
-             fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"))%>% 
+             fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
+          `ethnicity/lep/idea` = recode(`ethnicity/lep/idea`,
+                                       as = "Asian",
+                                       hp = "Hawaiaan/Pacific Islander",
+                                       am = "Native American/Alaskan",
+                                       tr = "Two or More Races",
+                                       hi = "Hispanic",
+                                       wh = "White",
+                                       bl = "Black"),
+         gender = recode(gender, 
+                         f = "Female",
+                         m = "Male")) %>% 
   ggplot(aes(`ethnicity/lep/idea`, students)) +
   geom_col(aes(fill = gender),
            position = "dodge",
            na.rm = TRUE) +
+  theme_tufte() +
   scale_fill_brewer(palette = "Set1") +
+  
   labs(title = "Multiple Out-of-school Suspension by Ethnicity & Gender in Preschool",
        fill = "Gender",
        x = "Multiple Out-of-School Suspensions",
        y = "Number of Students") + 
-  theme(text = element_text(size = 30, face = "bold"))
+  theme(text = element_text(size = 30, face = "bold"),
+        axis.text.x = element_text(angle = 90, hjust = 1))
 ggsave(here("plot", "susp_ps.jpg"))
-
 ```
 
 * Multiple Out of school suspension rate by gender and race for k12 students
@@ -753,25 +818,37 @@ filter(type == "multoos",
          `ethnicity/lep` != "lep",
          `ethnicity/lep` != "all"
          ) %>% 
-mutate(`ethnicity/lep/` = factor(`ethnicity/lep`,
-                                   levels = c("as", "hp",
-                                              "am","tr","wh", "hi",
-                                              "bl"))) %>% 
+mutate(`ethnicity/lep` = fct_relevel (
+  `ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
+        `ethnicity/lep` = recode(`ethnicity/lep`,
+                                       as = "Asian",
+                                       hp = "Hawaiaan/Pacific Islander",
+                                       am = "Native American/Alaskan",
+                                       tr = "Two or More Races",
+                                       hi = "Hispanic",
+                                       wh = "White",
+                                       bl = "Black"),
+         gender = recode(gender, 
+                         f = "Female",
+                         m = "Male")) %>% 
 ggplot(aes(fill = gender,
            x = `ethnicity/lep`, 
            y = students)) +
 geom_col( position = "dodge") + 
+theme_tufte() +  
 scale_fill_brewer(palette = "Set1") +
 labs(
   title = "Multiple Out-of-school Suspension by Ethnicity & Gender in K12",
   fill = "Gender",
   x = "Type of Suspensions",
   y = "Number of Students") + 
-theme(text = element_text(size = 30, face = "bold"))
+theme(text = element_text(size = 30, face = "bold"),
+        axis.text.x = element_text(angle = 90, hjust = 1))
 ggsave(here("plot", "susp_ps.jpg"))
 ```
 
-The graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included, the graphs show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. 
+
+__The two graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included, the graphs also show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. Overall, Male students are suspended more than female students across all school level.__ 
 
 ## Research Question 2 - Descriptive Results
 ```{r echo = FALSE, include=FALSE}
