@@ -46,7 +46,7 @@ pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor
 
 Previous research has shown that school staffing choices can have an impact on student outcomes. In particular, novice teachers and law enforcement officials located on school campuses may impact negatively the number of disciplinary actions taken with students of various subgroups. Often, poor classroom management by novice teachers leads to them sending more students to the school office for a form of disciplinary action (e.g., referrals, suspensions, and even arrests) (Taylor et al., 2018). Less research has been done on how law enforcement officials impact student disciplinary outcomes, but there have been some studies that suggest there are both benefits (i.e., deterring student to student assaults) and costs (i.e., more students reported for "non-serious violent crimes") (James & McCallion, 2013). 
 
-[Errol - add info about mechanisms/connection between x and y variables]
+The relationship between student disciplinary outcomes and number of new teachers has several potential mechanisms. In addition to poor classroom management, schools with a higher level of new teachers may lack in senior leadership, giving new teachers fewer opportunities to improve their teaching. Our study also looks for a similar relationship between law enforcement presence and student discipline, where higher LEO presence affects how students act and teachers respond.
 
 ## Research Questions  [update using presentaiton RQs]
 
@@ -1298,6 +1298,21 @@ tab_model(mod)
 ```
 
 # Discussion
+
+The present study aimed to 1.) identify relationships between novice teachers and student suspension rates, and 2.) law enforcement official concentration and referrals and arrests. Both of these relationships were then investigated for any moderating student demographics.
+
+## New Teachers and Suspensions
+
+Our analysis shows a meaningful relationship between presence of new teachers and student discipline, where more new teachers correlate with more disciplinary actions. ERROL ADD line on gender, race, etc. Our results indicate that new teachers may benefit from additional classroom management training, or for administrators to schedule classroom management trainings when large numbers of new teachers are hired at the same time.
+
+## Law Enforcement Officials and Expulsions/Referrals
+
+The significant relationship between LEO presence and Referral/Arrest Rates may suggest that administrators look for alternative methods of encouraging proper student behavior. ERROL ADD Gender race note. 
+
+## Limitations and Future Research
+
+The current study has some shortcomings in regards to applicability of our findings - the school level data does not give a total count of suspensions, only the number of students who had suspensions during the study time. As this data does not break down to specific classrooms, we cannot validate whether more suspensions are happening in classrooms with new teachers specifically. Additionally, our analyses do not examine LEO presence as a proportion of total school staff, but rather as a simple count. Additionally, our analyses includes Juvenile Justice facilities, which tend to have much higher concentrations of law enforcement officers than traditional public schools. A future analysis would benefit from anaylyzing these two groups separately, as well as investigating the cross-section of schools with high LEO presence and novice teacher percent.
+
 
 # References
 
