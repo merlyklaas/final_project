@@ -76,6 +76,9 @@ enroll <- import(here("data", "Enrollment.csv")) %>%
 <!-- Change negative to NA -->
 
 ```{r enroll remove neg, eval = FALSE}
+#Recommend adding something to this code's settings to prevent all the "changed values" messages from appearing.
+
+
 #Function to remove negative numbers from data
 
 remove_neg <- function (x) ifelse(x < 0, NA, x)
@@ -165,6 +168,8 @@ enroll_100 <- enroll_final %>%
   select(c(1:19)) %>%
   filter_at(vars(c(10:19)),any_vars(.>100))
 ```
+It looks like you are filtering out most of your data — is that intentional?
+
 
 <!-- Note: For very few schools, the pct over one sub-group is greater than 100 - this mostly happens in the `idea` enrollment.  -->
 
