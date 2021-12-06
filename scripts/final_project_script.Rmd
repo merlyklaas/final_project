@@ -826,7 +826,7 @@ ggsave(here("plot", "susp_ps.jpg"))
 ```
 
 
-__The two graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included, the graphs also show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. Overall, Male students are suspended more than female students across all school level.__ 
+__The two graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included in the third and fourth graphs, they also show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. Overall, Male students are suspended more than female students across all school level.__ 
 
 ## Research Question 2 - Descriptive Results
 ```{r echo = FALSE, include=FALSE}
