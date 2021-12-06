@@ -658,7 +658,6 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 
 ```{r}
 dat <- import(here("data", "data_join.csv"))
-
 dat %>%
   drop_na() %>% 
   select(
