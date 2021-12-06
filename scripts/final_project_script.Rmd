@@ -9,30 +9,27 @@ output:
         toc_depth: 3
         highlight: pygments
         code_folding: hide
+    pdf:
+      toc: true
+      number_sections: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       warning = FALSE,
+                      cache = TRUE, 
                       error = FALSE,
+                      cache.lazy = FALSE,
                       fig.width = 9, 
                       fig.height = 9)
 
 # We used the pacman library to load packages. 
 #if (!require("pacman")) install.packages("pacman") #uncomment code to install pacman, if you don't already have it.
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance, sjmisc, gtsummary, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
 
-# Add your packages that you need here. This will load the libraries
-#removed purr - part of tidyverse
-#let's only include libraries we are using so that others don't have to install the irrelevant ones 
-#if (!require("pacman")) install.packages("pacman") 
-#pacman::p_load(tidyverse, rio, here, ggridges, readr, ggthemes, sandwich, pracma, lme4,equatiomatic, performance, jtools, sundry,naniar,stargazer,vtable, reshape2, skimr, rddtools,tidylog,janitor) 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych, jtools, lme4, sjPlot, sjmisc, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
-#>>>>>>> Stashed changes
-
-if (!require("pacman")) install.packages("pacman") 
-pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, tidylog, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary, car, lm.beta, ggplot2, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
+pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary, ggstance, broom.mixed, car, lm.beta)
+ 
+# pacman::p_load(tidyverse, rio, here, ggridges, ggthemes, janitor, reshape2, psych,jtools, lme4, sjPlot, performance, sjmisc, gtsummary, car, lm.beta, Hmisc, ppcor, dplyr, tidyr, readr, tinytex, crayon, naniar, magrittr) 
 
 ```
 
@@ -347,7 +344,7 @@ data_join <- enroll_final %>%
 <!-- To create graphs for the suspension and expulsion, we created a longer version, and subsetted per our need. Here's the process. -->
 
 
-```{r load suspension and expulsion}
+```{r load suspension and expulsion, eval = FALSE}
 #Function to remove negative numbers from data
 
 remove_neg <- function (x) ifelse(x < 0, NA, x)
@@ -365,23 +362,24 @@ susp_ps <- susp %>%
 susp_k12 <- susp %>% 
   select(c(1:8,51:167))
 
-expl <- import(here("data", "Expulsions.csv")) %>%
-    as_tibble() %>%
-    clean_names() %>% 
-    mutate(across(c(9:142), remove_neg))
-
-#preK expulsion data
-expl_ps <- expl %>% 
-  select(c(1:8), matches('psdisc')) 
-
-#K12 data expulsion data
-expl_k12 <- expl %>% 
-  select(c(1:142), -matches('psdisc'))
+# We don't use any expulsion data in our analysis
+# expl <- import(here("data", "Expulsions.csv")) %>%
+#     as_tibble() %>%
+#     clean_names() %>% 
+#     mutate(across(c(9:142), remove_neg))
+# 
+# #preK expulsion data
+# expl_ps <- expl %>% 
+#   select(c(1:8), matches('psdisc')) 
+# 
+# #K12 data expulsion data
+# expl_k12 <- expl %>% 
+#   select(c(1:142), -matches('psdisc'))
 
 ```
 
 
-```{r tidy data}
+```{r tidy data, eval = FALSE}
 
 susp_k12_504 <- susp_k12 %>% 
         select(combokey, matches('_504_')) %>% 
@@ -412,34 +410,37 @@ susp_ps_tidy <- susp_ps %>%
             values_to = "students" 
         )
 
-expl_k12_504 <- expl_k12 %>% 
-        select(combokey, matches('_504_')) %>% 
-        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>% 
-        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
-
-expl_k12_tidy <- expl_k12 %>% 
-        select(-matches('tot')) %>% 
-        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
-        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
-        left_join(expl_k12_504, by = "combokey") %>% 
-        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>% 
-        pivot_longer(
-            cols = -c(1:8), 
-            names_to = c("disability", "type","ethnicity/lep", "gender"),
-            names_sep = "_",
-            names_prefix = "sch_",
-            values_to = "students",
-        )
-
-expl_ps_tidy <- expl_ps %>% 
-        select(-matches('tot'))%>% 
-        pivot_longer(
-            cols = -c(1:8), 
-            names_to = c("type", "ethnicity/lep/idea","gender"),
-            names_sep = "_",
-            names_prefix = "sch_psdisc_",
-            values_to = "students" 
-        )
+# export(susp_k12_tidy, here("data", "susp_k12_tidy.csv"))
+# export(susp_ps_tidy, here("data", "susp_ps_tidy.csv"))
+# We don't use any expulsion in our analysis.
+# expl_k12_504 <- expl_k12 %>% 
+#         select(combokey, matches('_504_')) %>% 
+#         rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>% 
+#         rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+# 
+# expl_k12_tidy <- expl_k12 %>% 
+#         select(-matches('tot')) %>% 
+#         rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>% 
+#         rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>% 
+#         left_join(expl_k12_504, by = "combokey") %>% 
+#         rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>% 
+#         pivot_longer(
+#             cols = -c(1:8), 
+#             names_to = c("disability", "type","ethnicity/lep", "gender"),
+#             names_sep = "_",
+#             names_prefix = "sch_",
+#             values_to = "students",
+#         )
+# 
+# expl_ps_tidy <- expl_ps %>% 
+#         select(-matches('tot'))%>% 
+#         pivot_longer(
+#             cols = -c(1:8), 
+#             names_to = c("type", "ethnicity/lep/idea","gender"),
+#             names_sep = "_",
+#             names_prefix = "sch_psdisc_",
+#             values_to = "students" 
+#         )
 
 ```
 
@@ -450,8 +451,10 @@ expl_ps_tidy <- expl_ps %>%
 ```{r}
 #Importing the file and doing some cleaning to  make sure it runs, dropping Puerto Rico because they don't appear to report suspensions -rates were zero. 
 #This throws error for me because of space. Guess we have a lot of data loaded in the prev. chunks
-rq1 <- import(here("data","data_join.csv")) %>%
-  as_tibble() %>%
+data_join <- import(here("data","data_join.csv")) %>%
+  as_tibble()
+
+rq1 <- data_join %>%
   filter(lea_state != "PR") %>%
   mutate(leaid = as.numeric(leaid),
          lea_state = as.factor(lea_state)) %>%
@@ -478,8 +481,8 @@ Table 1. Descriptive information about the study sample
 
 #Summary statistics of #school, #enrollment by race, and #tot disciplines 
 
-dat <- import(here("data", "data_join.csv"))
-dat %>%
+
+data_join %>%
   drop_na() %>% 
   select(
          `White Students Enrollment (%)` = sch_enr_wh,
@@ -506,7 +509,7 @@ The main predictor variable for research question one was the percent of teacher
 
 The main predictor of interest for research question two was the number of law enforcement officials (sworn law enforcement officers and security guards). This variable was calculated by summing the total FTE of sworn law enforcement officers and security guards to get a count. 
 
-The analysis had two outcomes of interest that broadly examined school climate — one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(susp_std,weights = tot_enr, na.rm = TRUE)`, and the numbers ranged from `r min(rq1$susp_std)` to `r min(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
+The analysis had two outcomes of interest that broadly examined school climate — one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(rq1$susp_std)`, and the numbers ranged from `r min(rq1$susp_std)` to `r max(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
 
 For research question 2, the outcome measure of interest was the total number of disciplinary actions. The total number of disciplinary actions was determined by adding the number of student referrals and arrests for each district.
 
@@ -572,11 +575,14 @@ rq1 %>%
 ## Analytic Approach
 Descriptive statistics and regression analyses were used to answer the two research questions. To answer the first research question, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. The final model is represented by the following sets of equations. 
 
-Y_jks= π_0ks + X_j + π_1ks*noviceteachers+ ε_jks
-π_ks=β_00s+ r_0jk
-π_1ks=β_01s+ r_1jk
-β_00s= γ_000+ μ_00k
-β_01s= γ_100
+<!-- Y_jks= π_0ks + X_j + π_1ks*noviceteachers+ ε_jks -->
+
+$$Y_{jks}= \pi_{0ks} + X_j + \pi_{1ks}*noviceteachers+ \varepsilon _{jks}$$
+
+$$\pi_{ks}=\beta_{00s}+ r_{0jk}$$
+$$\pi_{1ks}=\beta_{01s}+ r_{1jk}$$
+$$\beta_{00s}= \gamma_{000}+ \mu_{00k}$$
+$$\beta_{01s}= \gamma_{100}$$
 
 Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level rate of novice teachers. This model allows the intercept to vary by district and school and also includes a random slope for the rate of novice teachers across districts. The γ100 coefficient represents the relationship between school level rate of novice teachers and study outcomes and addresses the first research question. This model was selected through a model comparison test that compared this 3 level HLM to other model specifications and was found to be the best performing model (based on the AIC score). 
 
@@ -679,7 +685,14 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 
 ### Suspension rate by ethnicity in preschool
 ```{r}
-susp_ps_tidy %>% 
+#loading tidy files
+susp_ps_tidy <- import(here("data", "susp_ps_tidy.csv"))
+susp_k12_tidy <- import(here("data", "susp_k12_tidy.csv"))
+```
+
+```{r}
+#making small changes so that it doesn't throw run-time error
+fig_1 <- susp_ps_tidy %>% 
   filter(`ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>% 
   mutate(
@@ -695,10 +708,14 @@ susp_ps_tidy %>%
                                   bl = "Black"),
          type = dplyr::recode(type, multoos = "Multiple Out of School",
                      singoos = "Single Out of School")) %>% 
-  
-ggplot(aes(fill = `ethnicity/lep/idea`, 
+  group_by(type, `ethnicity/lep/idea`) %>%
+  summarize(
+    sum = sum(students, na.rm = TRUE)
+  )
+
+ggplot(fig_1, aes(fill = `ethnicity/lep/idea`, 
            x = type, 
-           y =students)) + 
+           y =sum)) + 
   geom_col(position = "fill",
                stat = "identity", 
            alpha = 0.7, na.rm = TRUE) +
@@ -709,12 +726,12 @@ ggplot(aes(fill = `ethnicity/lep/idea`,
        x = "Type of Suspensions",
        y = "Percentage of Students") + 
   theme(text = element_text(size = 30, face = "bold"))
-ggsave(here("plot", "susp_ps.jpg"))
+#ggsave(here("plot", "susp_ps.jpg"))
 ```
 
 ### Suspension rate by Ethnicity in k12
 ```{r}
-susp_k12_tidy %>% 
+fig_2 <- susp_k12_tidy %>% 
   drop_na() %>% 
   filter(`ethnicity/lep` != "lep",
          `ethnicity/lep` != "all",
@@ -733,9 +750,13 @@ susp_k12_tidy %>%
                                        bl = "Black"), 
          type = dplyr::recode(type, multoos = "Multiple Out of School",
                      singoos = "Single Out of School")) %>% 
-  ggplot(aes(fill = `ethnicity/lep`,
+    group_by(type, `ethnicity/lep`)  %>% 
+    summarise(
+      sum = sum(students,na.rm = TRUE)
+    )
+  ggplot(fig_2, aes(fill = `ethnicity/lep`,
              x = type, 
-             y = students)) + 
+             y = sum)) + 
 geom_col(position = "fill",
          stat = "identity",
            alpha = 0.7, na.rm = TRUE) +
@@ -746,14 +767,14 @@ labs(title = "Suspension Rate by Ethnicity in K12",
        x = "Type of Suspensions",
        y = "Percentage of Students") + 
 theme(text = element_text(size = 30, face = "bold"))
-ggsave(here("plot", "susp_k12.jpg"))
+#ggsave(here("plot", "susp_k12.jpg"))
 
 
 ```
 
 * Multiple Out of school suspension rate by gender and race for preschool students
 ```{r}
-susp_ps_tidy %>% 
+fig_3 <- susp_ps_tidy %>% 
   filter(type == "multoos",
          `ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>% 
@@ -770,7 +791,12 @@ susp_ps_tidy %>%
          gender = dplyr::recode(gender, 
                          f = "Female",
                          m = "Male")) %>% 
-  ggplot(aes(`ethnicity/lep/idea`, students)) +
+  group_by(`ethnicity/lep/idea`, gender) %>% 
+  summarise(
+    sum = sum(students, na.rm = TRUE)
+  )
+
+  ggplot(fig_3,aes(`ethnicity/lep/idea`, sum)) +
   geom_col(aes(fill = gender),
            position = "dodge",
            na.rm = TRUE) +
@@ -783,12 +809,12 @@ susp_ps_tidy %>%
        y = "Number of Students") + 
   theme(text = element_text(size = 30, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave(here("plot", "multoos_ps.jpg"))
+#ggsave(here("plot", "multoos_ps.jpg"))
 ```
 
 * Multiple Out of school suspension rate by gender and race for k12 students
 ```{r}
-susp_k12_tidy %>% 
+fig_4 <- susp_k12_tidy %>% 
 filter(type == "multoos",
          `ethnicity/lep` != "lep",
          `ethnicity/lep` != "all"
@@ -806,9 +832,14 @@ mutate(`ethnicity/lep` = fct_relevel (
          gender = dplyr::recode(gender, 
                          f = "Female",
                          m = "Male")) %>% 
-ggplot(aes(fill = gender,
+  group_by(`ethnicity/lep`, gender) %>% 
+  summarise(
+    sum = sum(students, na.rm = TRUE)
+  )
+
+ggplot(fig_4, aes(fill = gender,
            x = `ethnicity/lep`, 
-           y = students)) +
+           y = sum)) +
 geom_col( position = "dodge") + 
 theme_tufte() +  
 scale_fill_brewer(palette = "Set1") +
@@ -819,29 +850,22 @@ labs(
   y = "Number of Students") + 
 theme(text = element_text(size = 30, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave(here("plot", "multoos_12.jpg"))
+#ggsave(here("plot", "multoos_12.jpg"))
 ```
 
 
 __The two graphs of Suspensions rate by Ethnicity show that Black Students are being suspended more compared to their peers in Preschool and K-12. When gender is included in the third and fourth graphs, they also show that both Black Male and Black Female students are being suspended more compared to their peers in Preschool and K-12. Overall, Male students are suspended more than female students across all school level.__ 
 
 ## Research Question 2 - Descriptive Results
-```{r echo = FALSE, include=FALSE}
-#getwd()
-```
-
-```{r echo = FALSE, include=FALSE}
-na_strings <- c(-3, -5, -6, -8, -9, -11)
-```
 
 <!-- RA = referrals and arrests -->
 ```{r echo = FALSE, include=FALSE}
 RA <- import(here("data", "Referrals and Arrests.csv")) %>%
 as_tibble() %>%
- 
-set_na(na = c(-3, -5, -6, -8, -9, -11))
+set_na(na = c(-3, -5, -6, -8, -9, -11)) %>% 
+clean_names()
 
-RA
+#RA
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -849,70 +873,18 @@ RA
 ```
 
 ```{r echo = FALSE, include=FALSE}
-skim(RA)
-```
-
-<!-- Verify that COMBOKEY is the key for joining -->
-```{r echo = FALSE, include=FALSE}
-RA %>%
-count(COMBOKEY)
-```
-
-<!-- Describe the RA data set -->
-```{r echo = FALSE, include=FALSE}
-RA %>%
-  describeBy()
-```
-
-```{r echo = FALSE, include=FALSE}
-str(RA)
-```
-
-```{r echo = FALSE, include=FALSE}
 enroll <- import(here("data", "enroll.csv")) %>%
 as_tibble() %>%
- 
-set_na(na = c(-3, -5, -6, -8, -9, -11))
-```
-
-<!-- Describe the enroll data set -->
-```{r echo = FALSE, include=FALSE}
-enroll %>%
-  describeBy()
+set_na(na = c(-3, -5, -6, -8, -9, -11)) %>% 
+clean_names()
 ```
 
 ```{r echo = FALSE, include=FALSE}
-str(enroll)
-```
-
-```{r echo = FALSE, include=FALSE}
-RA2 <- RA %>%
-  clean_names()
-
-RA2
-```
-
-```{r echo = FALSE, include=FALSE}
-enroll2 <- enroll %>%
-  clean_names()
-
-enroll2
-```
-
-```{r echo = FALSE, include=FALSE}
-ra_full <- merge(x=RA2, y=enroll2, by="combokey") %>%
+ra_full <- merge(x=RA, y=enroll, by="combokey") %>%
   select(! ends_with(".y"))
 
 
-ra_full
-```
-
-```{r echo = FALSE, include=FALSE}
-# export(ra_full, here("data", "ra_full.csv"))
-```
-
-```{r echo = FALSE, include=FALSE}
-# export(ra_full, here("data", "ra_full2.xlsx"))
+#ra_full
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -922,7 +894,7 @@ as_tibble() %>%
 set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
   clean_names()
 
-sch_su
+#sch_su
 ```
 
 <!-- Complete data set -->
@@ -933,7 +905,7 @@ ra_final <- merge(x=ra_full, y=sch_su, by="combokey") %>%
   subset(select = -c(schid, leaid, lea_name)) %>%
     rename(lea_state=lea_state.x, lea_state_name = lea_state_name.x, leaid= leaid.x, lea_name=lea_name.x, schid=schid.x, sch_name=sch_name.x, jj=jj.x)
 
-ra_final
+#ra_final
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -951,7 +923,7 @@ ra_lawst <- ra_final %>%
 select(lea_state_name, starts_with("tot")) %>%
   set_na(na = c(-3, -5, -6, -8, -9, -11))
 
-ra_lawst
+#ra_lawst
 ```
 
 <!-- Sum by state -->
@@ -961,7 +933,7 @@ ra_sum <- ra_lawst %>%
   summarise_all(sum, na.rm = TRUE) %>%
   filter(lea_state_name != "NA")
 
-ra_sum
+#ra_sum
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -978,7 +950,7 @@ ra_sum2 <- ra_sum %>%
     values_to = "tot_st",
     values_drop_na = TRUE)
 
-ra_sum2
+#ra_sum2
 ```
 
 <!-- IDEA (Individuals with Disabilities Education Act) -->
@@ -989,7 +961,7 @@ ra_sum3 <- ra_sum2 %>%
   mutate_at("student_type", str_replace, "_idea", "") %>%
   separate(student_type, c("status", "dis_act", "gender"), "_")
 
-ra_sum3
+#ra_sum3
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -1036,7 +1008,7 @@ ra_sum3 %>%
 - Create a similar graph with total law enforcement officials
 
 <!-- Tidying Data Sets for Multiple Regression -->
-```{r echo = FALSE, include=FALSE}
+```{r eval = FALSE}
 ra_final %>%
   colnames ()
 ```
@@ -1048,46 +1020,24 @@ ra_reg <- ra_final %>%
 select(lea_state, lea_state_name, leaid, lea_name, schid, sch_name, combokey, jj, enroll_all, starts_with("tot"), sch_ftesecurity_leo, sch_ftesecurity_gua) %>%
   set_na(na = c("Not Reported"))
 
-ra_reg
-```
-
-```{r echo = FALSE, include=FALSE}
-# library(readr)
-
-urlfile = "https://raw.githubusercontent.com/merlyklaas/final_project/master/data/data_join.csv"
-
-joinD <- read.csv(url(urlfile))
-```
-
-```{r echo = FALSE, include=FALSE}
-# export(joinD, here("data", "joinD.xlsx"))
-```
-
-```{r echo = FALSE, include=FALSE}
-joinD %>%
-  colnames ()
-```
-
-```{r echo = FALSE, include=FALSE}
-ra_reg %>%
-  colnames ()
+#ra_reg
 ```
 
 <!-- ra_D merges the main arrest/referral data set with the joined data set -->
 ```{r echo = FALSE, include=FALSE}
-ra_D <- merge(x = ra_reg, y = joinD [, c(8, 26:28, 30, 33:35)], by = "combokey", all.x = TRUE)
+ra_D <- merge(x = ra_reg, y = data_join[, c(8, 26:28, 30, 33:35)], by = "combokey", all.x = TRUE)
 
 ra_D
 ```
 
-```{r echo = FALSE, include=FALSE}
+```{r eval = FALSE}
 ra_D %>%
   colnames ()
 ```
 
 <!-- 280 population size for Alabama Youth Services LEA only
 Total population size for data set is below -->
-```{r echo = FALSE, include=FALSE}
+```{r eval = FALSE}
   sum(ra_D$enroll_all, na.rm=TRUE)
 ```
 
@@ -1096,7 +1046,7 @@ Total population size for data set is below -->
 ra_reg$sch_ftesecurity_gua <- as.numeric(ra_reg$sch_ftesecurity_gua)
 ```
 
-```{r echo = FALSE, include=FALSE}
+```{r eval = FALSE}
 class(ra_reg$sch_ftesecurity_gua)
 ```
 
@@ -1115,7 +1065,7 @@ ra_tidy <- ra_reg %>%
             sum_leo = sum(sch_ftesecurity_leo, na.rm=TRUE), 
             sum_gua = sum(sch_ftesecurity_gua, na.rm=TRUE))
 
-ra_tidy
+#ra_tidy
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -1131,7 +1081,7 @@ ra_tidy2 <- ra_tidy %>%
   mutate(total_law = sum_leo + sum_gua) %>%
   select(!starts_with("sum"))
 
-ra_tidy2
+#ra_tidy2
 ```
 
 <!-- Collapsing for histogram
@@ -1140,7 +1090,7 @@ total_student = total number of students with a disciplinary action -->
 ra_tidy2_c <- ra_tidy2 %>%
   mutate(total_student = wodis_ref_m + wodis_ref_f + wdis_ref_idea_m + wdis_ref_idea_f + wodis_arr_m + wodis_arr_f + wdis_arr_idea_m + wdis_arr_idea_f)
   
-ra_tidy2_c
+#ra_tidy2_c
 ```
 
 <!-- Excluding LEA ID 4816620 as an outlier -->
@@ -1148,11 +1098,11 @@ ra_tidy2_c
 ratc <- ra_tidy2_c %>%
   filter(leaid != "4816620")
 
-ratc
+#ratc
 ```
 
 <!-- ratc (ra tidy2 collapsed - no outlier) -->
-```{r echo = FALSE, include=FALSE}
+```{r eval = FALSE}
 ratc %>%
   describeBy()
 ```
@@ -1183,7 +1133,7 @@ ra_tidy3 <- ra_tidy2 %>%
     names_to = "student_type",
     values_to = "tot_st")
   
-ra_tidy3
+#ra_tidy3
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -1193,7 +1143,7 @@ ra_tidy4 <- ra_tidy3 %>%
   separate(student_type, c("status", "dis_act", "gender"), "_") %>%
   filter(leaid != "4816620")
 
-ra_tidy4
+#ra_tidy4
 ```
 
 <!-- Multiple Regression
@@ -1203,23 +1153,7 @@ ra_tidy4$gender <- factor(ra_tidy4$gender)
 ```
 
 ```{r echo = FALSE, include=FALSE}
-levels(ra_tidy4$gender)
-```
-
-```{r echo = FALSE, include=FALSE}
-contrasts(ra_tidy4$gender)
-```
-
-```{r echo = FALSE, include=FALSE}
 ra_tidy4$status <- factor(ra_tidy4$status)
-```
-
-```{r echo = FALSE, include=FALSE}
-levels(ra_tidy4$status)
-```
-
-```{r echo = FALSE, include=FALSE}
-contrasts(ra_tidy4$status)
 ```
 
 ```{r echo = FALSE, include=FALSE}
@@ -1228,15 +1162,6 @@ ra_tidy4$dis_act <- factor(ra_tidy4$dis_act)
 
 ```{r echo = FALSE, include=FALSE}
 ra_tidy4$tot_st <- as.numeric(ra_tidy4$tot_st)
-```
-
-<!-- Check data structure --->
-```{r echo = FALSE, include=FALSE}
-str(ra_tidy4)
-```
-
-```{r echo = FALSE, include=FALSE}
-colnames(ra_tidy4)
 ```
 
 <!-- Summary of variables:
