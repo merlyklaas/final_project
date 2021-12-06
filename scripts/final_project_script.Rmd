@@ -875,7 +875,7 @@ clean_names()
 ```
 
 ```{r echo = FALSE, include=FALSE}
-enroll <- import(here("data", "Enrollment.csv")) %>%
+enroll <- import(here("data", "enroll.csv")) %>%
 as_tibble() %>%
 set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
 clean_names()
@@ -890,7 +890,7 @@ ra_full <- merge(x=RA, y=enroll, by="combokey") %>%
 ```
 
 ```{r echo = FALSE, include=FALSE}
-sch_su <- import(here("data", "School Support.csv")) %>%
+sch_su <- import(here("data", "sch_su.csv")) %>%
 as_tibble() %>%
 
 set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
@@ -904,7 +904,7 @@ set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
 ```{r echo = FALSE, include=FALSE}
 ra_final <- merge(x=ra_full, y=sch_su, by="combokey") %>%
   select(! ends_with(".y")) %>%
-  subset(select = -c(200:206)) %>%
+  subset(select = -c(schid, leaid, lea_name)) %>%
     rename(lea_state=lea_state.x, lea_state_name = lea_state_name.x, leaid= leaid.x, lea_name=lea_name.x, schid=schid.x, sch_name=sch_name.x, jj=jj.x)
 
 #ra_final
