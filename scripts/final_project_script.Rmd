@@ -475,7 +475,30 @@ The sample in this study included all K-12 schools across the United States. Ove
 
 Table 1. Descriptive information about the study sample
 ```{r }
-#Merly to add a descriptive statistics table
+
+#Summary statistics of #school, #enrollment by race, and #tot disciplines 
+
+dat <- import(here("data", "data_join.csv"))
+dat %>%
+  drop_na() %>% 
+  select(
+         `White Students Enrollment (%)` = sch_enr_wh,
+         `Hispanic Students Enrollment (%)` = sch_enr_hi,
+         `Black Students Enrollment (%)` = sch_enr_bl,
+         `Asian Students Enrollment (%)` = sch_enr_as,
+         `Native American/Alaskan Students Enrollment (%)` = sch_enr_am,
+         `Hawaiaan and Pacific Islander Students Enrollment (%)` = sch_enr_hp,
+         `Two or more races Student Enrollment (%)` = sch_enr_tr,
+         `Students with Disability Status Enrollment (%)` = sch_enr_idea,
+         `Suspension Rate` = tot_susp,
+         `Explusion Rate` = tot_expl,
+         `Number of Arrest` = tot_arr, 
+         `Number of Referral` = tot_ref) %>% 
+tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) %>% 
+  modify_footnote(
+    all_stat_cols() ~ "Mean (SD) per school"
+  ) %>%
+  modify_caption("**Table 1. Summary Statistics**") #Merly to add a descriptive statistics table
 ```
 
 ## Outcome Measures and Predictors of Interest
@@ -652,53 +675,27 @@ results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teac
 results + labs(x = "Change in number of students suspended per 1,000 students \n\ for every percentage point increase in the rate of novice teachers") + xlim(-1,2) + theme(axis.text=element_text(size=10), legend.text=element_text(size = 10))
 ```
 
-## Research Question 1 - Descriptive Results (Merly add graphs and description)
-
-### Descriptive Summary Statistics
-
-```{r}
-dat <- import(here("data", "data_join.csv"))
-dat %>%
-  drop_na() %>% 
-  select(
-         `White Students Enrollment (%)` = sch_enr_wh,
-         `Hispanic Students Enrollment (%)` = sch_enr_hi,
-         `Black Students Enrollment (%)` = sch_enr_bl,
-         `Asian Students Enrollment (%)` = sch_enr_as,
-         `Native American/Alaskan Students Enrollment (%)` = sch_enr_am,
-         `Hawaiaan and Pacific Islander Students Enrollment (%)` = sch_enr_hp,
-         `Two or more races Student Enrollment (%)` = sch_enr_tr,
-         `Students with Disability Status Enrollment (%)` = sch_enr_idea,
-         `Suspension Rate` = tot_susp,
-         `Explusion Rate` = tot_expl,
-         `Number of Arrest` = tot_arr, 
-         `Number of Referral` = tot_ref) %>% 
-tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) %>% 
-  modify_footnote(
-    all_stat_cols() ~ "Mean (SD) per school"
-  ) %>%
-  modify_caption("**Table 1. Summary Statistics**")
-
-```
-
+## Research Question 1 - Descriptive Results 
 
 ### Suspension rate by ethnicity in preschool
 ```{r}
 susp_ps_tidy %>% 
   filter(`ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>% 
-  mutate(`ethnicity/lep/idea` = 
+  mutate(
+    `ethnicity/lep/idea` =
              fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
-         `ethnicity/lep/idea` = recode(`ethnicity/lep/idea`,
-                                       as = "Asian",
-                                       hp = "Hawaiaan/Pacific Islander",
-                                       am = "Native American/Alaskan",
-                                       tr = "Two or More Races",
-                                       hi = "Hispanic",
-                                       wh = "White",
-                                       bl = "Black"), 
-         type = recode(type, multoos = "Multiple Out of School",
+  `ethnicity/lep/idea` = dplyr::recode(`ethnicity/lep/idea`,
+                                  as = "Asian",
+                                  hp = "Hawaiaan/Pacific Islander",
+                                  am = "Native American/Alaskan",
+                                  tr = "Two or More Races",
+                                  hi = "Hispanic",
+                                  wh = "White",
+                                  bl = "Black"),
+         type = dplyr::recode(type, multoos = "Multiple Out of School",
                      singoos = "Single Out of School")) %>% 
+  
 ggplot(aes(fill = `ethnicity/lep/idea`, 
            x = type, 
            y =students)) + 
@@ -726,7 +723,7 @@ susp_k12_tidy %>%
          ) %>% 
     mutate(`ethnicity/lep` = 
              fct_relevel (`ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
-           `ethnicity/lep` = recode(`ethnicity/lep`,
+           `ethnicity/lep` = dplyr::recode(`ethnicity/lep`,
                                        as = "Asian",
                                        hp = "Hawaiaan/Pacific Islander",
                                        am = "Native American/Alaskan",
@@ -734,7 +731,7 @@ susp_k12_tidy %>%
                                        hi = "Hispanic",
                                        wh = "White",
                                        bl = "Black"), 
-         type = recode(type, multoos = "Multiple Out of School",
+         type = dplyr::recode(type, multoos = "Multiple Out of School",
                      singoos = "Single Out of School")) %>% 
   ggplot(aes(fill = `ethnicity/lep`,
              x = type, 
@@ -762,7 +759,7 @@ susp_ps_tidy %>%
          `ethnicity/lep/idea` != "idea" ) %>% 
   mutate(`ethnicity/lep/idea` = 
              fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
-          `ethnicity/lep/idea` = recode(`ethnicity/lep/idea`,
+          `ethnicity/lep/idea` = dplyr::recode(`ethnicity/lep/idea`,
                                        as = "Asian",
                                        hp = "Hawaiaan/Pacific Islander",
                                        am = "Native American/Alaskan",
@@ -770,7 +767,7 @@ susp_ps_tidy %>%
                                        hi = "Hispanic",
                                        wh = "White",
                                        bl = "Black"),
-         gender = recode(gender, 
+         gender = dplyr::recode(gender, 
                          f = "Female",
                          m = "Male")) %>% 
   ggplot(aes(`ethnicity/lep/idea`, students)) +
@@ -786,7 +783,7 @@ susp_ps_tidy %>%
        y = "Number of Students") + 
   theme(text = element_text(size = 30, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave(here("plot", "susp_ps.jpg"))
+ggsave(here("plot", "multoos_ps.jpg"))
 ```
 
 * Multiple Out of school suspension rate by gender and race for k12 students
@@ -798,7 +795,7 @@ filter(type == "multoos",
          ) %>% 
 mutate(`ethnicity/lep` = fct_relevel (
   `ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
-        `ethnicity/lep` = recode(`ethnicity/lep`,
+        `ethnicity/lep` = dplyr::recode(`ethnicity/lep`,
                                        as = "Asian",
                                        hp = "Hawaiaan/Pacific Islander",
                                        am = "Native American/Alaskan",
@@ -806,7 +803,7 @@ mutate(`ethnicity/lep` = fct_relevel (
                                        hi = "Hispanic",
                                        wh = "White",
                                        bl = "Black"),
-         gender = recode(gender, 
+         gender = dplyr::recode(gender, 
                          f = "Female",
                          m = "Male")) %>% 
 ggplot(aes(fill = gender,
@@ -822,7 +819,7 @@ labs(
   y = "Number of Students") + 
 theme(text = element_text(size = 30, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave(here("plot", "susp_ps.jpg"))
+ggsave(here("plot", "multoos_12.jpg"))
 ```
 
 
