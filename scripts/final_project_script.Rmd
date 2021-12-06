@@ -3,16 +3,16 @@ title: "School Personnel and School Climate"
 author: "TEAM QRME"
 date: "11/10/2021"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: 3
-    number_sections: true
   html_document:
     toc: yes
     toc_float: yes
     toc_depth: 3
     highlight: pygments
     code_folding: hide
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -992,7 +992,6 @@ ra_sum3 %>%
 
 Figure X displays the total number of student arrests and referrals per state broken down by student disability status.
 ```{r echo = FALSE, eval = FALSE}
-#throwing error
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
   geom_col(aes(fill = status)) +
@@ -1020,15 +1019,15 @@ ra_final %>%
 ra_reg = ra_final data set down-sized & tidied for regression analysis -->
 ```{r echo = FALSE, include=FALSE}
 ra_reg <- ra_final %>%
-select(lea_state, lea_state_name, leaid, lea_name, schid, sch_name, combokey, jj, enroll_all, starts_with("tot"), sch_ftesecurity_leo, sch_ftesecurity_gua) %>%
-  set_na(na = c("Not Reported"))
+select(c(1:8), starts_with("tot"), sch_ftesecurity_leo, sch_ftesecurity_gua) 
+
 
 #ra_reg
 ```
 
 <!-- ra_D merges the main arrest/referral data set with the joined data set -->
 ```{r echo = FALSE, include=FALSE}
-ra_D <- merge(x = ra_reg, y = data_join[, c(8, 26:28, 30, 33:35)], by = "combokey", all.x = TRUE)
+ra_D <- merge(x = ra_reg, y = data_join[, c(8,13,26:28, 30, 33:35)], by = "combokey", all.x = TRUE)
 
 ra_D
 ```
@@ -1041,7 +1040,7 @@ ra_D %>%
 <!-- 280 population size for Alabama Youth Services LEA only
 Total population size for data set is below -->
 ```{r eval = FALSE}
-  sum(ra_D$enroll_all, na.rm=TRUE)
+  sum(ra_D$tot_enr, na.rm=TRUE)
 ```
 
 <!-- Changed _gua variable from character to numeric -->
@@ -1221,7 +1220,6 @@ summary(mod)
 
 Table X shows the results of the regression analysis for RQ2.
 ```{r}
-library(sjPlot)
 tab_model(mod)
 ```
 
