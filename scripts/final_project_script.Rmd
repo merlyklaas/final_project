@@ -485,15 +485,19 @@ Table 1. Descriptive information about the study sample
 
 data_join %>%
   drop_na() %>%
+  filter(pct_new_teachers != Inf,
+         sch_fteteach_tot != Inf) %>% 
   select(
          `White Students Enrollment (%)` = sch_enr_wh,
          `Hispanic Students Enrollment (%)` = sch_enr_hi,
          `Black Students Enrollment (%)` = sch_enr_bl,
          `Asian Students Enrollment (%)` = sch_enr_as,
          `Native American/Alaskan Students Enrollment (%)` = sch_enr_am,
-         `Hawaiaan and Pacific Islander Students Enrollment (%)` = sch_enr_hp,
+         `Hawaiian and Pacific Islander Students Enrollment (%)` = sch_enr_hp,
          `Two or more races Student Enrollment (%)` = sch_enr_tr,
          `Students with Disability Status Enrollment (%)` = sch_enr_idea,
+         `Novice Teacher Enrolled (%)` = pct_new_teachers,
+         `Law Enforcement Officials` = sch_fteteach_tot,
          `Suspension Rate` = tot_susp,
          `Explusion Rate` = tot_expl,
          `Number of Arrest` = tot_arr,
@@ -684,6 +688,8 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 
 ## Research Question 1 - Descriptive Results
 
+Figure 2 and figure 3 about Suspensions rate by Ethnicity in Preschool and K-12 show that __Black Students__ were suspended more compared to their peers in Preschool and K-12. In Figure 4 and Figure 5 when gender was included, both __Black Male__ and __Black Female__ students were suspended more compared to their peers in Preschool and K-12. Overall, __Male__ students were suspended more than female students across all school level.
+
 ### Suspension rate by ethnicity in preschool
 ```{r}
 #loading tidy files
@@ -722,11 +728,11 @@ ggplot(fig_1, aes(fill = `ethnicity/lep/idea`,
            alpha = 0.7, na.rm = TRUE) +
   scale_fill_brewer(palette = "Set1") +
   theme_tufte() +
-  labs(title = "Suspension Rate by Ethnicity in Preschool",
+  labs(title = "Figure 2. Suspension Rate by Ethnicity in Preschool",
        fill = "Ethnicity",
        x = "Type of Suspensions",
        y = "Percentage of Students") +
-  theme(text = element_text(size = 30, face = "bold"))
+  theme(text = element_text(size = 15, face = "bold"))
 #ggsave(here("plot", "susp_ps.jpg"))
 ```
 
@@ -764,11 +770,11 @@ geom_col(position = "fill",
            alpha = 0.7, na.rm = TRUE) +
   theme_tufte() +
 scale_fill_brewer(palette = "Set1") +
-labs(title = "Suspension Rate by Ethnicity in K12",
+labs(title = "Figure 3. Suspension Rate by Ethnicity in K12",
        fill = "Ethnicity",
        x = "Type of Suspensions",
        y = "Percentage of Students") +
-theme(text = element_text(size = 30, face = "bold"))
+theme(text = element_text(size = 15, face = "bold"))
 #ggsave(here("plot", "susp_k12.jpg"))
 
 
@@ -805,11 +811,11 @@ fig_3 <- susp_ps_tidy %>%
   theme_tufte() +
   scale_fill_brewer(palette = "Set1") +
 
-  labs(title = "Multiple Out-of-school Suspension by Ethnicity & Gender in Preschool",
+  labs(title = "Figure 4. Multiple Out-of-school Suspension by Ethnicity & Gender in Preschool",
        fill = "Gender",
        x = "Race / Ethnicity",
        y = "Number of Students with Multiple Out of School Suspension") +
-  theme(text = element_text(size = 30, face = "bold"),
+  theme(text = element_text(size = 15, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
 #ggsave(here("plot", "multoos_ps.jpg"))
 ```
@@ -846,17 +852,17 @@ geom_col( position = "dodge") +
 theme_tufte() +  
 scale_fill_brewer(palette = "Set1") +
 labs(
-  title = "Multiple Out-of-school Suspension by Ethnicity & Gender in K12",
+  title = "Figure 5. Multiple Out-of-school Suspension by Ethnicity & Gender in K12",
   fill = "Gender",
   x = "Race/Ethnicity",
   y = "Number of Students with Multiple Out of School Suspension") +
-theme(text = element_text(size = 30, face = "bold"),
+theme(text = element_text(size = 15, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
 #ggsave(here("plot", "multoos_12.jpg"))
 ```
 
 
-The two graphs of Suspensions rate by Ethnicity show that __Black Students__ were suspended more compared to their peers in Preschool and K-12. When gender was included in the third and fourth graphs, they also show that both __Black Male__ and __Black Female__ students were suspended more compared to their peers in Preschool and K-12. Overall, __Male__ students were suspended more than female students across all school level.
+
 
 ## Research Question 2 - Descriptive Results
 
