@@ -687,12 +687,12 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 ### Suspension rate by ethnicity in preschool
 ```{r}
 #loading tidy files
+#these files are very long and throw errors while knitting
 susp_ps_tidy <- import(here("data", "susp_ps_tidy.csv"))
 susp_k12_tidy <- import(here("data", "susp_k12_tidy.csv"))
 ```
 
-```{r}
-#making small changes so that it doesn't throw run-time error
+```{r }
 fig_1 <- susp_ps_tidy %>%
   filter(`ethnicity/lep/idea` != "lep" ,
          `ethnicity/lep/idea` != "idea" ) %>%
@@ -731,7 +731,8 @@ ggplot(fig_1, aes(fill = `ethnicity/lep/idea`,
 ```
 
 ### Suspension rate by Ethnicity in k12
-```{r}
+```{r eval = FALSE}
+#these chunks are using a lot of space, and throwing run-time errors. We have saves the images, and are exporting them instead of running these chunks in the knit. 
 fig_2 <- susp_k12_tidy %>%
   drop_na() %>%
   filter(`ethnicity/lep` != "lep",
@@ -774,7 +775,7 @@ theme(text = element_text(size = 30, face = "bold"))
 ```
 
 * Multiple Out of school suspension rate by gender and race for preschool students
-```{r}
+```{r }
 fig_3 <- susp_ps_tidy %>%
   filter(type == "multoos",
          `ethnicity/lep/idea` != "lep" ,
@@ -874,7 +875,7 @@ clean_names()
 ```
 
 ```{r echo = FALSE, include=FALSE}
-enroll <- import(here("data", "enroll.csv")) %>%
+enroll <- import(here("data", "Enrollment.csv")) %>%
 as_tibble() %>%
 set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
 clean_names()
@@ -889,7 +890,7 @@ ra_full <- merge(x=RA, y=enroll, by="combokey") %>%
 ```
 
 ```{r echo = FALSE, include=FALSE}
-sch_su <- import(here("data", "sch_su.csv")) %>%
+sch_su <- import(here("data", "School Support.csv")) %>%
 as_tibble() %>%
 
 set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
@@ -903,7 +904,7 @@ set_na(na = c(-3, -5, -6, -8, -9, -11)) %>%
 ```{r echo = FALSE, include=FALSE}
 ra_final <- merge(x=ra_full, y=sch_su, by="combokey") %>%
   select(! ends_with(".y")) %>%
-  subset(select = -c(schid, leaid, lea_name)) %>%
+  subset(select = -c(200:206)) %>%
     rename(lea_state=lea_state.x, lea_state_name = lea_state_name.x, leaid= leaid.x, lea_name=lea_name.x, schid=schid.x, sch_name=sch_name.x, jj=jj.x)
 
 #ra_final
@@ -990,7 +991,8 @@ ra_sum3 %>%
 ```
 
 Figure X displays the total number of student arrests and referrals per state broken down by student disability status.
-```{r echo = FALSE}
+```{r echo = FALSE, eval = FALSE}
+#throwing error
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
   geom_col(aes(fill = status)) +
