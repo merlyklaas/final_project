@@ -1238,20 +1238,21 @@ tab_model(mod)
 
 # Discussion
 
-The present study aimed to 1.) identify relationships between novice teachers and student suspension rates, and 2.) law enforcement official concentration and referrals and arrests. Both of these relationships were then investigated for any moderating student demographics.
+The present study aimed to 1.) identify relationships between novice teachers and student suspension rates, and 2.) law enforcement official concentration and referrals and arrests. In both cases, our analysis finds significant correlations between staffing choices and student disciplinary outcomes. These correlations are still significant after controlling for school demographics and school status as well.
 
-## New Teachers and Suspensions
+### New Teachers and Suspensions
 
-Our analysis shows a meaningful relationship between presence of new teachers and student discipline, where more new teachers correlate with more disciplinary actions. ERROL ADD line on gender, race, etc. Our results indicate that new teachers may benefit from additional classroom management training, or for administrators to schedule classroom management trainings when large numbers of new teachers are hired at the same time.
+Our analysis shows a meaningful relationship between presence of new teachers and student discipline, where more new teachers correlate with more disciplinary actions. This supports our hypothesis that at schools with higher percentages of novice teachers, student disciplinary rates tend to be higher. Our results indicate that new teachers may benefit from additional classroom management training, or for administrators to schedule classroom management trainings when large numbers of new teachers are hired at the same time.
 
-## Law Enforcement Officials and Expulsions/Referrals
+### Law Enforcement Officials and Expulsions/Referrals
 
-The significant relationship between LEO presence and Referral/Arrest Rates may suggest that administrators look for alternative methods of encouraging proper student behavior. ERROL ADD Gender race note.
+The significant relationship between count of security presence at a school and number of arrests and referrals that occur at a given school should encourage administrators to investigate alternative methods to reducing school violence and ensuring safety of the students. 
 
-## Limitations and Future Research
+### Limitations and Future Research
 
-The current study has some shortcomings in regards to applicability of our findings - the school level data does not give a total count of suspensions, only the number of students who had suspensions during the study time. As this data does not break down to specific classrooms, we cannot validate whether more suspensions are happening in classrooms with new teachers specifically. Additionally, our analyses do not examine LEO presence as a proportion of total school staff, but rather as a simple count. Additionally, our analyses includes Juvenile Justice facilities, which tend to have much higher concentrations of law enforcement officers than traditional public schools. A future analysis would benefit from anaylyzing these two groups separately, as well as investigating the cross-section of schools with high LEO presence and novice teacher percent.
+The current study has some shortcomings in regards to applicability of our findings - the school level data does not give a total count of suspensions, only the number of students who had suspensions during the study time. As this data does not break down to specific classrooms, we cannot validate whether more suspensions are happening in classrooms with new teachers specifically. Additionally, our analyses do not examine LEO presence as a proportion of total school staff, but rather as a simple count. Additionally, our analyses includes Juvenile Justice facilities, which tend to have much higher concentrations of law enforcement officers than traditional public schools. A future analysis would benefit from anaylyzing these two groups separately, as well as investigating the cross-section of schools with high LEO presence and novice teacher percent. As our LEO analysis does not look at proportional data, further analysis there is necessary to understand the true significance of LEO and security guard presence on student disciplinary outcomes. 
 
+A valuable follow up to this study would be to further contextualize the teacher and LEO employment data with overall school size, funding, and other available data. These analyses would help determine whether student disciplinary outcomes are rising as a result of an unusual or misallocation of school resources, or due to the mechanisms discussed earlier. 
 
 \newpage
 
