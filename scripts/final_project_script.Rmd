@@ -577,7 +577,7 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 
 ## Research Question 1 - Descriptive Results
 
-Figure 2 and figure 3 about Suspensions rate by Ethnicity in Preschool and K-12 show that __Black Students__ were suspended more compared to their peers in Preschool and K-12. In Figure 4 and Figure 5 when gender was included, both __Black Male__ and __Black Female__ students were suspended more compared to their peers in Preschool and K-12. Overall, __Male__ students were suspended more than female students across all school level.
+Figure 2. Suspension Rate in Preschool shows that, __Black pre-school students__ accounted for 15% of total student population, but received 17-25% of one or more out of school suspensions. In comparison, white students represent lower range suspension rate, between 15-21% of students suspended, while accounted for 51% of total student population. 
 
 <!-- To create graphs for the suspension and expulsion, we created a longer version, and subsetted per our need. Here's the process. -->
 
@@ -705,16 +705,20 @@ susp_ps_tidy <- susp_ps %>%
 #  export(fig_1,here("data","ds_1.csv"))
 
 
-ds_1 <- import(here("data","ds_1.csv"))
+ds_1 <- import(here("data","ds_1.csv")) %>% 
+  mutate(pct = sum/sum(sum))
+
 
 ds_1$`ethnicity/lep/idea` <- fct_inorder(ds_1$`ethnicity/lep/idea`)
-
+  
 ggplot(ds_1, aes(fill = `ethnicity/lep/idea`,
            x = type,
            y =sum)) +
   geom_col(position = "fill",
                stat = "identity",
            alpha = 0.7, na.rm = TRUE) +
+  geom_text(aes(label=paste0(sprintf("%1.1f", pct*100),"%")), 
+            position = position_fill(vjust = 0.5), colour="black", size = 2) +
   scale_fill_brewer(palette = "Set1") +
   theme_tufte() +
   labs(title = "Figure 2. Suspension Rate by Ethnicity in Preschool",
@@ -723,6 +727,7 @@ ggplot(ds_1, aes(fill = `ethnicity/lep/idea`,
        y = "Percentage of Students") +
   theme(text = element_text(size = 15, face = "bold"))
 ```
+Figure 3. Suspension Rate in K12 shows that, Black students in K12 accounted for 15% of the total student population, but accounted for 16-21% of students who were receiving one or more suspension. In comparison, white students also represent similar range of between 10-22% of students suspended, while accounted for 51% of total student population. 
 
 ```{r }
  
@@ -752,7 +757,8 @@ ggplot(ds_1, aes(fill = `ethnicity/lep/idea`,
 #  export(fig_2,here("data","ds_2.csv"))
 
 
-ds_2 <- import(here("data","ds_2.csv"))
+ds_2 <- import(here("data","ds_2.csv"))%>% 
+  mutate(pct = sum/sum(sum))
 ds_2$`ethnicity/lep` <- fct_inorder(ds_2$`ethnicity/lep`)
 
   ggplot(ds_2, aes(fill = `ethnicity/lep`,
@@ -761,6 +767,8 @@ ds_2$`ethnicity/lep` <- fct_inorder(ds_2$`ethnicity/lep`)
 geom_col(position = "fill",
          stat = "identity",
            alpha = 0.7, na.rm = TRUE) +
+    geom_text(aes(label=paste0(sprintf("%1.1f", pct*100),"%")), 
+            position = position_fill(vjust = 0.5), colour="black", size = 2) +
   theme_tufte() +
 scale_fill_brewer(palette = "Set1") +
 labs(title = "Figure 3. Suspension Rate by Ethnicity in K12",
@@ -771,6 +779,10 @@ theme(text = element_text(size = 15, face = "bold"))
 
 
 ```
+
+
+In Figure 4 and Figure 5 when gender was included, both __Black Male__ and __Black Female__ students were suspended more compared to their peers in Preschool and K-12. Overall, __Male__ students were suspended more than female students across all school level.
+
 
 ```{r }
 # fig_3 <- susp_ps_tidy %>%
