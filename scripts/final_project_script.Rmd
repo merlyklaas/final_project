@@ -342,108 +342,6 @@ data_join <- enroll_final %>%
 #export(data_join, here("data","data_join.csv"))
 ```
 
-<!-- To create graphs for the suspension and expulsion, we created a longer version, and subsetted per our need. Here's the process. -->
-
-
-```{r load suspension and expulsion, eval = FALSE}
-#Function to remove negative numbers from data
-
-remove_neg <- function (x) ifelse(x < 0, NA, x)
-
-susp <- import(here("data", "Suspensions.csv")) %>%
-    as_tibble() %>%
-    clean_names() %>%
-    mutate(across(c(9:189), remove_neg))
-
-#preK suspension data
-susp_ps <- susp %>%
-  select(c(1:50))
-
-#K12 suspension
-susp_k12 <- susp %>%
-  select(c(1:8,51:167))
-
-# We don't use any expulsion data in our analysis
-# expl <- import(here("data", "Expulsions.csv")) %>%
-#     as_tibble() %>%
-#     clean_names() %>%
-#     mutate(across(c(9:142), remove_neg))
-#
-# #preK expulsion data
-# expl_ps <- expl %>%
-#   select(c(1:8), matches('psdisc'))
-#
-# #K12 data expulsion data
-# expl_k12 <- expl %>%
-#   select(c(1:142), -matches('psdisc'))
-
-```
-
-
-```{r tidy data, eval = FALSE}
-
-susp_k12_504 <- susp_k12 %>%
-        select(combokey, matches('_504_')) %>%
-        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>%
-        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
-
-susp_k12_tidy <- susp_k12 %>%
-        select(-matches('tot|_504|oosinstances')) %>%
-        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>%
-        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>%
-        left_join(susp_k12_504, by = "combokey") %>%
-        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>%
-        pivot_longer(
-            cols = -c(1:8),
-            names_to = c("disability", "type","ethnicity/lep", "gender"),
-            names_sep = "_",
-            names_prefix = "sch_",
-            values_to = "students",
-        )
-
-susp_ps_tidy <- susp_ps %>%
-        select(-matches('tot|oosinstances'))%>%
-        pivot_longer(
-            cols = -c(1:8),
-            names_to = c("type", "ethnicity/lep/idea","gender"),
-            names_sep = "_",
-            names_prefix = "sch_psdisc_",
-            values_to = "students"
-        )
-
-# export(susp_k12_tidy, here("data", "susp_k12_tidy.csv"))
-# export(susp_ps_tidy, here("data", "susp_ps_tidy.csv"))
-# We don't use any expulsion in our analysis.
-# expl_k12_504 <- expl_k12 %>%
-#         select(combokey, matches('_504_')) %>%
-#         rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>%
-#         rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
-#
-# expl_k12_tidy <- expl_k12 %>%
-#         select(-matches('tot')) %>%
-#         rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>%
-#         rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>%
-#         left_join(expl_k12_504, by = "combokey") %>%
-#         rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>%
-#         pivot_longer(
-#             cols = -c(1:8),
-#             names_to = c("disability", "type","ethnicity/lep", "gender"),
-#             names_sep = "_",
-#             names_prefix = "sch_",
-#             values_to = "students",
-#         )
-#
-# expl_ps_tidy <- expl_ps %>%
-#         select(-matches('tot'))%>%
-#         pivot_longer(
-#             cols = -c(1:8),
-#             names_to = c("type", "ethnicity/lep/idea","gender"),
-#             names_sep = "_",
-#             names_prefix = "sch_psdisc_",
-#             values_to = "students"
-#         )
-
-```
 
 # Methods
 
@@ -562,7 +460,7 @@ appendix_figure2 <- state_means %>%
 
 <!-- Explore the visual relationship between percent new teachers and rates of suspension. It looks like it is a positive relationship. As the percent of new teachers increases, the rate of suspension increases. Looking at this by state, it looks like starting point (intercept) and the slope between these two variables vary. Some states have steeper slopes or start higher. Indicates need for a hierchichal linear model. -->
 
-```{r }
+```{r eval = FALSE}
 # Rate of suspensions per 1000 students across states
 # Explore the relationship between novice teachers and rate of suspension
 rq1 %>%
@@ -691,36 +589,138 @@ results + labs(x = "Change in number of students suspended per 1,000 students \n
 Figure 2 and figure 3 about Suspensions rate by Ethnicity in Preschool and K-12 show that __Black Students__ were suspended more compared to their peers in Preschool and K-12. In Figure 4 and Figure 5 when gender was included, both __Black Male__ and __Black Female__ students were suspended more compared to their peers in Preschool and K-12. Overall, __Male__ students were suspended more than female students across all school level.
 
 ### Suspension rate by ethnicity in preschool
-```{r}
-#loading tidy files
-#these files are very long and throw errors while knitting
-susp_ps_tidy <- import(here("data", "susp_ps_tidy.csv"))
-susp_k12_tidy <- import(here("data", "susp_k12_tidy.csv"))
+
+<!-- To create graphs for the suspension and expulsion, we created a longer version, and subsetted per our need. Here's the process. -->
+
+
+```{r load suspension and expulsion, eval = FALSE}
+#Function to remove negative numbers from data
+
+remove_neg <- function (x) ifelse(x < 0, NA, x)
+
+susp <- import(here("data", "Suspensions.csv")) %>%
+    as_tibble() %>%
+    clean_names() %>%
+    mutate(across(c(9:189), remove_neg))
+
+#preK suspension data
+susp_ps <- susp %>%
+  select(c(1:50))
+
+#K12 suspension
+susp_k12 <- susp %>%
+  select(c(1:8,51:167))
+
+# We don't use any expulsion data in our analysis
+# expl <- import(here("data", "Expulsions.csv")) %>%
+#     as_tibble() %>%
+#     clean_names() %>%
+#     mutate(across(c(9:142), remove_neg))
+#
+# #preK expulsion data
+# expl_ps <- expl %>%
+#   select(c(1:8), matches('psdisc'))
+#
+# #K12 data expulsion data
+# expl_k12 <- expl %>%
+#   select(c(1:142), -matches('psdisc'))
+
+```
+
+
+```{r tidy data, eval = FALSE}
+
+susp_k12_504 <- susp_k12 %>%
+        select(combokey, matches('_504_')) %>%
+        rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>%
+        rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+
+susp_k12_tidy <- susp_k12 %>%
+        select(-matches('tot|_504|oosinstances')) %>%
+        rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>%
+        rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>%
+        left_join(susp_k12_504, by = "combokey") %>%
+        rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>%
+        pivot_longer(
+            cols = -c(1:8),
+            names_to = c("disability", "type","ethnicity/lep", "gender"),
+            names_sep = "_",
+            names_prefix = "sch_",
+            values_to = "students",
+        )
+
+susp_ps_tidy <- susp_ps %>%
+        select(-matches('tot|oosinstances'))%>%
+        pivot_longer(
+            cols = -c(1:8),
+            names_to = c("type", "ethnicity/lep/idea","gender"),
+            names_sep = "_",
+            names_prefix = "sch_psdisc_",
+            values_to = "students"
+        )
+
+# We don't use any expulsion in our analysis.
+# expl_k12_504 <- expl_k12 %>%
+#         select(combokey, matches('_504_')) %>%
+#         rename_with( ~ (gsub("_504_", "_all_", .x, fixed = TRUE))) %>%
+#         rename_with( ~ (gsub("discwdis", "504", .x, fixed = TRUE)))
+#
+# expl_k12_tidy <- expl_k12 %>%
+#         select(-matches('tot')) %>%
+#         rename_with( ~ (gsub("_idea_", "_", .x, fixed = TRUE))) %>%
+#         rename_with( ~ (gsub("discwdis", "idea", .x, fixed = TRUE))) %>%
+#         left_join(expl_k12_504, by = "combokey") %>%
+#         rename_with( ~ (gsub("discwodis", "no", .x, fixed = TRUE))) %>%
+#         pivot_longer(
+#             cols = -c(1:8),
+#             names_to = c("disability", "type","ethnicity/lep", "gender"),
+#             names_sep = "_",
+#             names_prefix = "sch_",
+#             values_to = "students",
+#         )
+#
+# expl_ps_tidy <- expl_ps %>%
+#         select(-matches('tot'))%>%
+#         pivot_longer(
+#             cols = -c(1:8),
+#             names_to = c("type", "ethnicity/lep/idea","gender"),
+#             names_sep = "_",
+#             names_prefix = "sch_psdisc_",
+#             values_to = "students"
+#         )
+
 ```
 
 ```{r }
-fig_1 <- susp_ps_tidy %>%
-  filter(`ethnicity/lep/idea` != "lep" ,
-         `ethnicity/lep/idea` != "idea" ) %>%
-  mutate(
-    `ethnicity/lep/idea` =
-             fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
-  `ethnicity/lep/idea` = dplyr::recode(`ethnicity/lep/idea`,
-                                  as = "Asian",
-                                  hp = "Hawaiaan/Pacific Islander",
-                                  am = "Native American/Alaskan",
-                                  tr = "Two or More Races",
-                                  hi = "Hispanic",
-                                  wh = "White",
-                                  bl = "Black"),
-         type = dplyr::recode(type, multoos = "Multiple Out of School",
-                     singoos = "Single Out of School")) %>%
-  group_by(type, `ethnicity/lep/idea`) %>%
-  summarize(
-    sum = sum(students, na.rm = TRUE)
-  )
+#The above data files are very large - 356 MB and 1GB respectively. Since, each time on knitting the program runs into a run-time error, we saved our plot data as data files. Here's the code. This is our procedure for the next four chunks.
+#fig_1 <- susp_ps_tidy %>%
+  # filter(`ethnicity/lep/idea` != "lep" ,
+  #        `ethnicity/lep/idea` != "idea" ) %>%
+  # mutate(
+  #   `ethnicity/lep/idea` =
+  #            fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
+  # `ethnicity/lep/idea` = dplyr::recode(`ethnicity/lep/idea`,
+  #                                 as = "Asian",
+  #                                 hp = "Hawaiaan/Pacific Islander",
+  #                                 am = "Native American/Alaskan",
+  #                                 tr = "Two or More Races",
+  #                                 hi = "Hispanic",
+  #                                 wh = "White",
+  #                                 bl = "Black"),
+  #        type = dplyr::recode(type, multoos = "Multiple Out of School",
+  #                    singoos = "Single Out of School")) %>%
+  # group_by(type, `ethnicity/lep/idea`) %>%
+  # summarize(
+  #   sum = sum(students, na.rm = TRUE)
+  # )
+#  export(fig_1,here("data","ds_1.csv"))
 
-ggplot(fig_1, aes(fill = `ethnicity/lep/idea`,
+
+ds_1 <- import(here("data","ds_1.csv"))
+
+ds_1$`ethnicity/lep/idea` <- fct_inorder(ds_1$`ethnicity/lep/idea`)
+
+ggplot(ds_1, aes(fill = `ethnicity/lep/idea`,
            x = type,
            y =sum)) +
   geom_col(position = "fill",
@@ -733,36 +733,41 @@ ggplot(fig_1, aes(fill = `ethnicity/lep/idea`,
        x = "Type of Suspensions",
        y = "Percentage of Students") +
   theme(text = element_text(size = 15, face = "bold"))
-#ggsave(here("plot", "susp_ps.jpg"))
 ```
 
 ### Suspension rate by Ethnicity in k12
-```{r eval = FALSE}
-#these chunks are using a lot of space, and throwing run-time errors. We have saves the images, and are exporting them instead of running these chunks in the knit. 
-fig_2 <- susp_k12_tidy %>%
-  drop_na() %>%
-  filter(`ethnicity/lep` != "lep",
-         `ethnicity/lep` != "all",
-         type == "singoos"|
-         type == "multoos"
-         ) %>%
-    mutate(`ethnicity/lep` =
-             fct_relevel (`ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
-           `ethnicity/lep` = dplyr::recode(`ethnicity/lep`,
-                                       as = "Asian",
-                                       hp = "Hawaiaan/Pacific Islander",
-                                       am = "Native American/Alaskan",
-                                       tr = "Two or More Races",
-                                       hi = "Hispanic",
-                                       wh = "White",
-                                       bl = "Black"),
-         type = dplyr::recode(type, multoos = "Multiple Out of School",
-                     singoos = "Single Out of School")) %>%
-    group_by(type, `ethnicity/lep`)  %>%
-    summarise(
-      sum = sum(students,na.rm = TRUE)
-    )
-  ggplot(fig_2, aes(fill = `ethnicity/lep`,
+```{r }
+ 
+# fig_2 <- susp_k12_tidy %>%
+#   drop_na() %>%
+#   filter(`ethnicity/lep` != "lep",
+#          `ethnicity/lep` != "all",
+#          type == "singoos"|
+#          type == "multoos"
+#          ) %>%
+#     mutate(`ethnicity/lep` =
+#              fct_relevel (`ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
+#            `ethnicity/lep` = dplyr::recode(`ethnicity/lep`,
+#                                        as = "Asian",
+#                                        hp = "Hawaiaan/Pacific Islander",
+#                                        am = "Native American/Alaskan",
+#                                        tr = "Two or More Races",
+#                                        hi = "Hispanic",
+#                                        wh = "White",
+#                                        bl = "Black"),
+#          type = dplyr::recode(type, multoos = "Multiple Out of School",
+#                      singoos = "Single Out of School")) %>%
+#     group_by(type, `ethnicity/lep`)  %>%
+#     summarise(
+#       sum = sum(students,na.rm = TRUE)
+#     )
+#  export(fig_2,here("data","ds_2.csv"))
+
+
+ds_2 <- import(here("data","ds_2.csv"))
+ds_2$`ethnicity/lep` <- fct_inorder(ds_2$`ethnicity/lep`)
+
+  ggplot(ds_2, aes(fill = `ethnicity/lep`,
              x = type,
              y = sum)) +
 geom_col(position = "fill",
@@ -775,36 +780,40 @@ labs(title = "Figure 3. Suspension Rate by Ethnicity in K12",
        x = "Type of Suspensions",
        y = "Percentage of Students") +
 theme(text = element_text(size = 15, face = "bold"))
-#ggsave(here("plot", "susp_k12.jpg"))
 
 
 ```
 
 * Multiple Out of school suspension rate by gender and race for preschool students
 ```{r }
-fig_3 <- susp_ps_tidy %>%
-  filter(type == "multoos",
-         `ethnicity/lep/idea` != "lep" ,
-         `ethnicity/lep/idea` != "idea" ) %>%
-  mutate(`ethnicity/lep/idea` =
-             fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
-          `ethnicity/lep/idea` = dplyr::recode(`ethnicity/lep/idea`,
-                                       as = "Asian",
-                                       hp = "Hawaiaan/Pacific Islander",
-                                       am = "Native American/Alaskan",
-                                       tr = "Two or More Races",
-                                       hi = "Hispanic",
-                                       wh = "White",
-                                       bl = "Black"),
-         gender = dplyr::recode(gender,
-                         f = "Female",
-                         m = "Male")) %>%
-  group_by(`ethnicity/lep/idea`, gender) %>%
-  summarise(
-    sum = sum(students, na.rm = TRUE)
-  )
+# fig_3 <- susp_ps_tidy %>%
+#   filter(type == "multoos",
+#          `ethnicity/lep/idea` != "lep" ,
+#          `ethnicity/lep/idea` != "idea" ) %>%
+#   mutate(`ethnicity/lep/idea` =
+#              fct_relevel (`ethnicity/lep/idea`, "as", "hp", "am","tr", "hi", "wh","bl"),
+#           `ethnicity/lep/idea` = dplyr::recode(`ethnicity/lep/idea`,
+#                                        as = "Asian",
+#                                        hp = "Hawaiaan/Pacific Islander",
+#                                        am = "Native American/Alaskan",
+#                                        tr = "Two or More Races",
+#                                        hi = "Hispanic",
+#                                        wh = "White",
+#                                        bl = "Black"),
+#          gender = dplyr::recode(gender,
+#                          f = "Female",
+#                          m = "Male")) %>%
+#   group_by(`ethnicity/lep/idea`, gender) %>%
+#   summarise(
+#     sum = sum(students, na.rm = TRUE)
+#   )
+#  export(fig_3,here("data","ds_3.csv"))
 
-  ggplot(fig_3,aes(`ethnicity/lep/idea`, sum)) +
+
+ds_3 <- import(here("data","ds_3.csv"))
+ds_3$`ethnicity/lep/idea` <- fct_inorder(ds_3$`ethnicity/lep/idea`)
+
+  ggplot(ds_3,aes(`ethnicity/lep/idea`, sum)) +
   geom_col(aes(fill = gender),
            position = "dodge",
            na.rm = TRUE) +
@@ -822,30 +831,35 @@ fig_3 <- susp_ps_tidy %>%
 
 * Multiple Out of school suspension rate by gender and race for k12 students
 ```{r}
-fig_4 <- susp_k12_tidy %>%
-filter(type == "multoos",
-         `ethnicity/lep` != "lep",
-         `ethnicity/lep` != "all"
-         ) %>%
-mutate(`ethnicity/lep` = fct_relevel (
-  `ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
-        `ethnicity/lep` = dplyr::recode(`ethnicity/lep`,
-                                       as = "Asian",
-                                       hp = "Hawaiaan/Pacific Islander",
-                                       am = "Native American/Alaskan",
-                                       tr = "Two or More Races",
-                                       hi = "Hispanic",
-                                       wh = "White",
-                                       bl = "Black"),
-         gender = dplyr::recode(gender,
-                         f = "Female",
-                         m = "Male")) %>%
-  group_by(`ethnicity/lep`, gender) %>%
-  summarise(
-    sum = sum(students, na.rm = TRUE)
-  )
+# fig_4 <- susp_k12_tidy %>%
+# filter(type == "multoos",
+#          `ethnicity/lep` != "lep",
+#          `ethnicity/lep` != "all"
+#          ) %>%
+# mutate(`ethnicity/lep` = fct_relevel (
+#   `ethnicity/lep`, "as", "hp", "am","tr", "hi", "wh","bl"),
+#         `ethnicity/lep` = dplyr::recode(`ethnicity/lep`,
+#                                        as = "Asian",
+#                                        hp = "Hawaiaan/Pacific Islander",
+#                                        am = "Native American/Alaskan",
+#                                        tr = "Two or More Races",
+#                                        hi = "Hispanic",
+#                                        wh = "White",
+#                                        bl = "Black"),
+#          gender = dplyr::recode(gender,
+#                          f = "Female",
+#                          m = "Male")) %>%
+#   group_by(`ethnicity/lep`, gender) %>%
+#   summarise(
+#     sum = sum(students, na.rm = TRUE)
+#   )
+#  export(fig_4,here("data","ds_4.csv"))
 
-ggplot(fig_4, aes(fill = gender,
+
+ds_4 <- import(here("data","ds_4.csv"))
+ds_4$`ethnicity/lep` <- fct_inorder(ds_4$`ethnicity/lep`)
+
+ggplot(ds_4, aes(fill = gender,
            x = `ethnicity/lep`,
            y = sum)) +
 geom_col( position = "dodge") +
@@ -858,7 +872,7 @@ labs(
   y = "Number of Students with Multiple Out of School Suspension") +
 theme(text = element_text(size = 15, face = "bold"),
         axis.text.x = element_text(angle = 90, hjust = 1))
-#ggsave(here("plot", "multoos_12.jpg"))
+
 ```
 
 

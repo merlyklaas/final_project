@@ -1,0 +1,15 @@
+type,ethnicity/lep/idea,sum
+Multiple Out of School,Asian,2
+Multiple Out of School,Hawaiaan/Pacific Islander,2
+Multiple Out of School,Native American/Alaskan,16
+Multiple Out of School,Two or More Races,72
+Multiple Out of School,Hispanic,100
+Multiple Out of School,White,433
+Multiple Out of School,Black,497
+Single Out of School,Asian,9
+Single Out of School,Hawaiaan/Pacific Islander,0
+Single Out of School,Native American/Alaskan,33
+Single Out of School,Two or More Races,111
+Single Out of School,Hispanic,210
+Single Out of School,White,611
+Single Out of School,Black,726
