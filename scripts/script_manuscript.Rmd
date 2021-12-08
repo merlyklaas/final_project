@@ -16,7 +16,7 @@ author:
     affiliation   : "1"
     equal_contrib : yes
     
-  - name          : "Merly Klass"
+  - name          : "Merly Klaas"
     affiliation   : "1"
     equal_contrib : yes
     

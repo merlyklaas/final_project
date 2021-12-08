@@ -4,7 +4,7 @@ author:
   - Manuel V. Cano
   - Errol Kaylor
   - Havisha Khurana
-  - Merly Klass
+  - Merly Klaas
   - Cassie N. Malcom
 output:
   html_document:
@@ -438,7 +438,7 @@ appendix_figure1 <- state_means %>%
              size = 1) +
   geom_errorbarh(aes(xmin = state_mean_newtch - 1.96*state_mean_newtch_se,
                      xmax = state_mean_newtch+ 1.96*state_mean_newtch_se)) +
-  labs( y = "State", x = "Percent novice teachers") +
+  labs( y = "State", x = "Percent novice teachers", title = "Figure 1") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
   panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=8))
 
@@ -452,7 +452,7 @@ appendix_figure2 <- state_means %>%
              size = 1) +
   geom_errorbarh(aes(xmin = state_mean_susp - 1.96*state_mean_susp_se,
                      xmax = state_mean_susp+ 1.96*state_mean_susp_se)) +
-  labs( y = "State", x = "Mean rate of student suspensions per 1000") +
+  labs( y = "State", x = "Mean rate of student suspensions per 1000", title = "Figure 2") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
   panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
 ```
@@ -1233,6 +1233,11 @@ A valuable follow up to this study would be to further contextualize the teacher
 ```{r}
 appendix_figure1
 appendix_figure2
+```
+
+Table 1
+
+```{r}
 appendix_table1
 ```
 
