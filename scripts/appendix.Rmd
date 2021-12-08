@@ -1,0 +1,69 @@
+\renewcommand{\appendixname}{Appendix}
+\renewcommand{\thefigure}{\arabic{figure}} \setcounter{figure}{0}
+\renewcommand{\thetable}{\arabic{table}} \setcounter{table}{0}
+\renewcommand{\theequation}{SI\arabic{table}} \setcounter{equation}{0}
+
+```{r import data, echo = FALSE}
+data_join <- import(here("data","data_join.csv")) %>%
+  as_tibble()
+
+rq1 <- data_join %>%
+  filter(lea_state != "PR") %>%
+  mutate(leaid = as.numeric(leaid),
+         lea_state = as.factor(lea_state)) %>%
+  filter(!is.na(susp_std)) %>%
+  filter(!is.na(pct_new_teachers)) %>%
+  filter(pct_new_teachers != Inf) %>%
+  mutate(pct_new_teachers = ifelse(pct_new_teachers > 100,100, pct_new_teachers))
+
+```
+
+```{r include = FALSE}
+# Explore the extent to which rate of novice teachers and rate of suspensions vary
+# across states. Appears to have wide variation within state and across states.
+
+#Creating a data frame with state averages and using this to plot district rates
+state_means <- rq1 %>%
+  group_by(lea_state) %>%
+  summarise(state_mean_susp = mean(susp_std,weights = tot_enr, na.rm = TRUE),
+            state_mean_susp_se = sd(susp_std, na.rm = TRUE)/sqrt(n()),
+            state_mean_newtch = mean(pct_new_teachers,weights = tot_enr, na.rm = TRUE),
+            state_mean_newtch_se = sd(pct_new_teachers, na.rm = TRUE)/sqrt(n()),
+            )
+
+#Rate of Novice teachers across states
+appendix_figure1 <- state_means %>%  
+  mutate(lea_state = reorder(lea_state,state_mean_newtch)) %>%
+  ggplot(aes(state_mean_newtch, lea_state)) +
+    geom_point(color = "#0aadff")  +
+    geom_vline(xintercept = mean(rq1$pct_new_teachers, na.rm = TRUE),
+             color = "red",
+             size = 1) +
+  geom_errorbarh(aes(xmin = state_mean_newtch - 1.96*state_mean_newtch_se,
+                     xmax = state_mean_newtch+ 1.96*state_mean_newtch_se)) +
+  labs( y = "State", x = "Percent novice teachers") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=8))
+
+#Rate of Suspensions expulsion across States
+appendix_figure2 <- state_means %>%  
+  mutate(lea_state = reorder(lea_state,state_mean_susp)) %>%
+  ggplot(aes(state_mean_susp, lea_state)) +
+    geom_point(color = "#0aadff")  +
+    geom_vline(xintercept = mean(rq1$susp_std, na.rm = TRUE),
+             color = "red",
+             size = 1) +
+  geom_errorbarh(aes(xmin = state_mean_susp - 1.96*state_mean_susp_se,
+                     xmax = state_mean_susp+ 1.96*state_mean_susp_se)) +
+  labs( y = "State", x = "Mean rate of student suspensions per 1000") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
+```
+
+```{r appendix1, fig.height = 8, fig.width = 8, fig.align = "center"}
+appendix_figure1
+```
+
+```{r appendix2, fig.height = 8, fig.width = 8, fig.align = "center"}
+appendix_figure2
+```

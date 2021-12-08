@@ -29,7 +29,7 @@ affiliation:
     institution   : "University of Oregon"
 
 authornote: |
-  Department of Educational Policy, Methodology, and Leadership. College of Educaion
+  Department of Educational Policy, Methodology, and Leadership. College of Education
 
 abstract: |
  School staffing choices impact student outcomes. Prior research has explored the association between novice teachers and law enforcement officers on students' disciplinary actions. This study uses publicly available data on schools from the 2017-18 Civil Rights Data Collection (n = 97,632). We had two research questions that aimed to answer how school staffing affects school climate. To study the relationship between novice teachers and student rates of suspensions, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. We also used a multiple regression with one continuous and two categorical predictors to find the association between law enforcement officials and student arrests and referrals. In both cases, the relationship was statistically significant even after controlling for characteristics. We also noted that males and Black students receive more disciplinary actions. Our results indicate that new teachers may benefit from additional classroom management training. In addition, alternative methods of encouraging proper student behavior should be considered.
@@ -37,25 +37,24 @@ abstract: |
   <!-- https://tinyurl.com/ybremelq -->
   
 keywords          : "novice teachers, suspension, law enforcement officers, arrests and referrals, school staffing"
-wordcount         : ""
 
 bibliography      : ["r-references.bib", "reference.bib"]
+appendix          : appendix.rmd
 
 floatsintext      : yes
-figurelist        : no
-tablelist         : no
+figurelist        : yes
+tablelist         : yes
 footnotelist      : no
 numbersections    : yes    
-linenumbers       : yes
+linenumbers       : no
 mask              : no
 draft             : no
+replace_ampersands: no
+
 
 documentclass     : "apa6"
-lang              : "english"
 classoption       : "man"
-output            : 
-  papaja::apa6_pdf:
-    keep_tex: FALSE
+output            : papaja::apa6_pdf
 ---
 
 ```{r setup, include=FALSE}
@@ -65,20 +64,15 @@ r_refs("r-references.bib")
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       warning = FALSE,
-                      error = FALSE,
-                      fig.width = 9,
-                      fig.height = 9)
+                      error = FALSE)
 
 # We used the pacman library to load packages.
 #if (!require("pacman")) install.packages("pacman") #uncomment code to install pacman, if you don't already have it.
 
 pacman::p_load(papaja, tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary, ggstance, broom.mixed, car, lm.beta)
-
-r_refs("r-references.bib")
 ```
 
-
-[Sentence that gives an overview of the study] This research project will be conducted using High school, Middle school, and Elementary school level data from the [**Civil Rights Data Collection (CRDC)**] (https://ocrdata.ed.gov/), 2017-2018 data set.
+# Introduction
 
 ## Prior Literature
 
@@ -86,7 +80,7 @@ Previous research has shown that school staffing choices can have an impact on s
 
 The relationship between student disciplinary outcomes and number of new teachers has several potential mechanisms. In addition to poor classroom management, schools with a higher level of new teachers may lack in senior leadership, giving new teachers fewer opportunities to improve their teaching. Our study also looks for a similar relationship between law enforcement presence and student discipline, where higher LEO presence affects how students act and teachers respond.
 
-## Research Questions  [update using presentaiton RQs]
+## Research Questions
 
 Our team developed two research questions in order to determine if school staffing choices are related to student disciplinary outcomes.
 
@@ -387,7 +381,7 @@ data_join <- enroll_final %>%
 
 ## Sample and Exclusion Criteria
 
-```{r}
+```{r reimport joined data}
 #Importing the file and doing some cleaning to  make sure it runs, dropping Puerto Rico because they don't appear to report suspensions -rates were zero.
 #This throws error for me because of space. Guess we have a lot of data loaded in the prev. chunks
 data_join <- import(here("data","data_join.csv")) %>%
@@ -413,121 +407,58 @@ This analysis was conducted using publicly available data from the 2017-18 civil
 5. School characteristics (type: magnet, alternate, charter, and special education)
 6. Data sets are organized by state, school district (LEA), and school level
 
-The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve `r sum(rq1$tot_enr)`students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
-
-Table 1. Descriptive information about the study sample
 ```{r }
 
 #Summary statistics of #school, #enrollment by race, and #tot disciplines
-
 
 data_join %>%
   drop_na() %>%
   filter(pct_new_teachers != Inf,
          sch_fteteach_tot != Inf) %>% 
   select(
-         `White Students Enrollment (%)` = sch_enr_wh,
-         `Hispanic Students Enrollment (%)` = sch_enr_hi,
-         `Black Students Enrollment (%)` = sch_enr_bl,
-         `Asian Students Enrollment (%)` = sch_enr_as,
-         `Native American/Alaskan Students Enrollment (%)` = sch_enr_am,
-         `Hawaiian and Pacific Islander Students Enrollment (%)` = sch_enr_hp,
-         `Two or more races Student Enrollment (%)` = sch_enr_tr,
-         `Students with Disability Status Enrollment (%)` = sch_enr_idea,
-         `Novice Teacher Enrolled (%)` = pct_new_teachers,
-         `Law Enforcement Officials` = sch_fteteach_tot,
-         `Suspension Rate` = tot_susp,
-         `Explusion Rate` = tot_expl,
-         `Number of Arrest` = tot_arr,
-         `Number of Referral` = tot_ref) %>%
+         "White Students Enrollment (%" = sch_enr_wh,
+         "Hispanic Students Enrollment (%)" = sch_enr_hi,
+         "Black Students Enrollment (%)" = sch_enr_bl,
+         "Asian Students Enrollment (%)" = sch_enr_as,
+         "Native American/Alaskan Students Enrollment (%)" = sch_enr_am,
+         "Hawaiian and Pacific Islander Students Enrollment (%)" = sch_enr_hp,
+         "Two or more races Student Enrollment (%)" = sch_enr_tr,
+         "Students with Disability Status Enrollment (%)" = sch_enr_idea,
+         "Novice Teacher Enrolled (%)" = pct_new_teachers,
+         "Law Enforcement Officials" = sch_fteteach_tot,
+         "Suspension Rate" = tot_susp,
+         "Explusion Rate" = tot_expl,
+         "Number of Arrest" = tot_arr,
+         "Number of Referral" = tot_ref) %>%
 tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) %>%
   modify_footnote(
     all_stat_cols() ~ "Mean (SD) per school"
   ) %>%
-  modify_caption("**Table 1. Summary Statistics**") #Merly to add a descriptive statistics table
+  modify_caption("Summary Statistics") 
 ```
+
+The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve `r sum(rq1$tot_enr)`students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
+
+We used `r cite_r("r-references.bib")` for all our analyses.
 
 ## Outcome Measures and Predictors of Interest
 The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. A teacher was considered novice if they were in their first or second year of teaching. This variable was calculated by dividing the total FTE of novice teachers at a school by the total FTE of full time teachers. Across schools in our sample, the mean rate of novice teachers was `r mean(rq1$pct_new_teachers)`, and the numbers ranged from `r min(rq1$pct_new_teachers)` to `r max(rq1$pct_new_teachers)`. There was wide variation in the rate of novice teachers within and across states. In our sample, Florida had the highest rate of novice teachers while North Carolina had the lowest rate (see Figure 1 in the appendix).
 
 The main predictor of interest for research question two was the number of law enforcement officials (sworn law enforcement officers and security guards). This variable was calculated by summing the total FTE of sworn law enforcement officers and security guards to get a count.
 
-The analysis had two outcomes of interest that broadly examined school climate â€” one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(rq1$susp_std)`, and the numbers ranged from `r min(rq1$susp_std)` to `r max(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
+The analysis had two outcomes of interest that broadly examined school climate, one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(rq1$susp_std)`, and the numbers ranged from `r min(rq1$susp_std)` to `r max(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
 
 For research question 2, the outcome measure of interest was the total number of disciplinary actions. The total number of disciplinary actions was determined by adding the number of student referrals and arrests for each district.
 
-```{r }
-# Explore the extent to which rate of novice teachers and rate of suspensions vary
-# across states. Appears to have wide variation within state and across states.
-
-#Creating a data frame with state averages and using this to plot district rates
-state_means <- rq1 %>%
-  group_by(lea_state) %>%
-  summarise(state_mean_susp = mean(susp_std,weights = tot_enr, na.rm = TRUE),
-            state_mean_susp_se = sd(susp_std, na.rm = TRUE)/sqrt(n()),
-            state_mean_newtch = mean(pct_new_teachers,weights = tot_enr, na.rm = TRUE),
-            state_mean_newtch_se = sd(pct_new_teachers, na.rm = TRUE)/sqrt(n()),
-            )
-
-#Rate of Novice teachers across states
-appendix_figure1 <- state_means %>%  
-  mutate(lea_state = reorder(lea_state,state_mean_newtch)) %>%
-  ggplot(aes(state_mean_newtch, lea_state)) +
-    geom_point(color = "#0aadff")  +
-    geom_vline(xintercept = mean(rq1$pct_new_teachers, na.rm = TRUE),
-             color = "red",
-             size = 1) +
-  geom_errorbarh(aes(xmin = state_mean_newtch - 1.96*state_mean_newtch_se,
-                     xmax = state_mean_newtch+ 1.96*state_mean_newtch_se)) +
-  labs( y = "State", x = "Percent novice teachers") +
-  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=8))
-
-#Rate of Suspensions expulsion across States
-appendix_figure2 <- state_means %>%  
-  mutate(lea_state = reorder(lea_state,state_mean_susp)) %>%
-  ggplot(aes(state_mean_susp, lea_state)) +
-    geom_point(color = "#0aadff")  +
-    geom_vline(xintercept = mean(rq1$susp_std, na.rm = TRUE),
-             color = "red",
-             size = 1) +
-  geom_errorbarh(aes(xmin = state_mean_susp - 1.96*state_mean_susp_se,
-                     xmax = state_mean_susp+ 1.96*state_mean_susp_se)) +
-  labs( y = "State", x = "Mean rate of student suspensions per 1000") +
-  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"), axis.text=element_text(size=6))
-```
-
-<!-- Explore the visual relationship between percent new teachers and rates of suspension. It looks like it is a positive relationship. As the percent of new teachers increases, the rate of suspension increases. Looking at this by state, it looks like starting point (intercept) and the slope between these two variables vary. Some states have steeper slopes or start higher. Indicates need for a hierchichal linear model. -->
-
-```{r eval = FALSE}
-# Rate of suspensions per 1000 students across states
-# Explore the relationship between novice teachers and rate of suspension
-rq1 %>%
-  ggplot(aes(x = pct_new_teachers, y = susp_std)) +
-    geom_point() +   
-    geom_smooth(method = lm)
-
-#When looking at regression lines by state, we see different intercepts and slopes of relationship
-rq1 %>%
-  ggplot(aes(x = pct_new_teachers, y = susp_std, color = lea_state)) +
-  geom_smooth(method = lm, se = FALSE) + theme(legend.position="none")
-
-```
-
 ## Analytic Approach
 Descriptive statistics and regression analyses were used to answer the two research questions. To answer the first research question, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. The final model is represented by the following sets of equations.
-
-<!-- Y_jks= Ï€_0ks + X_j + Ï€_1ks*noviceteachers+ Îµ_jks -->
-
 $$Y_{jks}= \pi_{0ks} + X_j + \pi_{1ks}*noviceteachers+ \varepsilon _{jks}$$
-
 $$\pi_{ks}=\beta_{00s}+ r_{0jk}$$
 $$\pi_{1ks}=\beta_{01s}+ r_{1jk}$$
 $$\beta_{00s}= \gamma_{000}+ \mu_{00k}$$
 $$\beta_{01s}= \gamma_{100}$$
 
-Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level rate of novice teachers. This model allows the intercept to vary by district and school and also includes a random slope for the rate of novice teachers across districts. The Î³100 coefficient represents the relationship between school level rate of novice teachers and study outcomes and addresses the first research question. This model was selected through a model comparison test that compared this 3 level HLM to other model specifications and was found to be the best performing model (based on the AIC score).
+Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level rate of novice teachers. This model allows the intercept to vary by district and school and also includes a random slope for the rate of novice teachers across districts. The y100 coefficient represents the relationship between school level rate of novice teachers and study outcomes and addresses the first research question. This model was selected through a model comparison test that compared this 3 level HLM to other model specifications and was found to be the best performing model (based on the AIC score).
 
 To answer the second research question, we used a multiple regression with one continuous and two categorical predictors. The continuous predictor was total number of law enforcement officials and the categorical variables included gender and disability status. Gender was coded so that **female** was 0 and disability status was coded so that students **with** a disability were 0.
 
@@ -535,9 +466,9 @@ To answer the second research question, we used a multiple regression with one c
 
 ## Research Question 1 - Rates of Novice Teachers and Suspensions
 
-Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the model estimated average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative, charter, or magnet school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 students by 1 (see table 1 in the appendix). Similar estimates were found across model specifications including a simpler HLM model with no added covariates and a 3 level random intercept and slopes model with interactions between rates of novice teachers and rate of black and special education students.
+Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the model estimated average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative, charter, or magnet school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 students by 1. Similar estimates were found across model specifications including a simpler HLM model with no added covariates and a 3 level random intercept and slopes model with interactions between rates of novice teachers and rate of black and special education students.
 
-```{r }
+```{r echo = FALSE, include=FALSE}
 
 # As part of the analysis, conducted 4 models that explored the relationship between percent new teachers and rate of suspensions. The first model only included the variable of interest as a control with random intercepts for district and state. The second model added enrollment covariates and school characteristics with random intercepts. The third model allowed the relationship between percent new teachers and rate of suspension to vary across districts. The last model included interactions between enrollment and percent new teachers. Model comparison tests found that the third model was the best model.
 #
@@ -589,29 +520,29 @@ rq1_m3 <- lmer(susp_std ~ pct_new_teachers_c + tot_enr_c + sch_enr_am_c + sch_en
                  (pct_new_teachers_c | leaid) + (1 | lea_state),
                data = rq1)
 # Checking model performance
-compare_performance(rq1_m0,rq1_m1,rq1_m2,rq1_m3, rank = TRUE) %>%
+compare_performance(rq1_m0,rq1_m1,rq1_m2,rq1_m3, rank = TRUE) %>% 
   print_md()
 
-
-appendix_table1 <- tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
-          dv.labels = c("Model 1 - Random Intercepts for states and districts, No covariates", "Model 2 - Random Intercepts for districts, with covariates",
-                      "Model 3 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts",
-                      "Model 4 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts and \n\ enrollment interactions"),
-          pred.labels = c("Intercept", "Percent New Teachers", "Total Enrollment",
-                        "Percent American Indian", "Percent Asian",
-                        "Percent Black", "Percent Latinx",
-                        "Percent Hawaiian/Pacific Islander",
-                        "Percent Multiracial", "Percent EL Classified",
-                        "Percent Special Ed.",
-                        "Special Ed School (Y/N)", "Magnet school ((Y/N)",
-                        "Charter School (Y/N)", "Alternative School (Y/N)",
-                        "Total law enforcement officers",
-                        "Percent New Teachers X Black Enrollment",
-                        "Percent New Teachers X Special Education"))
+# couldn't trouble shoot how to convert html table to latex apa
+# appendix_table1 <- tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.style = "stars",
+#           dv.labels = c("Model 1 - Random Intercepts for states and districts, No covariates", "Model 2 - Random Intercepts for districts, with covariates",
+#                       "Model 3 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts",
+#                       "Model 4 - Random Intercepts for schools and districts, \n\ random slope of novice teachers across districts and \n\ enrollment interactions"),
+#           pred.labels = c("Intercept", "Percent New Teachers", "Total Enrollment",
+#                         "Percent American Indian", "Percent Asian",
+#                         "Percent Black", "Percent Latinx",
+#                         "Percent Hawaiian/Pacific Islander",
+#                         "Percent Multiracial", "Percent EL Classified",
+#                         "Percent Special Ed.",
+#                         "Special Ed School (Y/N)", "Magnet school (Y/N)",
+#                         "Charter School (Y/N)", "Alternative School (Y/N)",
+#                         "Total law enforcement officers",
+#                         "Percent New Teachers X Black Enrollment",
+#                         "Percent New Teachers X Special Education"))
+# appendix_table1 
 ```
 
-Figure 1. Estimated relationship between rate of novice teachers and student suspension rates across model specification
-```{r, echo=TRUE}
+```{r fig.height = 6.5, fig.width = 10, fig.align = "center"}
 results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teachers_c"),
            model.names = c("Model 1 - Random Intercepts for districts and states,\n\ no covariates", "Model 2 - Random Intercepts for districts and states,\n\ with covariates",
                       "Main Model - Random Intercepts for districts and states, \n\ random slope of novice teachers across districts",
@@ -621,17 +552,17 @@ results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teac
            robust = FALSE,
            point.shape = FALSE)
 
-results + labs(x = "Change in number of students suspended per 1,000 students \n\ for every percentage point increase in the rate of novice teachers") + xlim(-1,2) + theme(axis.text=element_text(size=10), legend.text=element_text(size = 10))
+results + labs(x = "Change in rate of suspended students per one unit increase of novice teachers rate",
+               title = "Estimated relationship across model specification") + 
+  xlim(-1,2) + 
+  theme(axis.text=element_text(size=9), legend.text=element_text(size = 9))
 ```
 
 ## Research Question 1 - Descriptive Results
 
 Figure 2 and figure 3 about Suspensions rate by Ethnicity in Preschool and K-12 show that __Black Students__ were suspended more compared to their peers in Preschool and K-12. In Figure 4 and Figure 5 when gender was included, both __Black Male__ and __Black Female__ students were suspended more compared to their peers in Preschool and K-12. Overall, __Male__ students were suspended more than female students across all school level.
 
-### Suspension rate by ethnicity in preschool
-
 <!-- To create graphs for the suspension and expulsion, we created a longer version, and subsetted per our need. Here's the process. -->
-
 
 ```{r load suspension and expulsion, eval = FALSE}
 #Function to remove negative numbers from data
@@ -666,7 +597,6 @@ susp_k12 <- susp %>%
 #   select(c(1:142), -matches('psdisc'))
 
 ```
-
 
 ```{r tidy data, eval = FALSE}
 
@@ -731,7 +661,7 @@ susp_ps_tidy <- susp_ps %>%
 
 ```
 
-```{r }
+```{r fig.height = 8, fig.width = 8, fig.align = "center"}
 #The above data files are very large - 356 MB and 1GB respectively. Since, each time on knitting the program runs into a run-time error, we saved our plot data as data files. Here's the code. This is our procedure for the next four chunks.
 #fig_1 <- susp_ps_tidy %>%
   # filter(`ethnicity/lep/idea` != "lep" ,
@@ -768,15 +698,14 @@ ggplot(ds_1, aes(fill = `ethnicity/lep/idea`,
            alpha = 0.7, na.rm = TRUE) +
   scale_fill_brewer(palette = "Set1") +
   theme_tufte() +
-  labs(title = "Figure 2. Suspension Rate by Ethnicity in Preschool",
+  labs(title = "Suspension Rate by Ethnicity in Preschool",
        fill = "Ethnicity",
        x = "Type of Suspensions",
        y = "Percentage of Students") +
   theme(text = element_text(size = 15, face = "bold"))
 ```
 
-### Suspension rate by Ethnicity in k12
-```{r }
+```{r fig.height = 8, fig.width = 8, fig.align = "center"}
  
 # fig_2 <- susp_k12_tidy %>%
 #   drop_na() %>%
@@ -815,7 +744,7 @@ geom_col(position = "fill",
            alpha = 0.7, na.rm = TRUE) +
   theme_tufte() +
 scale_fill_brewer(palette = "Set1") +
-labs(title = "Figure 3. Suspension Rate by Ethnicity in K12",
+labs(title = "Suspension Rate by Ethnicity in K12",
        fill = "Ethnicity",
        x = "Type of Suspensions",
        y = "Percentage of Students") +
@@ -824,8 +753,7 @@ theme(text = element_text(size = 15, face = "bold"))
 
 ```
 
-* Multiple Out of school suspension rate by gender and race for preschool students
-```{r }
+```{r fig.height = 9, fig.width = 8, fig.align = "center"}
 # fig_3 <- susp_ps_tidy %>%
 #   filter(type == "multoos",
 #          `ethnicity/lep/idea` != "lep" ,
@@ -860,7 +788,7 @@ ds_3$`ethnicity/lep/idea` <- fct_inorder(ds_3$`ethnicity/lep/idea`)
   theme_tufte() +
   scale_fill_brewer(palette = "Set1") +
 
-  labs(title = "Figure 4. Multiple Out-of-school Suspension by Ethnicity & Gender in Preschool",
+  labs(title = "Multiple Out-of-school Suspension by Ethnicity & Gender in Preschool",
        fill = "Gender",
        x = "Race / Ethnicity",
        y = "Number of Students with Multiple Out of School Suspension") +
@@ -869,8 +797,8 @@ ds_3$`ethnicity/lep/idea` <- fct_inorder(ds_3$`ethnicity/lep/idea`)
 #ggsave(here("plot", "multoos_ps.jpg"))
 ```
 
-* Multiple Out of school suspension rate by gender and race for k12 students
-```{r}
+
+```{r fig.height = 9, fig.width = 8, fig.align = "center"}
 # fig_4 <- susp_k12_tidy %>%
 # filter(type == "multoos",
 #          `ethnicity/lep` != "lep",
@@ -906,7 +834,7 @@ geom_col( position = "dodge") +
 theme_tufte() +  
 scale_fill_brewer(palette = "Set1") +
 labs(
-  title = "Figure 5. Multiple Out-of-school Suspension by Ethnicity & Gender in K12",
+  title = "Multiple Out-of-school Suspension by Ethnicity & Gender in K12",
   fill = "Gender",
   x = "Race/Ethnicity",
   y = "Number of Students with Multiple Out of School Suspension") +
@@ -918,7 +846,7 @@ theme(text = element_text(size = 15, face = "bold"),
 
 
 
-## Research Question 2 - Descriptive Results
+## Research Question 2 - Descriptive Results and Analysis
 
 <!-- RA = referrals and arrests -->
 ```{r echo = FALSE, include=FALSE}
@@ -1030,11 +958,11 @@ ra_sum3 <- ra_sum2 %>%
 new_labels <- c("ref" = "Referrals", "arr" = "Arrests")
 ```
 
-Figure X displays the total number of student arrests and referrals per state broken down by student gender.
+Figure 6 displays the total number of student arrests and referrals per state broken down by student gender.
 <!-- How to get it to show a break in the gender indicating disability status or a percentage of each gender that is disabled? -->
 <!-- fct_rev added to flip state names alphabetical -->
 <!-- labeller used to spell out facet_wrap labels -->
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height = 12, fig.width = 11, fig.align = "center"}
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
   geom_col(aes(fill = gender)) +
@@ -1047,11 +975,11 @@ ra_sum3 %>%
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Gender") +
   scale_fill_manual (name = "Gender", values = c("darksalmon", "tomato4"), labels = c("Female", "Male")) +
-  theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
+  theme(axis.text=element_text(size=12), legend.text=element_text(size = 14))
 ```
 
-Figure X displays the total number of student arrests and referrals per state broken down by student disability status.
-```{r echo = FALSE}
+Figure 7 displays the total number of student arrests and referrals per state broken down by student disability status.
+```{r echo = FALSE, fig.height = 12, fig.width = 11, fig.align = "center"}
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
   geom_col(aes(fill = status)) +
@@ -1064,10 +992,8 @@ ra_sum3 %>%
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Disability Status") +
   scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))+
-  theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
+  theme(axis.text=element_text(size=12), legend.text=element_text(size = 14))
 ```
-
-- Create a similar graph with total law enforcement officials
 
 <!-- Tidying Data Sets for Multiple Regression -->
 ```{r eval = FALSE}
@@ -1169,26 +1095,6 @@ ratc %>%
   describeBy()
 ```
 
-<!-- How to label this graph with LEA IDs and make easier to read? Until figure out a better visual do not use in report.
-- Maybe drop school district with NAs and 0s or keep top 10 and bottom 10 to see variation -->
-```{r fig3, fig.height = 10, fig.width = 10, fig.align = "center", echo = FALSE, include=FALSE}
-ratc %>%
-ggplot(aes(as.factor(x = leaid), y = total_student)) +
-geom_col(width = 0.3)+
-theme_minimal() +
-  coord_flip()
-```
-
-<!-- Not loving this visual either, needs to be rethought. -->
-```{r echo = FALSE, include=FALSE}
-ggplot(ratc, aes(total_law, total_student)) +
-  geom_point() +
-  theme_minimal() +
-  labs(x = "Total Number of Law Enforcement Officials",
-    y = "Total Number of Students with a Disciplinary Action")
-```
-
-
 ```{r echo = FALSE, include=FALSE}
 ra_tidy3 <- ra_tidy2 %>%
   pivot_longer(cols = 2:9,
@@ -1234,41 +1140,11 @@ ra_tidy4$tot_st <- as.numeric(ra_tidy4$tot_st)
 * gender: The student's biological gender (male or female).
 * tot_st: The total number of students in the LEA with a dis_act. -->
 
-Table X shows descriptive statistics for the subset of data used in RQ2.
-```{r echo = FALSE}
-  describeBy(ra_tidy4[, -1])
-```
-
-<!-- Research hypothesis: The total number of disciplinary actions is related to the total number of law enforcement officials. A regression model will be run with total_law as a predictor of tot_st while controlling for gender and disability status.
-
-Correlation between tot_st and total_law? -->
-```{r}
-# corr.t <- corr.test(ra_tidy4[, c(2,5)],use="pairwise.complete.obs")
-
-# round(cor.mat,3)
-```
-
-<!-- Could this clustering effect in the corner of the graph be due to districts with NA or 0? -->
-```{r echo = FALSE, include=FALSE}
-scatterHist(tot_st ~ total_law,
-  data = ra_tidy4,
-  smooth=FALSE,
-  ab=FALSE,
-  correl=FALSE,
-  ellipse=FALSE,
-  xlab = "Total Number of Students with a Disciplinary Action",
-  ylab = "Total Number of Law Enforcement Officials",
-  pch=19,
-  title = "Relationship between Law Enforcement and Students with Actions")
-```
-
-## Research Question 2 - Relationship Between the Total Number of Law Enforcement Officials and Total Number of Student Disciplinary Actions
-
-As shown in Table X, for every one unit increase in FTE law enforcement officials the number of student disciplinary actions increase by 0.23. After adjusting for student gender and disability status the number of students with disciplinary actions between male and female students remained significant, Î² Ì‚_2=1.01,SE(Î² Ì‚_2 )=0.08,t(127288)=12.92,  p<0.001. The model indicated that the male students had 1.01 more disciplinary actions. The model also indicated that after adjusting for student gender and disability status the number of students with disciplinary actions between students with and without a disability remained significant, Î² Ì‚_3=1.14,SE(Î² Ì‚_3 )=0.08,  t(127288)=14.57,  p<0.001. This model explained 3.4% of the variance.
+As shown in Table 2, for every one unit increase in FTE law enforcement officials the number of student disciplinary actions increase by 0.23. After adjusting for student gender and disability status the number of students with disciplinary actions between male and female students remained significant, (p<0.001). The model indicated that the male students had 1.01 more disciplinary actions. The model also indicated that after adjusting for student gender and disability status the number of students with disciplinary actions between students with and without a disability remained significant, (p<0.001). This model explained 3.4% of the variance. 
 
 <!-- Results
 Add a control for total student population size -->
-```{r echo = FALSE}
+```{r echo = FALSE, results='hide'}
 mod <- lm(tot_st ~ 1 + total_law + gender + status, data=ra_tidy4)
 
 require(car)
@@ -1278,27 +1154,31 @@ Anova(mod,type=3)
 summary(mod)
 ```
 
-Table X shows the results of the regression analysis for RQ2.
+
+
 ```{r}
-tab_model(mod)
+mod1 <- apa_print(mod)
+mod1$table[, 1] <- c("(Intercept)", "Total Law", "Gender (M)", "Status (wodis)")
+apa_table(mod1$table, caption = "Regression results")
 ```
 
 # Discussion
 
-The present study aimed to 1.) identify relationships between novice teachers and student suspension rates, and 2.) law enforcement official concentration and referrals and arrests. Both of these relationships were then investigated for any moderating student demographics.
+The present study aimed to identify relationships between novice teachers and student suspension rates, and law enforcement official concentration and referrals and arrests. In both cases, our analysis finds significant correlations between staffing choices and student disciplinary outcomes. These correlations are still significant after controlling for school demographics and school status as well.
 
 ## New Teachers and Suspensions
 
-Our analysis shows a meaningful relationship between presence of new teachers and student discipline, where more new teachers correlate with more disciplinary actions. ERROL ADD line on gender, race, etc. Our results indicate that new teachers may benefit from additional classroom management training, or for administrators to schedule classroom management trainings when large numbers of new teachers are hired at the same time.
+Our analysis shows a meaningful relationship between presence of new teachers and student discipline, where more new teachers correlate with more disciplinary actions. This supports our hypothesis that at schools with higher percentages of novice teachers, student disciplinary rates tend to be higher. Our results indicate that new teachers may benefit from additional classroom management training, or for administrators to schedule classroom management trainings when large numbers of new teachers are hired at the same time.
 
 ## Law Enforcement Officials and Expulsions/Referrals
 
-The significant relationship between LEO presence and Referral/Arrest Rates may suggest that administrators look for alternative methods of encouraging proper student behavior. ERROL ADD Gender race note.
+The significant relationship between count of security presence at a school and number of arrests and referrals that occur at a given school should encourage administrators to investigate alternative methods to reducing school violence and ensuring safety of the students. 
 
 ## Limitations and Future Research
 
-The current study has some shortcomings in regards to applicability of our findings - the school level data does not give a total count of suspensions, only the number of students who had suspensions during the study time. As this data does not break down to specific classrooms, we cannot validate whether more suspensions are happening in classrooms with new teachers specifically. Additionally, our analyses do not examine LEO presence as a proportion of total school staff, but rather as a simple count. Additionally, our analyses includes Juvenile Justice facilities, which tend to have much higher concentrations of law enforcement officers than traditional public schools. A future analysis would benefit from anaylyzing these two groups separately, as well as investigating the cross-section of schools with high LEO presence and novice teacher percent.
+The current study has some shortcomings in regards to applicability of our findings - the school level data does not give a total count of suspensions, only the number of students who had suspensions during the study time. As this data does not break down to specific classrooms, we cannot validate whether more suspensions are happening in classrooms with new teachers specifically. Additionally, our analyses do not examine LEO presence as a proportion of total school staff, but rather as a simple count. Additionally, our analyses includes Juvenile Justice facilities, which tend to have much higher concentrations of law enforcement officers than traditional public schools. A future analysis would benefit from anaylyzing these two groups separately, as well as investigating the cross-section of schools with high LEO presence and novice teacher percent. As our LEO analysis does not look at proportional data, further analysis there is necessary to understand the true significance of LEO and security guard presence on student disciplinary outcomes. 
 
+A valuable follow up to this study would be to further contextualize the teacher and LEO employment data with overall school size, funding, and other available data. These analyses would help determine whether student disciplinary outcomes are rising as a result of an unusual or misallocation of school resources, or due to the mechanisms discussed earlier. 
 
 \newpage
 

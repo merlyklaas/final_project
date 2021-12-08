@@ -1,7 +1,11 @@
 ---
-title: "School Personnel and School Climate"
-author: "TEAM QRME"
-date: "11/10/2021"
+title: "Relationship Between School Staffing and Student Suspensions, Referrals, and Arrests"
+author: 
+  - Manuel V. Cano
+  - Errol Kaylor
+  - Havisha Khurana
+  - Merly Klass
+  - Cassie N. Malcom
 output:
   html_document:
     toc: yes
@@ -9,11 +13,9 @@ output:
     toc_depth: 3
     highlight: pygments
     code_folding: hide
-  pdf_document:
-    toc: yes
-    toc_depth: 3
-    number_sections: true
-bibliography: reference.bib
+bibliography:
+    - reference.bib
+    - r-references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -30,9 +32,11 @@ knitr::opts_chunk$set(echo = FALSE,
 pacman::p_load(papaja, tidyverse, rio, here, ggridges, ggthemes, skimr, janitor, reshape2, psych,jtools, lme4, sjPlot, performance,sjmisc, gtsummary, ggstance, broom.mixed, car, lm.beta)
 ```
 
-#Introduction
+# Abstract
 
-This research project will be conducted using High school, Middle school, and Elementary school level data from the [**Civil Rights Data Collection (CRDC)**] (https://ocrdata.ed.gov/), 2017-2018 data set.
+School staffing choices impact student outcomes. Prior research has explored the association between novice teachers and law enforcement officers on students' disciplinary actions. This study uses publicly available data on schools from the 2017-18 Civil Rights Data Collection (n = 97,632). We had two research questions that aimed to answer how school staffing affects school climate. To study the relationship between novice teachers and student rates of suspensions, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. We also used a multiple regression with one continuous and two categorical predictors to find the association between law enforcement officials and student arrests and referrals. In both cases, the relationship was statistically significant even after controlling for characteristics. We also noted that males and Black students receive more disciplinary actions. Our results indicate that new teachers may benefit from additional classroom management training. In addition, alternative methods of encouraging proper student behavior should be considered.
+
+# Introduction
 
 ## Prior Literature
 
@@ -369,7 +373,6 @@ This analysis was conducted using publicly available data from the 2017-18 civil
 
 The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve `r sum(rq1$tot_enr)`students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
 
-Table 1. Descriptive information about the study sample
 ```{r }
 
 #Summary statistics of #school, #enrollment by race, and #tot disciplines
@@ -400,6 +403,8 @@ tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) %>%
   ) %>%
   modify_caption("**Table 1. Summary Statistics**") #Merly to add a descriptive statistics table
 ```
+
+We used `r cite_r("r-references.bib")` for all our analyses.
 
 ## Outcome Measures and Predictors of Interest
 The main predictor variable for research question one was the percent of teachers that are novice teachers at a school. A teacher was considered novice if they were in their first or second year of teaching. This variable was calculated by dividing the total FTE of novice teachers at a school by the total FTE of full time teachers. Across schools in our sample, the mean rate of novice teachers was `r mean(rq1$pct_new_teachers)`, and the numbers ranged from `r min(rq1$pct_new_teachers)` to `r max(rq1$pct_new_teachers)`. There was wide variation in the rate of novice teachers within and across states. In our sample, Florida had the highest rate of novice teachers while North Carolina had the lowest rate (see Figure 1 in the appendix).
@@ -554,7 +559,7 @@ appendix_table1 <- tab_model(rq1_m0,rq1_m1,rq1_m2,rq1_m3, collapse.ci = TRUE, p.
                         "Percent Hawaiian/Pacific Islander",
                         "Percent Multiracial", "Percent EL Classified",
                         "Percent Special Ed.",
-                        "Special Ed School (Y/N)", "Magnet school ((Y/N)",
+                        "Special Ed School (Y/N)", "Magnet school (Y/N)",
                         "Charter School (Y/N)", "Alternative School (Y/N)",
                         "Total law enforcement officers",
                         "Percent New Teachers X Black Enrollment",
@@ -572,7 +577,8 @@ results <- plot_coefs(rq1_m0,rq1_m1,rq1_m2,rq1_m3, coefs = c(" " = "pct_new_teac
            robust = FALSE,
            point.shape = FALSE)
 
-results + labs(x = "Change in number of students suspended per 1,000 students \n\ for every percentage point increase in the rate of novice teachers") + xlim(-1,2) + theme(axis.text=element_text(size=10), legend.text=element_text(size = 10))
+results + labs(x = "Change in number of students suspended per 1,000 students \n\ for every percentage point increase in the rate of novice teachers",
+               title = "Figure 1. Estimated relationship between rate of novice teachers and student suspension rates across model specification") + xlim(-1,2) + theme(axis.text=element_text(size=10), legend.text=element_text(size = 10))
 ```
 
 ## Research Question 1 - Descriptive Results
@@ -986,7 +992,7 @@ ra_sum3 <- ra_sum2 %>%
 new_labels <- c("ref" = "Referrals", "arr" = "Arrests")
 ```
 
-Figure X displays the total number of student arrests and referrals per state broken down by student gender.
+Figure 6 displays the total number of student arrests and referrals per state broken down by student gender.
 <!-- How to get it to show a break in the gender indicating disability status or a percentage of each gender that is disabled? -->
 <!-- fct_rev added to flip state names alphabetical -->
 <!-- labeller used to spell out facet_wrap labels -->
@@ -1003,10 +1009,10 @@ ra_sum3 %>%
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Gender") +
   scale_fill_manual (name = "Gender", values = c("darksalmon", "tomato4"), labels = c("Female", "Male")) +
-  theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
+  theme(axis.text=element_text(size=14), legend.text=element_text(size = 12))
 ```
 
-Figure X displays the total number of student arrests and referrals per state broken down by student disability status.
+Figure 7 displays the total number of student arrests and referrals per state broken down by student disability status.
 ```{r echo = FALSE}
 ra_sum3 %>%
   ggplot(aes(x = fct_rev(lea_state_name), y = tot_st)) +
@@ -1020,7 +1026,7 @@ ra_sum3 %>%
        title = "Number of Student Arrests and Referrals by State",
        subtitle = "Visulalized by Disability Status") +
   scale_fill_manual (name = "Disability Status", values = c("darksalmon", "tomato4"), labels = c("Yes", "No"))+
-  theme(axis.text=element_text(size=14), legend.text=element_text(size = 14))
+  theme(axis.text=element_text(size=14), legend.text=element_text(size = 12))
 ```
 
 <!-- Tidying Data Sets for Multiple Regression -->
@@ -1123,25 +1129,6 @@ ratc %>%
   describeBy()
 ```
 
-<!-- How to label this graph with LEA IDs and make easier to read? Until figure out a better visual do not use in report.
-- Maybe drop school district with NAs and 0s or keep top 10 and bottom 10 to see variation -->
-```{r fig3, fig.height = 10, fig.width = 10, fig.align = "center", echo = FALSE, include=FALSE, eval = FALSE}
-ratc %>%
-ggplot(aes(as.factor(x = leaid), y = total_student)) +
-geom_col(width = 0.3)+
-theme_minimal() +
-  coord_flip()
-```
-
-<!-- Not loving this visual either, needs to be rethought. -->
-```{r echo = FALSE, include=FALSE, eval = FALSE}
-ggplot(ratc, aes(total_law, total_student)) +
-  geom_point() +
-  theme_minimal() +
-  labs(x = "Total Number of Law Enforcement Officials",
-    y = "Total Number of Students with a Disciplinary Action")
-```
-
 ```{r echo = FALSE, include=FALSE}
 ra_tidy3 <- ra_tidy2 %>%
   pivot_longer(cols = 2:9,
@@ -1187,11 +1174,6 @@ ra_tidy4$tot_st <- as.numeric(ra_tidy4$tot_st)
 * gender: The student's biological gender (male or female).
 * tot_st: The total number of students in the LEA with a dis_act. -->
 
-Table X shows descriptive statistics for the subset of data used in RQ2.
-```{r echo = FALSE}
-  describeBy(ra_tidy4[, -1])
-```
-
 <!-- Research hypothesis: The total number of disciplinary actions is related to the total number of law enforcement officials. A regression model will be run with total_law as a predictor of tot_st while controlling for gender and disability status.
 
 Correlation between tot_st and total_law? -->
@@ -1201,19 +1183,6 @@ Correlation between tot_st and total_law? -->
 # round(cor.mat,3)
 ```
 
-<!-- Could this clustering effect in the corner of the graph be due to districts with NA or 0? -->
-```{r echo = FALSE, include=FALSE, eval = FALSE}
-scatterHist(tot_st ~ total_law,
-  data = ra_tidy4,
-  smooth=FALSE,
-  ab=FALSE,
-  correl=FALSE,
-  ellipse=FALSE,
-  xlab = "Total Number of Students with a Disciplinary Action",
-  ylab = "Total Number of Law Enforcement Officials",
-  pch=19,
-  title = "Relationship between Law Enforcement and Students with Actions")
-```
 
 ## Research Question 2 - Relationship Between the Total Number of Law Enforcement Officials and Total Number of Student Disciplinary Actions
 
@@ -1238,23 +1207,33 @@ tab_model(mod)
 
 # Discussion
 
-The present study aimed to 1.) identify relationships between novice teachers and student suspension rates, and 2.) law enforcement official concentration and referrals and arrests. In both cases, our analysis finds significant correlations between staffing choices and student disciplinary outcomes. These correlations are still significant after controlling for school demographics and school status as well.
+The present study aimed to 
 
-### New Teachers and Suspensions
+1. identify relationships between novice teachers and student suspension rates, and 
+2. law enforcement official concentration and referrals and arrests. 
+
+In both cases, our analysis finds significant correlations between staffing choices and student disciplinary outcomes. These correlations are still significant after controlling for school demographics and school status as well.
+
+## New Teachers and Suspensions
 
 Our analysis shows a meaningful relationship between presence of new teachers and student discipline, where more new teachers correlate with more disciplinary actions. This supports our hypothesis that at schools with higher percentages of novice teachers, student disciplinary rates tend to be higher. Our results indicate that new teachers may benefit from additional classroom management training, or for administrators to schedule classroom management trainings when large numbers of new teachers are hired at the same time.
 
-### Law Enforcement Officials and Expulsions/Referrals
+## Law Enforcement Officials and Expulsions/Referrals
 
 The significant relationship between count of security presence at a school and number of arrests and referrals that occur at a given school should encourage administrators to investigate alternative methods to reducing school violence and ensuring safety of the students. 
 
-### Limitations and Future Research
+## Limitations and Future Research
 
 The current study has some shortcomings in regards to applicability of our findings - the school level data does not give a total count of suspensions, only the number of students who had suspensions during the study time. As this data does not break down to specific classrooms, we cannot validate whether more suspensions are happening in classrooms with new teachers specifically. Additionally, our analyses do not examine LEO presence as a proportion of total school staff, but rather as a simple count. Additionally, our analyses includes Juvenile Justice facilities, which tend to have much higher concentrations of law enforcement officers than traditional public schools. A future analysis would benefit from anaylyzing these two groups separately, as well as investigating the cross-section of schools with high LEO presence and novice teacher percent. As our LEO analysis does not look at proportional data, further analysis there is necessary to understand the true significance of LEO and security guard presence on student disciplinary outcomes. 
 
 A valuable follow up to this study would be to further contextualize the teacher and LEO employment data with overall school size, funding, and other available data. These analyses would help determine whether student disciplinary outcomes are rising as a result of an unusual or misallocation of school resources, or due to the mechanisms discussed earlier. 
 
-\newpage
+# Appendix
+
+```{r}
+appendix_figure1
+appendix_figure2
+appendix_table1
+```
 
 # References
-
