@@ -32,7 +32,7 @@ authornote: |
   Department of Educational Policy, Methodology, and Leadership. College of Education
 
 abstract: |
- School staffing choices impact student outcomes. Prior research has explored the association between novice teachers and law enforcement officers on students' disciplinary actions. This study uses publicly available data on schools from the 2017-18 Civil Rights Data Collection (n = 97,632). We had two research questions that aimed to answer how school staffing affects school climate. To study the relationship between novice teachers and student rates of suspensions, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. We also used a multiple regression with one continuous and two categorical predictors to find the association between law enforcement officials and student arrests and referrals. In both cases, the relationship was statistically significant even after controlling for characteristics. We also noted that males and Black students receive more disciplinary actions. Our results indicate that new teachers may benefit from additional classroom management training. In addition, alternative methods of encouraging proper student behavior should be considered.
+ School staffing choices impact student outcomes. Prior research has explored the association between novice teachers and law enforcement officers on students' disciplinary actions. This study uses publicly available data on schools from the 2017-18 Civil Rights Data Collection (*n* = 97,632). We had two research questions that aimed to answer how school staffing affects school climate. To study the relationship between novice teachers and student rates of suspensions, we used a 3-level hierarchical linear model (HLM) with schools nested within districts and districts nested within states. We also used a multiple regression with one continuous and two categorical predictors to find the association between law enforcement officials and student arrests and referrals. In both cases, the relationship was statistically significant even after controlling for characteristics. We also noted that males and Black students receive more disciplinary actions. Our results suggest that new teachers may benefit from additional classroom management training. In addition, alternative methods of encouraging proper student behavior should be considered.
   
   <!-- https://tinyurl.com/ybremelq -->
   
@@ -76,7 +76,7 @@ pacman::p_load(papaja, tidyverse, rio, here, ggridges, ggthemes, skimr, janitor,
 
 ## Prior Literature
 
-Previous research has shown that school staffing choices can have an impact on student outcomes. In particular, novice teachers and law enforcement officials located on school campuses may impact negatively the number of disciplinary actions taken with students of various subgroups. Often, poor classroom management by novice teachers leads to them sending more students to the school office for a form of disciplinary action (e.g., referrals, suspensions, and even arrests) [@williams2020]. Less research has been done on how law enforcement officials impact student disciplinary outcomes, but there have been some studies that suggest there are both benefits (i.e., deterring student to student assaults) and costs (i.e., more students reported for "non-serious violent crimes") [@james2013].
+Previous research has shown that school staffing choices can have an impact on student outcomes. In particular, novice teachers and law enforcement officials (LEO) located on school campuses may impact negatively the number of disciplinary actions taken with students of various subgroups. Often, poor classroom management by novice teachers leads to them sending more students to the school office for a form of disciplinary action [e.g., referrals, suspensions, and even arrests; @williams2020]. Less research has been done on how law enforcement officials impact student disciplinary outcomes, but there have been some studies that suggest there are both benefits (i.e., deterring student to student assaults) and costs [i.e., more students reported for "non-serious violent crimes"; @james2013].
 
 The relationship between student disciplinary outcomes and number of new teachers has several potential mechanisms. In addition to poor classroom management, schools with a higher level of new teachers may lack in senior leadership, giving new teachers fewer opportunities to improve their teaching. Our study also looks for a similar relationship between law enforcement presence and student discipline, where higher LEO presence affects how students act and teachers respond.
 
@@ -112,7 +112,10 @@ enroll <- import(here("data", "Enrollment.csv")) %>%
 ```{r enroll remove neg, eval = FALSE}
 #Function to remove negative numbers from data
 
-remove_neg <- function (x) ifelse(x < 0, NA, x)
+remove_neg <- function(x){
+  ifelse(x < 0, NA, x)
+}
+
 
 enroll <- enroll %>%
     mutate(across(c(9:123), remove_neg)) %>%
@@ -244,7 +247,8 @@ support<- read_csv(here("data", "School Support.csv")) %>%
   as_tibble() %>%
   clean_names() %>%
   mutate(across(c(9:22),remove_neg)) %>%
-  mutate(sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
+  mutate(
+    sum_new_teachers = (sch_fteteach_sy + sch_fteteach_fy),
     pct_new_teachers = sum_new_teachers*100/sch_fteteach_tot, #should be sch_fteteach_tot instead of sch_teachers_curr_total
     tot_law = rowSums(select(., contains('_ftesecurity_')), na.rm = TRUE)
         )
@@ -293,7 +297,7 @@ sch_characteristics_raw <- import(here("data","School Characteristics.csv")) %>%
 
 #function to change Yes to 1, and No to 0
 helperFunction <- function(x){
-    ifelse(x=="Yes", 1,0)
+    ifelse(x == "Yes", 1, 0)
 }
 
 sch_characteristics <- sch_characteristics_raw %>%
@@ -416,7 +420,7 @@ data_join %>%
   filter(pct_new_teachers != Inf,
          sch_fteteach_tot != Inf) %>% 
   select(
-         "White Students Enrollment (%" = sch_enr_wh,
+         "White Students Enrollment (%)" = sch_enr_wh,
          "Hispanic Students Enrollment (%)" = sch_enr_hi,
          "Black Students Enrollment (%)" = sch_enr_bl,
          "Asian Students Enrollment (%)" = sch_enr_as,
@@ -437,7 +441,7 @@ tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})")) %>%
   modify_caption("Summary Statistics") 
 ```
 
-The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r count(data_join)` schools who serve `r sum(rq1$tot_enr)`students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r count(rq1)` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
+The sample in this study included all K-12 schools across the United States. Overall, the 2017-18 civil rights data collection contains `r format(nrow(data_join), big.mark = ",")` schools who serve `r format(sum(rq1$tot_enr), big.mark = ",")` students in grades kindergarten (K) through 12th during the 2017-18 school year. For research question 1, schools that had missing enrollment information, such as missing counts of total enrollment or enrollment by race/ethnicity, were excluded from the analysis. Moreover, schools that did not report number of suspensions, referrals, arrests, number of novice teachers, were excluded from the analysis. For research question 1, the final sample included `r format(rq1, big.mark = ",")` K-12 schools. For research question 2, school districts that had missing values for referrals and arrests had those values coded as NA and were excluded, leaving a final sample of 127,292 districts. Table 1 summarizes information on the study sample for both research questions.
 
 We used `r cite_r("r-references.bib")` for all our analyses.
 
@@ -446,7 +450,7 @@ The main predictor variable for research question one was the percent of teacher
 
 The main predictor of interest for research question two was the number of law enforcement officials (sworn law enforcement officers and security guards). This variable was calculated by summing the total FTE of sworn law enforcement officers and security guards to get a count.
 
-The analysis had two outcomes of interest that broadly examined school climate, one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r mean(rq1$susp_std)`, and the numbers ranged from `r min(rq1$susp_std)` to `r max(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
+The analysis had two outcomes of interest that broadly examined school climate, one for each research question. For research question 1, the main outcome of interest was the rate of students who received a suspension. More specifically, this variable was defined as the number of suspended students per 1,000 students at a school. Across schools in our sample, the mean rate of suspensions was `r round(mean(rq1$susp_std))`, and the numbers ranged from `r min(rq1$susp_std)` to `r max(rq1$susp_std)`. There was wide variation in the rate of suspensions across and within states. Utah had the lowest rate of suspensions while South Carolina had the highest rate of suspensions (see Figure 2 in the appendix).
 
 For research question 2, the outcome measure of interest was the total number of disciplinary actions. The total number of disciplinary actions was determined by adding the number of student referrals and arrests for each district.
 
@@ -458,7 +462,7 @@ $$\pi_{1ks}=\beta_{01s}+ r_{1jk}$$
 $$\beta_{00s}= \gamma_{000}+ \mu_{00k}$$
 $$\beta_{01s}= \gamma_{100}$$
 
-Where the outcome (Y) of school (j) in district (k) in state (s) is predicted by a set of school level enrollment covariates (X_j) and a school level rate of novice teachers. This model allows the intercept to vary by district and school and also includes a random slope for the rate of novice teachers across districts. The y100 coefficient represents the relationship between school level rate of novice teachers and study outcomes and addresses the first research question. This model was selected through a model comparison test that compared this 3 level HLM to other model specifications and was found to be the best performing model (based on the AIC score).
+Where the outcome ($Y$) of school ($j$) in district ($k$) in state ($s$) is predicted by a set of school level enrollment covariates ($X_j$) and a school level rate of novice teachers. This model allows the intercept to vary by district and school and also includes a random slope for the rate of novice teachers across districts. The $y_100$ coefficient represents the relationship between school level rate of novice teachers and study outcomes and addresses the first research question. This model was selected through a model comparison test that compared this 3 level HLM to other model specifications and was found to be the best performing model (based on the AIC score).
 
 To answer the second research question, we used a multiple regression with one continuous and two categorical predictors. The continuous predictor was total number of law enforcement officials and the categorical variables included gender and disability status. Gender was coded so that **female** was 0 and disability status was coded so that students **with** a disability were 0.
 
@@ -466,7 +470,7 @@ To answer the second research question, we used a multiple regression with one c
 
 ## Research Question 1 - Rates of Novice Teachers and Suspensions
 
-Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the model estimated average rate of suspension was 104 students per 1000 students at typical schools (e.g. not an alternative, charter, or magnet school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 students by 1. Similar estimates were found across model specifications including a simpler HLM model with no added covariates and a 3 level random intercept and slopes model with interactions between rates of novice teachers and rate of black and special education students.
+Rates of novice teachers was positively and statistically significantly associated with higher rates of suspensions. Across schools in the United States, the model estimated average rate of suspension was 104 students per 1,000 students at typical schools (e.g. not an alternative, charter, or magnet school) with average rates of total enrollment and average rates of enrollment by race/ethnicity, EL students, and special education enrollment. A one percentage point increase in the rate of novice teachers increased the number of students suspended per 1000 students by 1. Similar estimates were found across model specifications including a simpler HLM model with no added covariates and a 3 level random intercept and slopes model with interactions between rates of novice teachers and rate of black and special education students.
 
 ```{r echo = FALSE, include=FALSE}
 
@@ -792,8 +796,9 @@ ds_3$`ethnicity/lep/idea` <- fct_inorder(ds_3$`ethnicity/lep/idea`)
        fill = "Gender",
        x = "Race / Ethnicity",
        y = "Number of Students with Multiple Out of School Suspension") +
-  theme(text = element_text(size = 15, face = "bold"),
-        axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(text = element_text(size = 15, face = "bold")) +
+#        axis.text.x = element_text(angle = 90, hjust = 1)) +
+    coord_flip()
 #ggsave(here("plot", "multoos_ps.jpg"))
 ```
 
